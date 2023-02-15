@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_marginTop="8dp"
+    android:layout_marginBottom="8dp">
+
+    <ImageView
+        android:id="@+id/resultView_imageView"
+        android:layout_width="100dp"
+        android:layout_height="match_parent"
+        android:layout_marginStart="8dp"
+        android:layout_gravity="center_vertical"
+        android:scaleType="centerCrop"/>
+
+    <LinearLayout
+        android:id="@+id/resultView_linearLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:gravity="center_vertical"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/resultView_primaryLabel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            style="@style/AppPrimaryHighlighted"
+            />
+
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="2dp"/>
+
+        <TextView
+            android:id="@+id/resultView_secondaryLabel"
+            android:layout_width="match_parent"
+            style="@style/AppPrimary"
+            android:layout_height="wrap_content"
+            android:gravity="start"/>
+
+        <LinearLayout
+            android:visibility="gone"
+            android:id="@+id/resultView_toxicityView"
+            android:background="@drawable/rounded_view_color_red"
+            android:padding="8dp"
+            android:layout_marginTop="16dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+        <ImageView
+            android:layout_gravity="center"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/glyphs_poisonous"/>
+
+        <TextView
+            android:layout_marginStart="8dp"
+            style="@style/AppPrimary"
+            android:text="@string/toxicityLevel_poisonous"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+    </LinearLayout>
+
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/resultView_scoreLabel"
+        android:layout_width="wrap_content"
+        android:gravity="center"
+        android:layout_height="match_parent"
+        android:layout_marginEnd="8dp"
+        android:visibility="gone"/>
+
+
+</LinearLayout>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<font-family
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <font
+        app:font="@font/avenir_next_regular"
+        app:fontStyle="normal"
+        app:fontWeight="400"
+        />
+
+    <font
+        app:font="@font/avenir_next_italic"
+        app:fontWeight="400"
+        app:fontStyle="italic"/>
+
+    <font
+        app:font="@font/avenir_next_medium"
+        app:fontWeight="700"
+        app:fontStyle="normal"/>
+
+    <font
+        app:fontStyle="italic"
+        app:font="@font/avenir_next_medium_italic"
+        app:fontWeight="700"/>
+
+    <font app:fontStyle="normal"
+        app:font="@font/avenir_text_ultra_light"
+        app:fontWeight="200"/>
+
+</font-family>

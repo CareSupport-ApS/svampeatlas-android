@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/mushroom_navigation"
+    android:label="empty"
+    app:startDestination="@id/onboardingFragment">
+
+    <fragment
+        android:id="@+id/mushroomFragment"
+        android:name="com.noque.svampeatlas.fragments.MushroomFragment"
+        android:label="@string/navigationItem_mushroomsVC"
+        tools:layout="@layout/fragment_mushroom" />
+
+    <fragment
+        android:id="@+id/mushroomDetailsFragment"
+        android:name="com.noque.svampeatlas.fragments.DetailsFragment"
+        android:label="fragment_details"
+        tools:layout="@layout/fragment_details">
+
+        <argument
+            android:name="id"
+            app:argType="integer" />
+
+        <argument
+            android:name="takesSelection"
+            app:argType="com.noque.svampeatlas.fragments.DetailsFragment$TakesSelection" />
+        <argument
+            android:name="Context"
+            app:argType="com.noque.svampeatlas.fragments.DetailsFragment$Context" />
+        <action
+            android:id="@+id/action_mushroomDetailsFragment_to_observationLocationFragment"
+            app:destination="@id/observationLocationFragment" />
+        <action
+            android:id="@+id/action_mushroomDetailsFragment_to_imageFragment"
+            app:destination="@id/imageFragment" />
+        <action
+            android:id="@+id/action_mushroomDetailsFragment_to_addObservationFragment"
+            app:destination="@id/addObservationFragment"
+            app:launchSingleTop="true"
+            app:popUpTo="@id/myPageFragment"
+            app:popUpToInclusive="false" />
+        <argument
+            android:name="imageFilePath"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="predictionResults"
+            app:argType="string"
+            app:nullable="true" />
+        <action
+            android:id="@+id/action_mushroomDetailsFragment_to_addObservationFragment_edit"
+            app:destination="@id/addObservationFragment"
+            app:launchSingleTop="true"
+            app:popUpTo="@id/addObservationFragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nearbyFragment"
+        android:name="com.noque.svampeatlas.fragments.NearbyFragment"
+        android:label="fragment_nearby"
+        tools:layout="@layout/fragment_nearby" />
+
+    <fragment
+        android:id="@+id/addObservationFragment"
+        android:name="com.noque.svampeatlas.fragments.AddObservationFragment"
+        android:label="@string/navigationItem_newObservationVC"
+        tools:layout="@layout/fragment_add_observation" >
+        <action
+            android:id="@+id/action_addObservationFragment_to_cameraFragment"
+            app:destination="@id/cameraFragment" />
+        <argument
+            android:name="context"
+            app:argType="com.noque.svampeatlas.fragments.AddObservationFragment$Context"
+            android:defaultValue="New" />
+        <argument
+            android:name="id"
+            app:argType="long"
+            android:defaultValue="0L" />
+        <argument
+            android:name="mushroomId"
+            app:argType="integer"
+            android:defaultValue="0" />
+        <argument
+            android:name="imageFilePath"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="null" />
+        <argument
+            android:name="predictionNotes"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="null" />
+    </fragment>
+    <fragment
+        android:id="@+id/cameraFragment"
+        android:name="com.noque.svampeatlas.fragments.CameraFragment"
+        android:label="fragment_camera"
+        tools:layout="@layout/fragment_camera">
+        <argument
+            android:name="Context"
+            app:argType="com.noque.svampeatlas.fragments.CameraFragment$Context"
+            android:defaultValue="IDENTIFY" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/myPageFragment"
+        android:name="com.noque.svampeatlas.fragments.MyPageFragment"
+        tools:layout="@layout/fragment_my_page" />
+
+
+    <action
+        android:id="@+id/action_global_mushroomDetailsFragment"
+        app:destination="@id/mushroomDetailsFragment"
+        app:launchSingleTop="false"
+        app:popUpToInclusive="false" />
+    <fragment
+        android:id="@+id/loginFragment"
+        android:name="com.noque.svampeatlas.fragments.LoginFragment"
+        android:label="fragment_login"
+        tools:layout="@layout/fragment_login" />
+    <action
+        android:id="@+id/action_global_nearbyFragment"
+        app:destination="@id/nearbyFragment"
+        app:popUpTo="@id/nearbyFragment"
+        app:popUpToInclusive="true" />
+    <action
+        android:id="@+id/action_global_myPageFragment"
+        app:destination="@id/myPageFragment"
+        app:launchSingleTop="true"
+        app:popUpTo="@id/myPageFragment"
+        app:popUpToInclusive="true" />
+    <action
+        android:id="@+id/action_global_cameraFragment"
+        app:destination="@id/cameraFragment"
+        app:popUpToInclusive="true" />
+    <fragment
+        android:id="@+id/onboardingFragment"
+        android:name="com.noque.svampeatlas.fragments.OnboardingFragment"
+        android:label="fragment_onboarding"
+        tools:layout="@layout/fragment_onboarding" />
+    <fragment
+        android:id="@+id/observationLocationFragment"
+        android:name="com.noque.svampeatlas.fragments.ObservationLocationFragment"
+        android:label="ObservationLocationFragment" >
+        <argument
+            android:name="latitude"
+            app:argType="float" />
+        <argument
+            android:name="longitude"
+            app:argType="float" />
+    </fragment>
+    <fragment
+        android:id="@+id/imageFragment"
+        android:name="com.noque.svampeatlas.fragments.ImageFragment"
+        android:label="ImageFragment" >
+        <argument
+            android:name="selectedIndex"
+            app:argType="integer" />
+        <argument
+            android:name="images"
+            app:argType="com.noque.svampeatlas.models.Image[]" />
+    </fragment>
+    <fragment
+        android:id="@+id/aboutFragment"
+        android:name="com.noque.svampeatlas.fragments.AboutFragment"
+        android:label="AboutFragment" />
+    <fragment
+        android:id="@+id/settingsFragment"
+        android:name="com.noque.svampeatlas.fragments.SettingsFragment"
+        android:label="SettingsFragment" />
+    <fragment
+        android:id="@+id/emptyFragment"
+        android:name="com.noque.svampeatlas.fragments.EmptyFragment"
+        android:label="fragment_empty"
+        tools:layout="@layout/fragment_empty" />
+    <action
+        android:id="@+id/action_global_emptyFragment"
+        app:destination="@id/emptyFragment" />
+    <fragment
+        android:id="@+id/notesFragment"
+        android:name="com.noque.svampeatlas.fragments.NotesFragment"
+        android:label="NotesFragment" >
+        <action
+            android:id="@+id/action_notesFragment_to_addObservationFragment"
+            app:destination="@id/addObservationFragment" />
+    </fragment>
+
+
+</navigation>

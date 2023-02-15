@@ -1,0 +1,14 @@
+<resources>
+    <!-- Language selector -->
+    <string-array name="language_entries">
+        <item>@string/language_danish</item>
+        <item>@string/language_english</item>
+        <item>@string/language_czech</item>
+    </string-array>
+
+    <string-array name="language_values">
+        <item>language_danish</item>
+        <item>language_english</item>
+        <item>language_czech</item>
+    </string-array>
+</resources>
