@@ -2,6 +2,7 @@ package com.noque.svampeatlas.fragments.add_observation
 
 import android.content.pm.ActivityInfo
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
