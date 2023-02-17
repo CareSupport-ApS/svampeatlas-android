@@ -230,6 +230,8 @@ class SpeciesFragment : Fragment() {
         }
     }
 
+    //
+
     private fun setupViewModels() {
         newObservationViewModel.resetEvent.observe(viewLifecycleOwner) {
             searchBar.resetText()
