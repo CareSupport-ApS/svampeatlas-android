@@ -131,6 +131,7 @@ class BlankActivity : AppCompatActivity() {
             dialog.show(supportFragmentManager, null)
             SharedPreferences.databaseShouldUpdate = true
         }
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
     }
 
     private fun setupViewModels() {

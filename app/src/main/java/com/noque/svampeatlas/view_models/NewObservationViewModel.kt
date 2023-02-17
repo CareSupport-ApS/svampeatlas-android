@@ -434,8 +434,8 @@ class NewObservationViewModel(application: Application, val context: AddObservat
                     }
                     result.onError {
                         _localitiesState.value = State.Error(it)
-                        if (context != AddObservationFragment.Context.Note)
-                        showNotification.postValue(Notification.LocalityInaccessible(MyApplication.applicationContext.resources))
+                            if (context != AddObservationFragment.Context.Note)
+                            showNotification.postValue(Notification.LocalityInaccessible(MyApplication.applicationContext.resources))
                     }
                 }
         }
