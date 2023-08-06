@@ -12,7 +12,6 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.widget.NestedScrollView
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
@@ -32,13 +31,13 @@ import com.noque.svampeatlas.R
 import com.noque.svampeatlas.extensions.openSettings
 import com.noque.svampeatlas.models.*
 import com.noque.svampeatlas.services.LocationService
+import com.noque.svampeatlas.utilities.ToastHelper
 import com.noque.svampeatlas.utilities.api.Geometry
 import com.noque.svampeatlas.utilities.autoCleared
 import com.noque.svampeatlas.view_models.*
 import com.noque.svampeatlas.view_models.factories.ObservationsViewModelFactory
 import com.noque.svampeatlas.view_models.factories.SpeciesViewModelFactory
 import com.noque.svampeatlas.views.*
-import java.io.File
 import kotlin.math.abs
 
 
@@ -67,7 +66,7 @@ class DetailsFragment : Fragment() {
     enum class Context {
         SPECIES,
         OBSERVATION,
-        OBSERVATIONWITHSPECIES
+        OBSERVATION_WITH_SPECIES
     }
 
     // Objects
@@ -116,7 +115,6 @@ class DetailsFragment : Fragment() {
     }
 
     // Views
-
     private var nestedScrollView by autoCleared<NestedScrollView>()
     private var appBarLayout by autoCleared<AppBarLayout>() {
         it?.removeOnOffsetChangedListener(appBarLayoutOnOffsetChangedListener)
@@ -124,7 +122,6 @@ class DetailsFragment : Fragment() {
     private var collapsibleToolBarLayout by autoCleared<CollapsingToolbarLayout>()
     private var toolbar by autoCleared<Toolbar>()
     private var imagesView by autoCleared<ImagesView>()
-
     private var observationHeaderView by autoCleared<ObservationHeaderView>()
     private var mushroomDetailsHeaderView by autoCleared<MushroomDetailsHeaderView>()
     private var descriptionViewLinearLayout by autoCleared<LinearLayout>()
@@ -152,7 +149,7 @@ class DetailsFragment : Fragment() {
         ViewModelProvider(
             this, ObservationsViewModelFactory(
                 args.id,
-                args.context == Context.OBSERVATIONWITHSPECIES,
+                args.context == Context.OBSERVATION_WITH_SPECIES,
                 requireActivity().application
             )
         )[ObservationViewModel::class.java]
@@ -163,9 +160,8 @@ class DetailsFragment : Fragment() {
         val adapter = CommentsAdapter()
 
         adapter.setListener(object: CommentsAdapter.Listener {
-            override fun sendComment(comment: String) {
+            override fun sendComment(comment: String) =
                 Session.uploadComment(observationViewModel.id, comment)
-            }
         })
         adapter
     }
@@ -229,7 +225,7 @@ class DetailsFragment : Fragment() {
                 when (args.context) {
                     Context.SPECIES -> {
                     }
-                    Context.OBSERVATION, Context.OBSERVATIONWITHSPECIES -> {
+                    Context.OBSERVATION, Context.OBSERVATION_WITH_SPECIES -> {
                         (observationViewModel.observationState.value as? State.Items)?.items?.let {
                             val action =
                                 DetailsFragmentDirections.actionMushroomDetailsFragmentToObservationLocationFragment(
@@ -344,7 +340,7 @@ class DetailsFragment : Fragment() {
                     images.addAll(it)
                 }
             }
-            Context.OBSERVATION, Context.OBSERVATIONWITHSPECIES -> {
+            Context.OBSERVATION, Context.OBSERVATION_WITH_SPECIES -> {
                 (observationViewModel.observationState.value as? State.Items)?.items?.images?.let {
                     images.addAll(it)
                 }
@@ -429,7 +425,7 @@ class DetailsFragment : Fragment() {
     }
 
     private fun setupViews() {
-        (requireActivity() as BlankActivity).setSupportActionBar(toolbar)
+        (requireActivity() as MainActivity).setSupportActionBar(toolbar)
 
         nestedScrollView.isNestedScrollingEnabled = false
         collapsibleToolBarLayout.setExpandedTitleColor(Color.alpha(0))
@@ -488,7 +484,7 @@ class DetailsFragment : Fragment() {
                 }
             }
 
-            Context.OBSERVATIONWITHSPECIES -> {
+            Context.OBSERVATION_WITH_SPECIES -> {
                 mushroomViewHeaderTextView.visibility = View.VISIBLE
                 mushroomView.setListener(mushroomViewListener)
                 mushroomView.round(true)
@@ -518,12 +514,8 @@ class DetailsFragment : Fragment() {
                     commentsAdapter.addComment(it.items)
                     observationViewModel.addComment(it.items)
                 }
-
-                is State.Error -> {}
-
-                is State.Loading -> {
-                    backgroundView.setLoading()
-                }
+                is State.Error -> { ToastHelper.handleError(requireActivity(), it.error) }
+                is State.Loading -> backgroundView.setLoading()
                 else -> {}
             }
         })
@@ -552,32 +544,22 @@ class DetailsFragment : Fragment() {
                     viewLifecycleOwner,
                     Observer {
                         when (it) {
-                            is State.Items -> {
-                                mapFragment.addHeatMap(it.items)
-                            }
-
-                            is State.Loading -> {
-                                mapFragment.setLoading()
-                            }
-
-                            is State.Error -> {
-                                mapFragment.setError(it.error, null)
-                            }
+                            is State.Items -> mapFragment.addHeatMap(it.items)
+                            is State.Loading -> mapFragment.setLoading()
+                            is State.Error -> mapFragment.setError(it.error, null)
                             else -> {}
                         }
                     })
 
                 speciesViewModel.recentObservationsState.observe(viewLifecycleOwner, Observer {
                     when (it) {
-                        is State.Items -> {
-                            observationsAdapter.configure(it.items, false)
-                        }
+                        is State.Items -> observationsAdapter.configure(it.items, false)
                         else -> {}
                     }
                 })
             }
 
-            Context.OBSERVATION, Context.OBSERVATIONWITHSPECIES -> {
+            Context.OBSERVATION, Context.OBSERVATION_WITH_SPECIES -> {
                 observationViewModel.observationState.observe(viewLifecycleOwner, Observer {
                     backgroundView.reset()
 

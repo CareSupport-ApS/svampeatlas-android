@@ -385,19 +385,19 @@ class CameraFragment : Fragment(), PromptFragment.Listener, MenuProvider {
         override fun onResume() {
             super.onResume()
             requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-            (requireActivity() as BlankActivity).hideSystemBars()
+            (requireActivity() as MainActivity).hideSystemBars()
             validateState()
         }
 
         override fun onStart() {
             requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-            (requireActivity() as BlankActivity).hideSystemBars()
+            (requireActivity() as MainActivity).hideSystemBars()
             super.onStart()
         }
 
         override fun onStop() {
             requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR
-            (requireActivity() as BlankActivity).showSystemBars()
+            (requireActivity() as MainActivity).showSystemBars()
             super.onStop()
         }
 
@@ -422,11 +422,11 @@ class CameraFragment : Fragment(), PromptFragment.Listener, MenuProvider {
                     }
                 }
                 Context.IDENTIFY -> {
-                    (requireActivity() as BlankActivity).setSupportActionBar(toolbar)
+                    (requireActivity() as MainActivity).setSupportActionBar(toolbar)
                     cameraControlsView.configureState(CameraControlsView.State.CAPTURE)
                 }
                 Context.NEW_OBSERVATION -> {
-                    (requireActivity() as BlankActivity).setSupportActionBar(toolbar)
+                    (requireActivity() as MainActivity).setSupportActionBar(toolbar)
                     cameraControlsView.configureState(CameraControlsView.State.CAPTURE_NEW)
                 }
             }

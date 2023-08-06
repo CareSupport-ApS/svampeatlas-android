@@ -19,7 +19,7 @@ import com.noque.svampeatlas.models.*
 import com.noque.svampeatlas.services.DataService
 import com.noque.svampeatlas.utilities.autoCleared
 import com.noque.svampeatlas.view_models.Session
-import com.noque.svampeatlas.views.BlankActivity
+import com.noque.svampeatlas.views.MainActivity
 import com.noque.svampeatlas.views.ProfileImageView
 import kotlinx.android.synthetic.main.fragment_my_page.*
 
@@ -49,7 +49,7 @@ class MyPageFragment : Fragment() {
                 val action = MyPageFragmentDirections.actionGlobalMushroomDetailsFragment(
                     observation.id,
                     DetailsFragment.TakesSelection.NO,
-                    DetailsFragment.Context.OBSERVATIONWITHSPECIES,
+                    DetailsFragment.Context.OBSERVATION_WITH_SPECIES,
                     null,
                     null
                 )
@@ -73,7 +73,7 @@ class MyPageFragment : Fragment() {
                 val action = MyPageFragmentDirections.actionGlobalMushroomDetailsFragment(
                     notification.observationID,
                     DetailsFragment.TakesSelection.NO,
-                    DetailsFragment.Context.OBSERVATIONWITHSPECIES,
+                    DetailsFragment.Context.OBSERVATION_WITH_SPECIES,
                     null,
                     null
                 )
@@ -131,7 +131,7 @@ class MyPageFragment : Fragment() {
     }
 
     private fun setupViews() {
-        (requireActivity() as BlankActivity).setSupportActionBar(toolbar)
+        (requireActivity() as MainActivity).setSupportActionBar(toolbar)
         collapsingToolbar.setCollapsedTitleTextColor(ResourcesCompat.getColor(resources, R.color.colorWhite, null))
         collapsingToolbar.setExpandedTitleColor(ResourcesCompat.getColor(resources, R.color.colorWhite, null))
         swipeRefreshLayout.setOnRefreshListener(onRefreshListener)

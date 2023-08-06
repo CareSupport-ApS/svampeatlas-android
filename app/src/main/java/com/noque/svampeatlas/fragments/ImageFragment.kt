@@ -9,7 +9,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
 import com.noque.svampeatlas.R
-import com.noque.svampeatlas.views.BlankActivity
+import com.noque.svampeatlas.views.MainActivity
 import com.noque.svampeatlas.views.ImagesView
 import kotlinx.android.synthetic.main.fragment_image.*
 
@@ -45,17 +45,17 @@ class ImageFragment: Fragment() {
 
     override fun onResume() {
         super.onResume()
-        (requireActivity() as BlankActivity).hideSystemBars()
+        (requireActivity() as MainActivity).hideSystemBars()
     }
 
     override fun onStart() {
         super.onStart()
-        (requireActivity() as BlankActivity).hideSystemBars()
+        (requireActivity() as MainActivity).hideSystemBars()
     }
 
     override fun onStop() {
         super.onStop()
-        (requireActivity() as BlankActivity).showSystemBars()
+        (requireActivity() as MainActivity).showSystemBars()
     }
 
     private fun initViews() {
@@ -64,6 +64,6 @@ class ImageFragment: Fragment() {
     }
 
     private fun setupViews() {
-        (requireActivity() as BlankActivity).setSupportActionBar(toolbar)
+        (requireActivity() as MainActivity).setSupportActionBar(toolbar)
     }
 }

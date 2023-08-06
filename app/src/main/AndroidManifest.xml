@@ -27,7 +27,7 @@
             android:resource="@string/asset_statements" />
         <activity
             android:exported="true"
-            android:name=".views.BlankActivity"
+            android:name=".views.MainActivity"
             android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

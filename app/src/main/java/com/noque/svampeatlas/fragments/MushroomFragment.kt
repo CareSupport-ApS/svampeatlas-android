@@ -8,7 +8,6 @@ import android.graphics.Rect
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.util.Log
 import android.view.Gravity
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
@@ -19,7 +18,6 @@ import android.widget.Toast
 import androidx.core.content.res.ResourcesCompat
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -36,9 +34,8 @@ import com.noque.svampeatlas.extensions.changeColor
 import com.noque.svampeatlas.extensions.dpToPx
 import com.noque.svampeatlas.extensions.italized
 import com.noque.svampeatlas.extensions.pxToDp
-import com.noque.svampeatlas.fragments.modals.DownloaderFragment
 import com.noque.svampeatlas.views.BackgroundView
-import com.noque.svampeatlas.views.BlankActivity
+import com.noque.svampeatlas.views.MainActivity
 import com.noque.svampeatlas.views.SearchBarListener
 import com.noque.svampeatlas.views.SearchBarView
 import com.noque.svampeatlas.view_models.factories.MushroomsViewModelFactory
@@ -302,7 +299,7 @@ class MushroomFragment : Fragment() {
     }
 
     private fun setupView() {
-        (requireActivity() as BlankActivity).setSupportActionBar(mushroomFragment_toolbar)
+        (requireActivity() as MainActivity).setSupportActionBar(mushroomFragment_toolbar)
 
         tabLayout?.apply {
             MushroomsViewModel.Category.values.forEach {

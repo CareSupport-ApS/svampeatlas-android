@@ -25,7 +25,7 @@ import com.noque.svampeatlas.models.State
 import com.noque.svampeatlas.utilities.autoCleared
 import com.noque.svampeatlas.view_models.NotesFragmentViewModel
 import com.noque.svampeatlas.views.BackgroundView
-import com.noque.svampeatlas.views.BlankActivity
+import com.noque.svampeatlas.views.MainActivity
 import kotlinx.android.synthetic.main.action_view_add_notebook_button.view.*
 import kotlinx.android.synthetic.main.fragment_notebook.*
 import java.util.*
@@ -108,7 +108,7 @@ class NotesFragment: Fragment(), PromptFragment.Listener {
 
 
     private fun setupViews() {
-        (requireActivity() as BlankActivity).setSupportActionBar(toolbar)
+        (requireActivity() as MainActivity).setSupportActionBar(toolbar)
         recyclerView.apply {
             val myHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
                 override fun onChildDrawOver(

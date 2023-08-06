@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.noque.svampeatlas.R
 import com.noque.svampeatlas.utilities.autoCleared
-import com.noque.svampeatlas.views.BlankActivity
+import com.noque.svampeatlas.views.MainActivity
 import kotlinx.android.synthetic.main.fragment_settings.*
 
 class SettingsFragment: Fragment() {
@@ -33,6 +33,6 @@ class SettingsFragment: Fragment() {
     }
 
     private fun setupView() {
-        (requireActivity() as BlankActivity).setSupportActionBar(toolbar)
+        (requireActivity() as MainActivity).setSupportActionBar(toolbar)
     }
 }

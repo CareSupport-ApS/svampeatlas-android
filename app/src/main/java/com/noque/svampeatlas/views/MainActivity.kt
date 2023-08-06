@@ -28,7 +28,7 @@ import www.sanju.motiontoast.MotionToast
 import java.lang.Exception
 
 
-class BlankActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity() {
 
     companion object {
         private const val TAG = "BlankActivity"

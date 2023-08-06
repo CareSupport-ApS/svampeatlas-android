@@ -27,7 +27,7 @@ import com.noque.svampeatlas.models.State
 import com.noque.svampeatlas.services.LocationService
 import com.noque.svampeatlas.utilities.autoCleared
 import com.noque.svampeatlas.view_models.NearbyObservationsViewModel
-import com.noque.svampeatlas.views.BlankActivity
+import com.noque.svampeatlas.views.MainActivity
 import com.noque.svampeatlas.views.ObservationView
 import kotlinx.android.synthetic.main.fragment_nearby.*
 
@@ -139,7 +139,7 @@ class NearbyFragment : Fragment(), MapSettingsFragment.Listener {
                 val action = NearbyFragmentDirections.actionGlobalMushroomDetailsFragment(
                     it.id,
                     DetailsFragment.TakesSelection.NO,
-                    DetailsFragment.Context.OBSERVATIONWITHSPECIES,
+                    DetailsFragment.Context.OBSERVATION_WITH_SPECIES,
                     null,
                     null
                 )
@@ -236,7 +236,7 @@ class NearbyFragment : Fragment(), MapSettingsFragment.Listener {
     }
 
     private fun setupViews() {
-        (requireActivity() as BlankActivity).setSupportActionBar(toolbar)
+        (requireActivity() as MainActivity).setSupportActionBar(toolbar)
         mapFragment?.showStyleSelector(true)
         mapFragment?.setListener(mapFragmentListener)
         observationView?.apply {

@@ -1,6 +1,5 @@
 package com.noque.svampeatlas.fragments
 
-import android.app.ActionBar
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,12 +7,11 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.widget.Toolbar
-import androidx.core.view.marginStart
 import androidx.fragment.app.Fragment
 import com.noque.svampeatlas.R
 import com.noque.svampeatlas.extensions.dpToPx
 import com.noque.svampeatlas.utilities.autoCleared
-import com.noque.svampeatlas.views.BlankActivity
+import com.noque.svampeatlas.views.MainActivity
 import com.noque.svampeatlas.views.HeaderView
 import kotlinx.android.synthetic.main.fragment_about.*
 
@@ -43,7 +41,7 @@ class AboutFragment: Fragment() {
     }
 
     private fun setupView() {
-        (requireActivity() as BlankActivity).setSupportActionBar(toolbar)
+        (requireActivity() as MainActivity).setSupportActionBar(toolbar)
         createText(getString(R.string.aboutVC_recognition_title), getString(R.string.aboutVC_recognition_message))
         createText(getString(R.string.aboutVC_general_title), getString(R.string.aboutVC_general_message))
         createText(getString(R.string.aboutVC_generalTerms_title), getString(R.string.aboutVC_generalTerms_message))

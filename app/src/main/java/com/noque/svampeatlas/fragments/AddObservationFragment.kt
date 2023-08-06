@@ -43,7 +43,7 @@ import com.noque.svampeatlas.view_holders.AddImageViewHolder
 import com.noque.svampeatlas.view_holders.AddedImageViewHolder
 import com.noque.svampeatlas.view_models.NewObservationViewModel
 import com.noque.svampeatlas.view_models.factories.NewObservationViewModelFactory
-import com.noque.svampeatlas.views.BlankActivity
+import com.noque.svampeatlas.views.MainActivity
 import com.noque.svampeatlas.views.SpinnerView
 import kotlinx.android.synthetic.main.action_view_continue.view.*
 import kotlinx.android.synthetic.main.action_view_save_notebook_entry.view.*
@@ -399,7 +399,7 @@ class AddObservationFragment : Fragment(), ActivityCompat.OnRequestPermissionsRe
                 toolbar.setTitle(R.string.addObservationVC_title)
             }
         }
-        (requireActivity() as BlankActivity).setSupportActionBar(toolbar)
+        (requireActivity() as MainActivity).setSupportActionBar(toolbar)
         tabLayout.setupWithViewPager(viewPager)
         addImagesRecyclerView.apply {
             val myHelper = ItemTouchHelper(imageSwipedCallback)

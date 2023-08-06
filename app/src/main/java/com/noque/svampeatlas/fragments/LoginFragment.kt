@@ -1,33 +1,21 @@
 package com.noque.svampeatlas.fragments
 
 
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Bundle
-import android.view.Gravity
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.EditText
-import android.widget.Toast
-import androidx.core.content.res.ResourcesCompat
-import androidx.lifecycle.Observer
-import com.noque.svampeatlas.extensions.changeColor
-import com.noque.svampeatlas.extensions.pxToDp
 import com.noque.svampeatlas.models.State
 
 import com.noque.svampeatlas.R
 import com.noque.svampeatlas.views.BackgroundView
-import com.noque.svampeatlas.views.BlankActivity
-import kotlinx.android.synthetic.main.custom_toast.*
-import kotlinx.android.synthetic.main.custom_toast.view.*
+import com.noque.svampeatlas.views.MainActivity
 import kotlinx.android.synthetic.main.fragment_login.*
 import androidx.core.content.ContextCompat.getSystemService
-import android.content.Context
 import android.view.inputmethod.InputMethodManager
-import android.app.Activity
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
@@ -36,7 +24,6 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.noque.svampeatlas.utilities.ToastHelper
 import com.noque.svampeatlas.view_models.Session
-import www.sanju.motiontoast.MotionToast
 
 
 class LoginFragment : Fragment() {
@@ -105,7 +92,7 @@ class LoginFragment : Fragment() {
     }
 
     private fun setupViews() {
-        (requireActivity() as BlankActivity).setSupportActionBar(loginFragment_toolbar)
+        (requireActivity() as MainActivity).setSupportActionBar(loginFragment_toolbar)
 
         loginButton.setOnClickListener(loginButtonClickListener)
         createAccountButton.setOnClickListener(createAccountButtonPressed)

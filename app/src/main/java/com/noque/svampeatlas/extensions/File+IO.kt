@@ -1,22 +1,16 @@
 package com.noque.svampeatlas.extensions
 
-import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.util.Log
 import androidx.exifinterface.media.ExifInterface
 import com.google.android.gms.maps.model.LatLng
-import com.google.maps.android.SphericalUtil
 import com.noque.svampeatlas.models.AppError
 import com.noque.svampeatlas.models.Location
 import com.noque.svampeatlas.models.Result
-import com.noque.svampeatlas.views.BlankActivity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
-import java.io.InputStream
-import java.io.OutputStream
 import java.lang.IllegalArgumentException
 import java.text.SimpleDateFormat
 import java.util.*

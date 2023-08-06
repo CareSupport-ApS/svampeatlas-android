@@ -10,7 +10,7 @@ import androidx.navigation.fragment.navArgs
 import com.google.android.gms.maps.model.LatLng
 
 import com.noque.svampeatlas.R
-import com.noque.svampeatlas.views.BlankActivity
+import com.noque.svampeatlas.views.MainActivity
 import kotlinx.android.synthetic.main.fragment_observation_location.*
 
 /**
@@ -50,7 +50,7 @@ class ObservationLocationFragment : Fragment() {
     }
 
     private fun setupViews() {
-        (requireActivity() as BlankActivity).setSupportActionBar(toolbar)
+        (requireActivity() as MainActivity).setSupportActionBar(toolbar)
         mapFragment.showStyleSelector(true)
     }
 }
