@@ -34,13 +34,15 @@ import android.net.Uri
 import android.widget.ImageView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.noque.svampeatlas.utilities.ToastHelper
 import com.noque.svampeatlas.view_models.Session
+import www.sanju.motiontoast.MotionToast
 
 
 class LoginFragment : Fragment() {
 
     companion object {
-        val TAG = "LoginFragment"
+        const val TAG = "LoginFragment"
     }
 
     // Views
@@ -56,18 +58,16 @@ class LoginFragment : Fragment() {
     private val loginButtonClickListener = View.OnClickListener {
 
         if (initialsEditText.text.isNullOrEmpty()) {
-            initialsEditText.setError(resources.getString(R.string.loginVC_initialsTextField_error))
+            initialsEditText.error = resources.getString(R.string.loginVC_initialsTextField_error)
         } else if (passwordEditText.text.isNullOrEmpty()) {
-            passwordEditText.setError(resources.getString(R.string.loginVC_passwordTextField_error))
+            passwordEditText.error = resources.getString(R.string.loginVC_passwordTextField_error)
         } else {
             Session.login(initialsEditText.text.toString(), passwordEditText.text.toString())
         }
 
-        getSystemService(requireContext(), InputMethodManager::class.java)?.let {
-            it.hideSoftInputFromWindow(
-                requireActivity().currentFocus?.windowToken, InputMethodManager.HIDE_NOT_ALWAYS
-            )
-        }
+        getSystemService(requireContext(), InputMethodManager::class.java)?.hideSoftInputFromWindow(
+            requireActivity().currentFocus?.windowToken, InputMethodManager.HIDE_NOT_ALWAYS
+        )
 
         view?.requestFocus()
     }
@@ -113,42 +113,14 @@ class LoginFragment : Fragment() {
     }
 
     private fun setupViewModels() {
-        Session.loggedInState.observe(viewLifecycleOwner, Observer {
+        Session.loggedInState.observe(viewLifecycleOwner) {
             backgroundView.reset()
 
             when (it) {
-                is State.Error -> {
-
-                    val bitmap = BitmapFactory.decodeResource(resources, R.drawable.icon_elmessageview_failure)
-                    createToast(it.error.title, it.error.message, bitmap.changeColor(ResourcesCompat.getColor(resources, R.color.colorRed, null)))
-                }
-
-                is State.Loading -> {
-                    backgroundView.setLoading()
-                }
+                is State.Error -> ToastHelper.handleError(requireActivity(), it.error)
+                is State.Loading -> backgroundView.setLoading()
                 else -> {}
             }
-        })
-    }
-
-    private fun createToast(title: String, message: String, bitmap: Bitmap) {
-        val container = custom_toast_container
-        val layout = layoutInflater.inflate(R.layout.custom_toast, container)
-
-        layout.customToast_titleTextView.text = title
-        layout.customToast_messageTextView.text = message
-        layout.customToast_imageView.setImageBitmap(bitmap)
-
-        with (Toast(context)) {
-            setGravity(Gravity.CENTER_VERTICAL, 0, 16.pxToDp(context))
-            duration = Toast.LENGTH_LONG
-            view = layout
-            show()
         }
-    }
-
-    fun hideSoftKeyboard(activity: Activity, view: View) {
-        val imm = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-        imm.hideSoftInputFromWindow(view.applicationWindowToken, 0)
     }
 }

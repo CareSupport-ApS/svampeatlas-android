@@ -24,6 +24,7 @@ import com.noque.svampeatlas.fragments.TermsFragment
 import com.noque.svampeatlas.services.FileManager
 import com.noque.svampeatlas.utilities.SharedPreferences
 import com.noque.svampeatlas.view_models.Session
+import www.sanju.motiontoast.MotionToast
 import java.lang.Exception
 
 
@@ -131,6 +132,11 @@ class BlankActivity : AppCompatActivity() {
             dialog.show(supportFragmentManager, null)
             SharedPreferences.databaseShouldUpdate = true
         }
+
+
+        // Setup toast
+
+        //MotionToast.setErrorBackgroundColor()
     }
 
     private fun setupViewModels() {

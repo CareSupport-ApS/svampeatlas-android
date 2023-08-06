@@ -123,6 +123,8 @@ dependencies {
     implementation("com.google.dagger:hilt-android:2.38.1")
     kapt("com.google.dagger:hilt-android-compiler:2.38.1")
 
+    // For better looking toast messages
+    implementation 'com.github.Spikeysanju:MotionToast:1.4'
 
     implementation 'com.logrocket:logrocket:1.7.1'
     implementation 'com.mindorks.android:prdownloader:0.6.0'
