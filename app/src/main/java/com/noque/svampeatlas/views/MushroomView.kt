@@ -8,14 +8,14 @@ import android.view.View
 import android.view.ViewOutlineProvider
 import android.widget.LinearLayout
 import androidx.constraintlayout.widget.ConstraintLayout
+import com.noque.svampeatlas.R
+import com.noque.svampeatlas.databinding.ViewMushroomBinding
 import com.noque.svampeatlas.extensions.downloadImage
 import com.noque.svampeatlas.extensions.italized
 import com.noque.svampeatlas.extensions.toReadableDate
 import com.noque.svampeatlas.extensions.upperCased
 import com.noque.svampeatlas.models.Mushroom
-import com.noque.svampeatlas.R
 import com.noque.svampeatlas.services.DataService
-import kotlinx.android.synthetic.main.view_mushroom.view.*
 
 class MushroomView(context: Context, attrs: AttributeSet?) : ConstraintLayout(context, attrs) {
 
@@ -27,12 +27,9 @@ class MushroomView(context: Context, attrs: AttributeSet?) : ConstraintLayout(co
     private var mushroom: Mushroom? = null
     private var listener: Listener? = null
 
+    private val binding = ViewMushroomBinding.inflate(LayoutInflater.from(context), this, false)
     private lateinit var informationLinearLayout: LinearLayout
-
     init {
-        val inflater = LayoutInflater.from(getContext())
-        inflater.inflate(R.layout.view_mushroom, this)
-        initViews()
         setupView()
     }
 
@@ -43,7 +40,7 @@ class MushroomView(context: Context, attrs: AttributeSet?) : ConstraintLayout(co
     }
 
     private fun setupView() {
-        mushroomView_linearLayout.addView(informationLinearLayout)
+        binding.mushroomViewLinearLayout.addView(informationLinearLayout)
         clipToOutline = true
     }
 
@@ -74,19 +71,19 @@ class MushroomView(context: Context, attrs: AttributeSet?) : ConstraintLayout(co
         this.mushroom = mushroom
 
         if (!mushroom.images.isNullOrEmpty()) {
-            mushroomView_imageView.visibility = View.VISIBLE
-            mushroomView_imageView.downloadImage(DataService.ImageSize.MINI, mushroom.images.first().url)
+            binding.mushroomViewImageView.visibility = View.VISIBLE
+            binding.mushroomViewImageView.downloadImage(DataService.ImageSize.MINI, mushroom.images.first().url)
         } else {
-            mushroomView_imageView.visibility = View.GONE
+            binding.mushroomViewImageView.visibility = View.GONE
         }
 
         if (mushroom.localizedName != null) {
-            mushroomView_primaryLabel.text = mushroom.localizedName!!.upperCased()
-            mushroomView_secondaryLabel.visibility = View.VISIBLE
-            mushroomView_secondaryLabel.text = mushroom.fullName.italized()
+            binding.mushroomViewPrimaryLabel.text = mushroom.localizedName!!.upperCased()
+            binding.mushroomViewSecondaryLabel.visibility = View.VISIBLE
+            binding.mushroomViewSecondaryLabel.text = mushroom.fullName.italized()
         } else {
-            mushroomView_primaryLabel.text = mushroom.fullName.italized()
-            mushroomView_secondaryLabel.visibility = View.GONE
+            binding.mushroomViewPrimaryLabel.text = mushroom.fullName.italized()
+            binding.mushroomViewSecondaryLabel.visibility = View.GONE
         }
 
         var information: MutableList<Pair<String, String>> = mutableListOf()
@@ -99,6 +96,6 @@ class MushroomView(context: Context, attrs: AttributeSet?) : ConstraintLayout(co
             information.add(Pair(resources.getString(R.string.mushroomView_latestObservation), it.toReadableDate(true, true)))
         }
 
-        mushroomView_informationView.configure(information)
+        binding.mushroomViewInformationView.configure(information)
     }
 }

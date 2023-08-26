@@ -4,13 +4,13 @@ import android.view.View
 import android.widget.Button
 import androidx.recyclerview.widget.RecyclerView
 import com.noque.svampeatlas.R
+import com.noque.svampeatlas.databinding.ItemLocalityBinding
 import com.noque.svampeatlas.models.Locality
-import kotlinx.android.synthetic.main.item_locality.view.*
 
-class LocalityViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+class LocalityViewHolder(binding: ItemLocalityBinding) : RecyclerView.ViewHolder(binding.root) {
 
 
-    private var button: Button = itemView.localityItem_button
+    private var button: Button = binding.localityItemButton
     private var selected = false
 
 

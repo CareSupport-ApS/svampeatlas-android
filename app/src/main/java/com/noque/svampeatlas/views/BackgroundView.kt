@@ -6,54 +6,41 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
-import com.noque.svampeatlas.R
+import com.noque.svampeatlas.databinding.ViewBackgroundBinding
 import com.noque.svampeatlas.models.AppError
 import com.noque.svampeatlas.models.RecoveryAction
-import kotlinx.android.synthetic.main.view_background.view.*
 
 class BackgroundView(context: Context, attrs: AttributeSet?) : ConstraintLayout(context, attrs) {
 
-    private val titleTextView by lazy {backgroundView_errorView_titleTextView}
-    private val messageTextView by lazy {backgroundView_errorView_messageTextView}
-    private val handlerButton by lazy {backgroundView_handlerButton}
-    private val errorLinearLayout by lazy {backgroundView_errorView_linearLayout}
 
-    private val spinnerView by lazy {backgroundView_spinnerView}
-
-
-    init {
-        val inflater = LayoutInflater.from(getContext())
-        inflater.inflate(R.layout.view_background, this)
-    }
+    private val binding = ViewBackgroundBinding.inflate(LayoutInflater.from(context), this, false)
 
     fun setLoading() {
-        spinnerView.startLoading()
+        binding.backgroundViewSpinnerView.startLoading()
     }
 
     fun setError(error: AppError) {
-        errorLinearLayout.visibility = View.GONE
-
-        backgroundView_errorView_titleTextView.text = error.title
-        backgroundView_errorView_messageTextView.text = error.message
-        backgroundView_errorView_linearLayout.visibility = View.VISIBLE
+        binding.backgroundViewErrorViewTitleTextView.text = error.title
+        binding.backgroundViewErrorViewMessageTextView.text = error.message
+        binding.backgroundViewErrorViewLinearLayout.visibility = View.VISIBLE
     }
 
     fun setErrorWithHandler(error: AppError, recoveryAction: RecoveryAction?, handler: ((RecoveryAction?) -> Unit)) {
-        spinnerView.stopLoading()
-        errorLinearLayout.visibility = View.VISIBLE
+        binding.backgroundViewSpinnerView.stopLoading()
+        binding.backgroundViewErrorViewLinearLayout.visibility = View.VISIBLE
 
-        titleTextView.text = error.title
-        messageTextView.text = error.message
-        handlerButton.visibility = View.VISIBLE
-        handlerButton.text = recoveryAction?.description(resources) ?: RecoveryAction.TRYAGAIN.description(resources)
-        handlerButton.setOnClickListener {
+        binding.backgroundViewErrorViewTitleTextView.text = error.title
+        binding.backgroundViewErrorViewMessageTextView.text = error.message
+        binding.backgroundViewHandlerButton.visibility = View.VISIBLE
+        binding.backgroundViewHandlerButton.text = recoveryAction?.description(resources) ?: RecoveryAction.TRYAGAIN.description(resources)
+        binding.backgroundViewHandlerButton.setOnClickListener {
             handler.invoke(recoveryAction)
         }
     }
 
     fun reset() {
         setBackgroundColor(Color.TRANSPARENT)
-        backgroundView_errorView_linearLayout.visibility = View.GONE
-        spinnerView.stopLoading()
+        binding.backgroundViewErrorViewLinearLayout.visibility = View.GONE
+        binding.backgroundViewSpinnerView.stopLoading()
     }
 }

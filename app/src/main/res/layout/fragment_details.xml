@@ -129,7 +129,7 @@
                             android:layout_height="wrap_content"
                             android:layout_marginBottom="4dp"/>
 
-                        <fragment
+                        <androidx.fragment.app.FragmentContainerView
                             android:id="@+id/detailsFragment_mapFragment"
                             android:name="com.noque.svampeatlas.fragments.MapFragment"
                             android:layout_width="match_parent"

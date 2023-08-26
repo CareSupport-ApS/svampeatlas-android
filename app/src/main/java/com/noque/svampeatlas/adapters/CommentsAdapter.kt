@@ -4,8 +4,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
+import com.noque.svampeatlas.databinding.ItemAddCommentBinding
+import com.noque.svampeatlas.databinding.ItemCommentBinding
 import com.noque.svampeatlas.models.Comment
-import com.noque.svampeatlas.R
 import com.noque.svampeatlas.view_holders.AddCommentViewHolder
 import com.noque.svampeatlas.view_holders.CommentViewHolder
 
@@ -68,24 +69,19 @@ class CommentsAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
-        var view: View
-        var viewHolder: RecyclerView.ViewHolder
-
-        when (ViewType.values[viewType]) {
+        return when (ViewType.values[viewType]) {
             ViewType.COMMENT -> {
-                view = layoutInflater.inflate(R.layout.item_comment, parent, false)
-                viewHolder = CommentViewHolder(view)
+                val binding = ItemCommentBinding.inflate(layoutInflater, parent, false)
+                CommentViewHolder(binding)
             }
+
             ViewType.ADDCOMMENT -> {
-                view = layoutInflater.inflate(R.layout.item_add_comment, parent, false)
-                val addCommentViewHolder = AddCommentViewHolder(view)
+                val binding = ItemAddCommentBinding.inflate(layoutInflater, parent, false)
+                val addCommentViewHolder = AddCommentViewHolder(binding)
                 addCommentViewHolder.setOnClickListener(sendCommentButtonClicked)
-                viewHolder = addCommentViewHolder
-                view.tag = viewHolder
+                addCommentViewHolder
             }
         }
-
-        return viewHolder
     }
 
     override fun getItemCount(): Int {

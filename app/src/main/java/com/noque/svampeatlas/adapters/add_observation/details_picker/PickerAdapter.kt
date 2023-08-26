@@ -54,9 +54,12 @@ abstract class PickerAdapter<T>() : BaseAdapter<PickerAdapter.PickerItem<T>, Pic
         inflater: LayoutInflater,
         parent: ViewGroup,
         viewTypeOrdinal: Int
-    ): Pair<View, RecyclerView.ViewHolder> {
-        inflater.inflate(R.layout.item_item,parent,false).apply {
-            return Pair(this, ItemViewHolder(this))
-        }
+    ): Pair<View, RecyclerView.ViewHolder>? {
+        // TODO
+        return null
+
+    //inflater.inflate(R.layout.item_item,parent,false).apply {
+          //  return Pair(this, ItemViewHolder(this))
+        //}
     }
 }

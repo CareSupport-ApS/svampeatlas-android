@@ -1,18 +1,9 @@
 package com.noque.svampeatlas.view_holders
 
-import android.graphics.Color
-import android.view.View
 import androidx.recyclerview.widget.RecyclerView
-import com.noque.svampeatlas.R
-import kotlinx.android.synthetic.main.item_unknown_species.view.*
+import com.noque.svampeatlas.databinding.ItemUnknownSpeciesBinding
 
-class UnknownSpeciesViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-
-
-
-    init {
-
-    }
+class UnknownSpeciesViewHolder(private val binding: ItemUnknownSpeciesBinding) : RecyclerView.ViewHolder(binding.root) {
 
 
     fun configure(isSelected: Boolean) {

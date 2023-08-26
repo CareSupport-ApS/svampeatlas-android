@@ -1,18 +1,17 @@
 package com.noque.svampeatlas.view_holders
 
-import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import com.noque.svampeatlas.R
-import kotlinx.android.synthetic.main.item_reloader.view.*
+import com.noque.svampeatlas.databinding.ItemReloaderBinding
 
-class ReloaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+class ReloaderViewHolder(binding: ItemReloaderBinding) : RecyclerView.ViewHolder(binding.root) {
 
     enum class Type {
         RELOAD,
         LOAD
     }
 
-    private val textView = itemView.reloaderItem_textView
+    private val textView = binding.reloaderItemTextView
 
     fun configure(type: Type) {
         when (type) {

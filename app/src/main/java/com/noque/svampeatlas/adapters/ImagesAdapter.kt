@@ -7,6 +7,7 @@ import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.noque.svampeatlas.models.Image
 import com.noque.svampeatlas.R
+import com.noque.svampeatlas.databinding.ItemImageBinding
 import com.noque.svampeatlas.view_holders.ImageViewHolder
 
 class ImagesAdapter: RecyclerView.Adapter<ImageViewHolder>() {
@@ -30,7 +31,7 @@ class ImagesAdapter: RecyclerView.Adapter<ImageViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ImageViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        val view = inflater.inflate(R.layout.item_image, parent, false)
+        val view = ItemImageBinding.inflate(inflater, parent, false)
         val imageViewHolder = ImageViewHolder(scaleType, view)
         imageViewHolder.itemView.tag = imageViewHolder
         imageViewHolder.setOnClickListener(onClickListener)

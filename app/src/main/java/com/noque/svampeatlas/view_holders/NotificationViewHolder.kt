@@ -1,22 +1,21 @@
 package com.noque.svampeatlas.view_holders
 
 import android.text.SpannableStringBuilder
-import android.view.View
 import androidx.core.text.bold
 import androidx.recyclerview.widget.RecyclerView
+import com.noque.svampeatlas.databinding.ItemNotificationBinding
 import com.noque.svampeatlas.extensions.Date
 import com.noque.svampeatlas.extensions.highlighted
 import com.noque.svampeatlas.extensions.italized
 import com.noque.svampeatlas.extensions.toReadableDate
 import com.noque.svampeatlas.models.Notification
 import com.noque.svampeatlas.services.DataService
-import kotlinx.android.synthetic.main.item_notification.view.*
 
-class NotificationViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+class NotificationViewHolder(binding: ItemNotificationBinding) : RecyclerView.ViewHolder(binding.root) {
 
-    private val profileImageView = itemView.notificationItem_profileImageView
-    private val primaryLabel = itemView.notificationItem_primaryLabel
-    private val secondaryLabel = itemView.notificationItem_secondaryLabel
+    private val profileImageView = binding.notificationItemProfileImageView
+    private val primaryLabel = binding.notificationItemPrimaryLabel
+    private val secondaryLabel = binding.notificationItemSecondaryLabel
 
 
     fun configure(notification: Notification) {

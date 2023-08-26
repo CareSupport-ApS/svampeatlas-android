@@ -12,6 +12,8 @@ import com.noque.svampeatlas.models.Host
 import com.noque.svampeatlas.models.Substrate
 import com.noque.svampeatlas.models.VegetationType
 import com.noque.svampeatlas.R
+import com.noque.svampeatlas.databinding.ItemSettingBinding
+import com.noque.svampeatlas.databinding.ItemTextInputBinding
 import com.noque.svampeatlas.fragments.add_observation.DetailsFragment
 import com.noque.svampeatlas.models.User
 import com.noque.svampeatlas.view_holders.InputTypeViewHolder
@@ -72,14 +74,14 @@ class DetailsAdapter(private val resources: Resources, private val categories: A
             DetailsFragment.Categories.SUBSTRATE,
             DetailsFragment.Categories.HOST,
             DetailsFragment.Categories.VEGETATIONTYPE -> {
-                view = layoutInflater.inflate(R.layout.item_setting, parent, false)
-                view.setOnClickListener(onClickListener)
-                viewHolder = SettingsViewHolder(view)
+                val binding = ItemSettingBinding.inflate(layoutInflater, parent, false)
+                //TODO: view.setOnClickListener(onClickListener)
+                viewHolder = SettingsViewHolder(binding)
             }
             DetailsFragment.Categories.NOTES,
             DetailsFragment.Categories.ECOLOGYNOTES -> {
-                view = layoutInflater.inflate(R.layout.item_text_input, parent, false)
-                viewHolder = InputTypeViewHolder(onInputTypeChanged, view)
+                val binding = ItemTextInputBinding.inflate(layoutInflater, parent, false)
+                viewHolder = InputTypeViewHolder(onInputTypeChanged, binding)
             }
         }
 

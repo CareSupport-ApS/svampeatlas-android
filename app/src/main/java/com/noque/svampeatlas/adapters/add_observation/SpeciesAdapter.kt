@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.noque.svampeatlas.R
+import com.noque.svampeatlas.databinding.ItemLoaderBinding
 import com.noque.svampeatlas.models.*
 import com.noque.svampeatlas.view_holders.*
 import com.noque.svampeatlas.view_models.NewObservationViewModel
@@ -117,67 +118,72 @@ class SpeciesAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        val layoutInflater = LayoutInflater.from(parent.context)
-        val view: View
-        val viewHolder: RecyclerView.ViewHolder
+                val layoutInflater = LayoutInflater.from(parent.context)
+        
+        //TODO
+        return  LoaderViewHolder(ItemLoaderBinding.inflate(layoutInflater, parent, false))
 
-        when (sections.getSectionViewType(viewType)) {
-            Section.ViewType.HEADER -> {
-                view = layoutInflater.inflate(R.layout.item_header, parent, false)
-                viewHolder = HeaderViewHolder(view)
-            }
-            Section.ViewType.ERROR -> {
-                view = layoutInflater.inflate(R.layout.item_error, parent, false)
-                viewHolder = ErrorViewHolder(view)
-            }
-            Section.ViewType.LOADER -> {
-                view = layoutInflater.inflate(R.layout.item_loader, parent, false)
-                viewHolder = LoaderViewHolder(view)
-            }
-            Section.ViewType.ITEM -> {
-                when (Item.ViewType.values[viewType - Section.ViewType.values.count()]) {
-                    Item.ViewType.UNKNOWNSPECIES -> {
-                        view = layoutInflater.inflate(R.layout.item_unknown_species, parent, false)
-                        view.setOnClickListener(onClickListener)
-                        viewHolder = UnknownSpeciesViewHolder(view)
-                    }
-                    Item.ViewType.SELECTEDSPECIES -> {
-                        view = layoutInflater.inflate(R.layout.item_selected_result, parent, false)
-                        val selectedResultItemViewHolder = SelectedResultItemViewHolder(view)
-                        selectedResultItemViewHolder.confidenceSet = {
-                            listener?.confidenceSet(it)
-                        }
 
-                        selectedResultItemViewHolder.deselectClicked = {
-                            listener?.deselectPressed()
-                        }
-
-                        viewHolder = selectedResultItemViewHolder
-                    }
-
-                    Item.ViewType.SELECTABLE -> {
-                        view = layoutInflater.inflate(R.layout.item_result, parent, false)
-                        view.setOnClickListener(onClickListener)
-                        viewHolder = ResultItemViewHolder(view)
-                    }
-
-                    Item.ViewType.CAUTIONCELL -> {
-                        view = layoutInflater.inflate(R.layout.item_caution, parent, false)
-                        viewHolder = CautionViewHolder(view)
-                    }
-
-                    Item.ViewType.CREDITATIONCELL -> {
-                        view = layoutInflater.inflate(R.layout.item_creditation, parent, false)
-                        val creditationViewHolder = CreditationViewHolder(view)
-                        creditationViewHolder.configure(CreditationViewHolder.Type.AINEWOBSERVATION)
-                        viewHolder = creditationViewHolder
-                    }
-                }
-            }
-        }
-
-        view.tag = viewHolder
-        return viewHolder
+//        val view: View
+//        val viewHolder: RecyclerView.ViewHolder
+//
+//        when (sections.getSectionViewType(viewType)) {
+//            Section.ViewType.HEADER -> {
+//                view = layoutInflater.inflate(R.layout.item_header, parent, false)
+//                viewHolder = HeaderViewHolder(view)
+//            }
+//            Section.ViewType.ERROR -> {
+//                view = layoutInflater.inflate(R.layout.item_error, parent, false)
+//                viewHolder = ErrorViewHolder(view)
+//            }
+//            Section.ViewType.LOADER -> {
+//                view = layoutInflater.inflate(R.layout.item_loader, parent, false)
+//                viewHolder = LoaderViewHolder(view)
+//            }
+//            Section.ViewType.ITEM -> {
+//                when (Item.ViewType.values[viewType - Section.ViewType.values.count()]) {
+//                    Item.ViewType.UNKNOWNSPECIES -> {
+//                        view = layoutInflater.inflate(R.layout.item_unknown_species, parent, false)
+//                        view.setOnClickListener(onClickListener)
+//                        viewHolder = UnknownSpeciesViewHolder(view)
+//                    }
+//                    Item.ViewType.SELECTEDSPECIES -> {
+//                        view = layoutInflater.inflate(R.layout.item_selected_result, parent, false)
+//                        val selectedResultItemViewHolder = SelectedResultItemViewHolder(view)
+//                        selectedResultItemViewHolder.confidenceSet = {
+//                            listener?.confidenceSet(it)
+//                        }
+//
+//                        selectedResultItemViewHolder.deselectClicked = {
+//                            listener?.deselectPressed()
+//                        }
+//
+//                        viewHolder = selectedResultItemViewHolder
+//                    }
+//
+//                    Item.ViewType.SELECTABLE -> {
+//                        view = layoutInflater.inflate(R.layout.item_result, parent, false)
+//                        view.setOnClickListener(onClickListener)
+//                        viewHolder = ResultItemViewHolder(view)
+//                    }
+//
+//                    Item.ViewType.CAUTIONCELL -> {
+//                        view = layoutInflater.inflate(R.layout.item_caution, parent, false)
+//                        viewHolder = CautionViewHolder(view)
+//                    }
+//
+//                    Item.ViewType.CREDITATIONCELL -> {
+//                        view = layoutInflater.inflate(R.layout.item_creditation, parent, false)
+//                        val creditationViewHolder = CreditationViewHolder(view)
+//                        creditationViewHolder.configure(CreditationViewHolder.Type.AINEWOBSERVATION)
+//                        viewHolder = creditationViewHolder
+//                    }
+//                }
+//            }
+//        }
+//
+//        view.tag = viewHolder
+//        return viewHolder
     }
 
 

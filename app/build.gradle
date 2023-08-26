@@ -12,6 +12,11 @@ plugins {
 android {
     compileSdk 33
 
+
+    buildFeatures {
+        viewBinding true
+    }
+
     signingConfigs {
         signing {
             storeFile file('/Users/emillind/Documents/Noque ApS/Danmarks Svampeatlas/Android/Key Store/Store Key')

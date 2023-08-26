@@ -4,11 +4,10 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
-import android.widget.Button
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.res.ResourcesCompat
 import com.noque.svampeatlas.R
-import kotlinx.android.synthetic.main.view_camera_controls.view.*
+import com.noque.svampeatlas.databinding.ViewCameraControlsBinding
 
 class CameraControlsView(context: Context, attrs: AttributeSet?) :
     ConstraintLayout(context, attrs) {
@@ -30,28 +29,23 @@ class CameraControlsView(context: Context, attrs: AttributeSet?) :
 
     private var listener: Listener? = null
     private var state: State = State.HIDDEN
+    private val binding = ViewCameraControlsBinding.inflate(LayoutInflater.from(context), this, false)
 
-    private val captureButton by lazy {cameraControlsView_captureButton }
-    private val photoLibraryButton by lazy {cameraControlsView_libraryButton }
-    private val actionButton by lazy { cameraControlsView_noPhotoButton }
-    private val spinner by lazy { cameraControlsView_captureButtonSpinner }
 
     init {
-        val inflater = LayoutInflater.from(context)
-        inflater.inflate(R.layout.view_camera_controls, this)
         setupView()
     }
 
     private fun setupView() {
-        captureButton.setOnClickListener {
+        binding.cameraControlsViewCaptureButton.setOnClickListener {
             listener?.captureButtonPressed()
         }
 
-        photoLibraryButton.setOnClickListener {
+        binding.cameraControlsViewLibraryButton.setOnClickListener {
             if (state == State.CONFIRM) listener?.resetButtonPressed() else listener?.photoLibraryButtonPressed()
         }
 
-        actionButton.setOnClickListener {
+        binding.actionButton.setOnClickListener {
             listener?.actionButtonPressed(state)
         }
     }
@@ -65,35 +59,35 @@ class CameraControlsView(context: Context, attrs: AttributeSet?) :
         visibility = View.VISIBLE
         when (state) {
             State.CAPTURE_NEW -> {
-                photoLibraryButton.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.icon_photo_library, null))
-                spinner.visibility = View.INVISIBLE
-                captureButton.visibility = View.VISIBLE
-                photoLibraryButton.visibility = View.VISIBLE
-                actionButton.visibility = View.VISIBLE
-                actionButton.setText(R.string.cameraControlTextButton_noPhoto)
+                binding.cameraControlsViewLibraryButton.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.icon_photo_library, null))
+                binding.cameraControlsViewCaptureButtonSpinner.visibility = View.INVISIBLE
+                binding.cameraControlsViewCaptureButton.visibility = View.VISIBLE
+                binding.cameraControlsViewLibraryButton.visibility = View.VISIBLE
+                binding.actionButton.visibility = View.VISIBLE
+                binding.actionButton.setText(R.string.cameraControlTextButton_noPhoto)
             }
             State.LOADING -> {
-                captureButton.visibility = View.INVISIBLE
-                spinner.visibility = View.VISIBLE
-                photoLibraryButton.visibility = View.INVISIBLE
-                actionButton.visibility = View.INVISIBLE
+                binding.cameraControlsViewCaptureButton.visibility = View.INVISIBLE
+                binding.cameraControlsViewCaptureButtonSpinner.visibility = View.VISIBLE
+                binding.cameraControlsViewLibraryButton.visibility = View.INVISIBLE
+                binding.actionButton.visibility = View.INVISIBLE
             }
 
             State.CAPTURE -> {
-                photoLibraryButton.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.icon_photo_library, null))
-                photoLibraryButton.visibility = View.VISIBLE
-                captureButton.visibility = View.VISIBLE
-                spinner.visibility = View.INVISIBLE
-                actionButton.visibility = View.INVISIBLE
+                binding.cameraControlsViewLibraryButton.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.icon_photo_library, null))
+                binding.cameraControlsViewLibraryButton.visibility = View.VISIBLE
+                binding.cameraControlsViewCaptureButton.visibility = View.VISIBLE
+                binding.cameraControlsViewCaptureButtonSpinner.visibility = View.INVISIBLE
+                binding.actionButton.visibility = View.INVISIBLE
             }
 
             State.CONFIRM -> {
-                captureButton.visibility = View.INVISIBLE
-                spinner.visibility = View.INVISIBLE
-                photoLibraryButton.visibility = View.VISIBLE
-                photoLibraryButton.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.icon_back_button, null))
-                actionButton.setText(R.string.cameraControlTextButton_usePhoto)
-                actionButton.visibility = View.VISIBLE
+                binding.cameraControlsViewCaptureButton.visibility = View.INVISIBLE
+                binding.cameraControlsViewCaptureButtonSpinner.visibility = View.INVISIBLE
+                binding.cameraControlsViewLibraryButton.visibility = View.VISIBLE
+                binding.cameraControlsViewLibraryButton.setImageDrawable(ResourcesCompat.getDrawable(resources, R.drawable.icon_back_button, null))
+                binding.actionButton.setText(R.string.cameraControlTextButton_usePhoto)
+                binding.actionButton.visibility = View.VISIBLE
             }
             State.HIDDEN -> {
                 visibility = View.GONE
@@ -102,7 +96,7 @@ class CameraControlsView(context: Context, attrs: AttributeSet?) :
     }
 
     fun rotate(transform: Float, animationDuration: Long) {
-        photoLibraryButton.animate().rotation(transform).setDuration(animationDuration).start()
-        actionButton.animate().rotation(transform).setDuration(animationDuration).start()
+        binding.cameraControlsViewLibraryButton.animate().rotation(transform).setDuration(animationDuration).start()
+        binding.actionButton.animate().rotation(transform).setDuration(animationDuration).start()
     }
 }

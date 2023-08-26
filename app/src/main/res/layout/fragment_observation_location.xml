@@ -16,7 +16,7 @@
         android:minHeight="?attr/actionBarSize"
         android:theme="?attr/actionBarTheme"/>
 
-    <fragment
+    <androidx.fragment.app.FragmentContainerView
         android:id="@+id/observationLocationFragment_mapFragment"
         android:name="com.noque.svampeatlas.fragments.MapFragment"
         android:layout_width="match_parent"

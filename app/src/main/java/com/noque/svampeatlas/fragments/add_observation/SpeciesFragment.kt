@@ -2,7 +2,6 @@ package com.noque.svampeatlas.fragments.add_observation
 
 import android.content.pm.ActivityInfo
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -13,19 +12,21 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.noque.svampeatlas.adapters.add_observation.SpeciesAdapter
 import com.noque.svampeatlas.R
+import com.noque.svampeatlas.adapters.add_observation.SpeciesAdapter
+import com.noque.svampeatlas.databinding.FragmentAddObservationSpecieBinding
 import com.noque.svampeatlas.fragments.AddObservationFragmentDirections
 import com.noque.svampeatlas.fragments.DetailsFragment
-import com.noque.svampeatlas.models.*
+import com.noque.svampeatlas.models.DeterminationConfidence
+import com.noque.svampeatlas.models.Mushroom
+import com.noque.svampeatlas.models.Prediction
+import com.noque.svampeatlas.models.State
 import com.noque.svampeatlas.utilities.SharedPreferences
-import com.noque.svampeatlas.utilities.autoCleared
-import com.noque.svampeatlas.views.SearchBarListener
-import com.noque.svampeatlas.views.SearchBarView
+import com.noque.svampeatlas.utilities.autoClearedViewBinding
 import com.noque.svampeatlas.view_models.MushroomsViewModel
-import com.noque.svampeatlas.view_models.factories.MushroomsViewModelFactory
 import com.noque.svampeatlas.view_models.NewObservationViewModel
-import kotlinx.android.synthetic.main.fragment_add_observation_specie.*
+import com.noque.svampeatlas.view_models.factories.MushroomsViewModelFactory
+import com.noque.svampeatlas.views.SearchBarListener
 
 class SpeciesFragment : Fragment() {
 
@@ -38,11 +39,9 @@ class SpeciesFragment : Fragment() {
     private var defaultState: Boolean = true
 
     // Views
-    private var recyclerView by autoCleared<RecyclerView> {
-        it?.adapter = null
-    }
-    private var searchBar by autoCleared<SearchBarView>() {
-        it?.setListener(null)
+    private val binding by autoClearedViewBinding(FragmentAddObservationSpecieBinding::bind) {
+        it?.addObservationSpecieFragmentRecyclerView?.adapter = null
+        it?.addObservationSpecieFragmentSearchBarView?.setListener(null)
     }
 
     // View models
@@ -117,9 +116,9 @@ class SpeciesFragment : Fragment() {
             super.onScrolled(recyclerView, dx, dy)
 
             if (!recyclerView.canScrollVertically(-1)) {
-                searchBar.expand()
+                binding.addObservationSpecieFragmentSearchBarView.expand()
             } else if (dy > 0) {
-                searchBar.collapse()
+                binding.addObservationSpecieFragmentSearchBarView.collapse()
             }
         }
     }
@@ -134,22 +133,17 @@ class SpeciesFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initViews()
         setupView()
         setupViewModels()
     }
 
-    private fun initViews() {
-        recyclerView = addObservationSpecieFragment_recyclerView
-        searchBar = addObservationSpecieFragment_searchBarView
-    }
 
     private fun setupView() {
-        searchBar.apply {
+        binding.addObservationSpecieFragmentSearchBarView.apply {
             setListener(searchBarListener)
         }
 
-        recyclerView.apply {
+        binding.addObservationSpecieFragmentRecyclerView.apply {
             layoutManager = LinearLayoutManager(context)
             adapter = speciesAdapter
             addOnScrollListener(onScrollListener)
@@ -232,13 +226,13 @@ class SpeciesFragment : Fragment() {
 
     private fun setupViewModels() {
         newObservationViewModel.resetEvent.observe(viewLifecycleOwner) {
-            searchBar.resetText()
+            binding.addObservationSpecieFragmentSearchBarView.resetText()
         }
 
         newObservationViewModel.mushroom.observe(viewLifecycleOwner) {
             if (it != null) {
-                recyclerView.setPadding(0, 0, 0, 0)
-                searchBar.visibility = View.GONE
+                binding.addObservationSpecieFragmentRecyclerView.setPadding(0, 0, 0, 0)
+                binding.addObservationSpecieFragmentSearchBarView.visibility = View.GONE
                 speciesAdapter.configureUpperSection(
                     State.Items(
                         listOf(
@@ -255,7 +249,7 @@ class SpeciesFragment : Fragment() {
                 speciesAdapter.configureMiddleSectionState(State.Empty(), null)
                 speciesAdapter.configureLowerSectionState(State.Empty(), null)
             } else {
-                recyclerView.setPadding(
+                binding.addObservationSpecieFragmentRecyclerView.setPadding(
                     0,
                     (resources.getDimension(R.dimen.searchbar_view_height) + resources.getDimension(
                         R.dimen.searchbar_top_margin
@@ -263,8 +257,8 @@ class SpeciesFragment : Fragment() {
                     0,
                     0
                 )
-                searchBar.visibility = View.VISIBLE
-                searchBar.expand()
+                binding.addObservationSpecieFragmentSearchBarView.visibility = View.VISIBLE
+                binding.addObservationSpecieFragmentSearchBarView.expand()
                 speciesAdapter.configureUpperSection(
                     State.Items(
                         listOf(
@@ -279,7 +273,7 @@ class SpeciesFragment : Fragment() {
                 )
             }
 
-            recyclerView.scrollToPosition(0)
+            binding.addObservationSpecieFragmentRecyclerView.scrollToPosition(0)
         }
 
         newObservationViewModel.predictionResultsState.observe(viewLifecycleOwner, Observer {
@@ -292,7 +286,7 @@ class SpeciesFragment : Fragment() {
     }
 
     private fun defaultState() {
-        searchBar.resetText()
+        binding.addObservationSpecieFragmentSearchBarView.resetText()
         defaultState = true
         mushroomViewModel.selectCategory(MushroomsViewModel.Category.FAVORITES, true)
     }

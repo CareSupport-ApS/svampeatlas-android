@@ -6,48 +6,30 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewOutlineProvider
-import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.TextView
-import com.noque.svampeatlas.extensions.downloadImage
-import com.noque.svampeatlas.models.Observation
 import com.noque.svampeatlas.R
+import com.noque.svampeatlas.databinding.ViewObservationBinding
+import com.noque.svampeatlas.extensions.downloadImage
 import com.noque.svampeatlas.extensions.toReadableDate
-import com.noque.svampeatlas.extensions.upperCased
-import com.noque.svampeatlas.models.Image
+import com.noque.svampeatlas.models.Observation
 import com.noque.svampeatlas.services.DataService
-import kotlinx.android.synthetic.main.view_observation.view.*
 
 class ObservationView(context: Context?, attrs: AttributeSet?) : LinearLayout(context, attrs) {
 
     private var _observation: Observation? = null
     val observation: Observation? get() = _observation
 
-    private lateinit var imageView: ImageView
-    private lateinit var primaryTextView: TextView
-    private lateinit var secondaryTextView: TextView
-    private lateinit var userTextView: TextView
-    private lateinit var validationStatusImageView: ImageView
-
+    private val binding = ViewObservationBinding.inflate(LayoutInflater.from(context), this, false)
 
     init {
         val inflater = LayoutInflater.from(getContext())
         inflater.inflate(R.layout.view_observation, this)
-        initViews()
         setupView()
     }
 
-    private fun initViews() {
-        imageView = observationView_imageView
-        primaryTextView = observationView_primaryTextView
-        secondaryTextView = observationView_secondaryTextView
-        userTextView = observationView_userTextView
-        validationStatusImageView = observationView_validationImageView
-    }
-
     private fun setupView() {
-        imageView.clipToOutline = true
-        imageView.outlineProvider = object: ViewOutlineProvider() {
+        binding.observationViewImageView.clipToOutline = true
+        binding.observationViewImageView.outlineProvider = object: ViewOutlineProvider() {
             override fun getOutline(view: View?, outline: Outline?) {
                 view?.let {
                     val radius = resources.getDimension(R.dimen.app_rounded_corners)
@@ -60,44 +42,44 @@ class ObservationView(context: Context?, attrs: AttributeSet?) : LinearLayout(co
     fun configure(observation: Observation, showValidationStatus: Boolean = false) {
         this._observation = observation
 
-        imageView.visibility = View.GONE
+        binding.observationViewImageView.visibility = View.GONE
 
         observation.images.firstOrNull()?.let {
-            imageView.downloadImage(DataService.ImageSize.MINI, observation.images.first().url)
-            imageView.visibility = View.VISIBLE
+            binding.observationViewImageView.downloadImage(DataService.ImageSize.MINI, observation.images.first().url)
+            binding.observationViewImageView.visibility = View.VISIBLE
         }
 
         if (showValidationStatus) {
-            validationStatusImageView.visibility = View.VISIBLE
+            binding.observationViewValidationImageView.visibility = View.VISIBLE
 
             when (observation.validationStatus) {
                 Observation.ValidationStatus.APPROVED -> {
-                    validationStatusImageView.setImageResource(R.drawable.glyph_checkmark)
-                    validationStatusImageView.setBackgroundResource(R.drawable.circle_view_color_green)
+                    binding.observationViewValidationImageView.setImageResource(R.drawable.glyph_checkmark)
+                    binding.observationViewValidationImageView.setBackgroundResource(R.drawable.circle_view_color_green)
                 }
                 Observation.ValidationStatus.VERIFYING -> {
-                    validationStatusImageView.setImageResource(R.drawable.glyph_neutral)
-                    validationStatusImageView.setBackgroundResource(R.drawable.circle_view_color_primary)
+                    binding.observationViewValidationImageView.setImageResource(R.drawable.glyph_neutral)
+                    binding.observationViewValidationImageView.setBackgroundResource(R.drawable.circle_view_color_primary)
                 }
                 Observation.ValidationStatus.REJECTED -> {
-                    validationStatusImageView.setImageResource(R.drawable.glyph_denied)
-                    validationStatusImageView.setBackgroundResource(R.drawable.circle_view_color_red)
+                    binding.observationViewValidationImageView.setImageResource(R.drawable.glyph_denied)
+                    binding.observationViewValidationImageView.setBackgroundResource(R.drawable.circle_view_color_red)
                 }
                 Observation.ValidationStatus.UNKNOWN -> {
-                    validationStatusImageView.visibility = View.GONE
+                    binding.observationViewValidationImageView.visibility = View.GONE
                 }
             }
         }
 
-        primaryTextView.text = observation.determination.localizedName ?: observation.determination.fullName
+        binding.observationViewPrimaryTextView.text = observation.determination.localizedName ?: observation.determination.fullName
 
         val date = observation.observationDate
         if (date != null) {
-            secondaryTextView.text = "${date.toReadableDate(true, true)}, ${observation.locality?.name}"
+            binding.observationViewSecondaryTextView.text = "${date.toReadableDate(true, true)}, ${observation.locality?.name}"
         } else {
-            secondaryTextView.text = observation.locationName
+            binding.observationViewSecondaryTextView.text = observation.locationName
         }
 
-        userTextView.text = observation.observationBy
+        binding.observationViewUserTextView.text = observation.observationBy
     }
 }

@@ -6,6 +6,9 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.noque.svampeatlas.models.Observation
 import com.noque.svampeatlas.R
+import com.noque.svampeatlas.databinding.ItemObservationBinding
+import com.noque.svampeatlas.databinding.ItemReloaderBinding
+import com.noque.svampeatlas.databinding.ItemResultBinding
 import com.noque.svampeatlas.view_holders.ObservationViewHolder
 import com.noque.svampeatlas.view_holders.ReloaderViewHolder
 
@@ -52,17 +55,16 @@ class ObservationsAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        val view: View
         val viewHolder: RecyclerView.ViewHolder
 
        when (ViewType.values[viewType]) {
            ViewType.RESULTSITEM -> {
-               view = inflater.inflate(R.layout.item_observation, parent, false)
-               viewHolder = ObservationViewHolder(view)
+               val binding = ItemObservationBinding.inflate(inflater, parent, false)
+               viewHolder = ObservationViewHolder(binding)
            }
            ViewType.RELOADERITEM -> {
-               view = inflater.inflate(R.layout.item_reloader, parent, false)
-               viewHolder = ReloaderViewHolder(view)
+               val binding = ItemReloaderBinding.inflate(inflater, parent, false)
+               viewHolder = ReloaderViewHolder(binding)
            }
        }
 

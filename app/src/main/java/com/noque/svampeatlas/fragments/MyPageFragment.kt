@@ -2,42 +2,40 @@ package com.noque.svampeatlas.fragments
 
 
 import android.os.Bundle
-import android.view.*
-import androidx.fragment.app.Fragment
-import androidx.appcompat.widget.Toolbar
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import androidx.core.content.res.ResourcesCompat
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.google.android.material.appbar.CollapsingToolbarLayout
-import com.noque.svampeatlas.adapters.MyPageAdapter
-
 import com.noque.svampeatlas.R
-import com.noque.svampeatlas.models.*
+import com.noque.svampeatlas.adapters.MyPageAdapter
+import com.noque.svampeatlas.databinding.FragmentMyPageBinding
+import com.noque.svampeatlas.models.AppError
+import com.noque.svampeatlas.models.Notification
+import com.noque.svampeatlas.models.Observation
+import com.noque.svampeatlas.models.State
 import com.noque.svampeatlas.services.DataService
-import com.noque.svampeatlas.utilities.autoCleared
+import com.noque.svampeatlas.utilities.autoClearedViewBinding
 import com.noque.svampeatlas.view_models.Session
 import com.noque.svampeatlas.views.MainActivity
-import com.noque.svampeatlas.views.ProfileImageView
-import kotlinx.android.synthetic.main.fragment_my_page.*
 
-class MyPageFragment : Fragment() {
+class MyPageFragment : Fragment(R.layout.fragment_my_page) {
 
     companion object {
-        val TAG = "MyPageFragment"
+        const val TAG = "MyPageFragment"
     }
 
     // Views
 
-    private var toolbar by autoCleared<Toolbar>()
-    private var recyclerView by autoCleared<RecyclerView> { it?.adapter = null }
-    private var userView by autoCleared<ProfileImageView>()
-    private var collapsingToolbar by autoCleared<CollapsingToolbarLayout>()
-    private var swipeRefreshLayout by autoCleared<SwipeRefreshLayout>()
-
-
+    private val binding by autoClearedViewBinding(FragmentMyPageBinding::bind)
     // Adapters
 
 
@@ -96,13 +94,14 @@ class MyPageFragment : Fragment() {
         Session.reloadData(true)
     }
 
-    override fun onCreateView(
+    /*override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
         setHasOptionsMenu(true)
+        binding = FragmentMyPageBinding.inflate(inflater, container, false)
         return inflater.inflate(R.layout.fragment_my_page, container, false)
-    }
+    }*/
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.my_page_fragment_menu, menu)
@@ -120,22 +119,17 @@ class MyPageFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        toolbar = mypageFragment_toolbar
-        recyclerView = myPageFragment_recyclerView
-        userView = myPageFragment_profileImageView
-        collapsingToolbar = myPageFragment_collapsingToolbarLayout
-        swipeRefreshLayout = myPageFragment_swipeRefreshLayout
         setupViews()
         setupViewModels()
         Session.reloadData(false)
     }
 
     private fun setupViews() {
-        (requireActivity() as MainActivity).setSupportActionBar(toolbar)
-        collapsingToolbar.setCollapsedTitleTextColor(ResourcesCompat.getColor(resources, R.color.colorWhite, null))
-        collapsingToolbar.setExpandedTitleColor(ResourcesCompat.getColor(resources, R.color.colorWhite, null))
-        swipeRefreshLayout.setOnRefreshListener(onRefreshListener)
-        recyclerView.apply {
+        (requireActivity() as MainActivity).setSupportActionBar(binding.mypageFragmentToolbar)
+        binding.myPageFragmentCollapsingToolbarLayout.setCollapsedTitleTextColor(ResourcesCompat.getColor(resources, R.color.colorWhite, null))
+        binding.myPageFragmentCollapsingToolbarLayout.setExpandedTitleColor(ResourcesCompat.getColor(resources, R.color.colorWhite, null))
+        binding.myPageFragmentSwipeRefreshLayout.setOnRefreshListener(onRefreshListener)
+        binding.myPageFragmentRecyclerView.apply {
             adapter = this@MyPageFragment.adapter
             layoutManager = LinearLayoutManager(context, RecyclerView.VERTICAL, false)
         }
@@ -143,14 +137,14 @@ class MyPageFragment : Fragment() {
 
     private fun setupViewModels() {
             Session.user.observe(viewLifecycleOwner, Observer {
-                collapsingToolbar.title = it?.name
-                if (it != null) userView.configure(it.initials, it.imageURL, DataService.ImageSize.FULL)
+                binding.myPageFragmentCollapsingToolbarLayout.title = it?.name
+                if (it != null) binding.myPageFragmentProfileImageView.configure(it.initials, it.imageURL, DataService.ImageSize.FULL)
             })
 
             Session.notificationsState.observe(viewLifecycleOwner, Observer { state ->
                 when (state) {
                     is State.Loading -> {
-                        swipeRefreshLayout.isRefreshing = true
+                        binding.myPageFragmentSwipeRefreshLayout.isRefreshing = true
                     }
 
                     is State.Items -> {
@@ -176,7 +170,7 @@ class MyPageFragment : Fragment() {
             Session.observationsState.observe(viewLifecycleOwner, Observer { state ->
                 when (state) {
                     is State.Loading -> {
-                        swipeRefreshLayout.isRefreshing = true
+                        binding.myPageFragmentSwipeRefreshLayout.isRefreshing = true
                     }
 
                     is State.Items -> {
@@ -206,7 +200,7 @@ class MyPageFragment : Fragment() {
 
     private fun evaluateIfFinishedLoading() {
         if (Session.observationsState.value !is State.Loading && Session.notificationsState.value !is State.Loading) {
-            swipeRefreshLayout.isRefreshing = false
+            binding.myPageFragmentSwipeRefreshLayout.isRefreshing = false
         }
     }
 }

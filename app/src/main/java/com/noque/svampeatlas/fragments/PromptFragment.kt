@@ -9,7 +9,8 @@ import android.widget.Button
 import android.widget.TextView
 import androidx.fragment.app.DialogFragment
 import com.noque.svampeatlas.R
-import kotlinx.android.synthetic.main.fragment_prompt.*
+import com.noque.svampeatlas.databinding.FragmentPromptBinding
+import com.noque.svampeatlas.utilities.autoClearedViewBinding
 
 class PromptFragment: DialogFragment() {
 
@@ -27,12 +28,7 @@ class PromptFragment: DialogFragment() {
     }
 
 // Views
-    private lateinit var titleTextView: TextView
-    private lateinit var messageTextView: TextView
-    private lateinit var positiveButton: Button
-    private lateinit var negativeButton: Button
-
-
+private val binding by autoClearedViewBinding(FragmentPromptBinding::bind)
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -43,28 +39,20 @@ class PromptFragment: DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initViews()
         setupViews()
     }
 
-    private fun initViews() {
-        titleTextView = promptFragment_titleTextView
-        messageTextView = promptFragment_messageTextView
-        positiveButton = promptFragment_positiveButton
-        negativeButton = promptFragment_negativeButton
-    }
-
     private fun setupViews() {
-        titleTextView.text = arguments?.getString(KEY_TITLE)
-        messageTextView.text = arguments?.getString(KEY_MESSAGE)
-        positiveButton.text = arguments?.getString(KEY_POSITIVE)
-        negativeButton.text = arguments?.getString(KEY_NEGATIVE)
+        binding.promptFragmentTitleTextView.text = arguments?.getString(KEY_TITLE)
+        binding.promptFragmentMessageTextView.text = arguments?.getString(KEY_MESSAGE)
+        binding.promptFragmentPositiveButton.text = arguments?.getString(KEY_POSITIVE)
+        binding.promptFragmentNegativeButton.text = arguments?.getString(KEY_NEGATIVE)
 
-        positiveButton.setOnClickListener {
+        binding.promptFragmentPositiveButton.setOnClickListener {
             (targetFragment as Listener).positiveButtonPressed()
             dismiss()
         }
-        negativeButton.setOnClickListener {
+        binding.promptFragmentNegativeButton.setOnClickListener {
             (targetFragment as Listener).negativeButtonPressed()
             dismiss()
         }

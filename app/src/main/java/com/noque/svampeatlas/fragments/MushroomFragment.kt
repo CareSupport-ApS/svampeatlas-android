@@ -1,62 +1,53 @@
 package com.noque.svampeatlas.fragments
 
 
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Rect
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.view.Gravity
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AnimationUtils
-import android.widget.Toast
 import androidx.core.content.res.ResourcesCompat
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.noque.svampeatlas.adapters.MushroomListAdapter
-
-import com.noque.svampeatlas.R
-import com.noque.svampeatlas.view_models.MushroomsViewModel
-import com.noque.svampeatlas.models.State
-import kotlinx.android.synthetic.main.fragment_mushroom.*
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.tabs.TabLayout
+import com.noque.svampeatlas.R
+import com.noque.svampeatlas.adapters.MushroomListAdapter
+import com.noque.svampeatlas.databinding.FragmentMushroomBinding
 import com.noque.svampeatlas.extensions.changeColor
 import com.noque.svampeatlas.extensions.dpToPx
 import com.noque.svampeatlas.extensions.italized
-import com.noque.svampeatlas.extensions.pxToDp
-import com.noque.svampeatlas.views.BackgroundView
+import com.noque.svampeatlas.models.State
+import com.noque.svampeatlas.utilities.ToastHelper.handleSuccess
+import com.noque.svampeatlas.utilities.autoClearedViewBinding
+import com.noque.svampeatlas.view_models.MushroomsViewModel
+import com.noque.svampeatlas.view_models.factories.MushroomsViewModelFactory
 import com.noque.svampeatlas.views.MainActivity
 import com.noque.svampeatlas.views.SearchBarListener
-import com.noque.svampeatlas.views.SearchBarView
-import com.noque.svampeatlas.view_models.factories.MushroomsViewModelFactory
-import kotlinx.android.synthetic.main.custom_toast.*
-import kotlinx.android.synthetic.main.custom_toast.view.*
 
 
 class MushroomFragment : Fragment() {
 
     companion object {
-        val TAG = "MushroomFragment"
+        const val TAG = "MushroomFragment"
     }
 
 
     // Views
 
-    private var recyclerView: RecyclerView? = null
-    private var backgroundView: BackgroundView? = null
-    private var searchBarView: SearchBarView? = null
-    private var swipeRefreshLayout: SwipeRefreshLayout? = null
-    private var tabLayout: TabLayout? = null
+    private val binding by autoClearedViewBinding(FragmentMushroomBinding::bind) {
+        it?.mushroomFragmentRecyclerView?.adapter = null
+    }
 
     // View models
 
@@ -104,9 +95,9 @@ class MushroomFragment : Fragment() {
                 super.onScrolled(recyclerView, dx, dy)
 
                 if (!recyclerView.canScrollVertically(-1)) {
-                    searchBarView?.expand()
+                    binding.mushroomFragmentSearchBarView.expand()
                 } else if (dy > 0) {
-                    searchBarView?.collapse()
+                    binding.mushroomFragmentSearchBarView.collapse()
                 }
             }
         }
@@ -115,7 +106,7 @@ class MushroomFragment : Fragment() {
     private val onRefreshListener  by lazy {
         SwipeRefreshLayout.OnRefreshListener {
             mushroomsViewModel.reloadData()
-            swipeRefreshLayout?.isRefreshing = false
+            binding.mushroomFragmentSwipeRefreshLayout.isRefreshing = false
         }
     }
 
@@ -124,13 +115,13 @@ class MushroomFragment : Fragment() {
             override fun onTabReselected(tab: TabLayout.Tab) {
                 when (MushroomsViewModel.Category.values[tab.position]) {
                     MushroomsViewModel.Category.FAVORITES -> {
-                        searchBarView?.visibility = View.GONE
-                        recyclerView?.setPadding(0, 0, 0, 0)
+                        binding.mushroomFragmentSearchBarView.visibility = View.GONE
+                        binding.mushroomFragmentRecyclerView.setPadding(0, 0, 0, 0)
 
                     }
                     MushroomsViewModel.Category.SPECIES -> {
-                        searchBarView?.visibility = View.VISIBLE
-                        recyclerView?.setPadding(
+                        binding.mushroomFragmentSearchBarView.visibility = View.VISIBLE
+                        binding.mushroomFragmentRecyclerView.setPadding(
                             0,
                             (resources.getDimension(R.dimen.searchbar_view_height) + resources.getDimension(
                                 R.dimen.searchbar_top_margin
@@ -150,13 +141,13 @@ class MushroomFragment : Fragment() {
 
                 when (category) {
                     MushroomsViewModel.Category.FAVORITES -> {
-                        searchBarView?.visibility = View.GONE
-                        recyclerView?.setPadding(0, 0, 0, 0)
+                        binding.mushroomFragmentSearchBarView.visibility = View.GONE
+                        binding.mushroomFragmentRecyclerView.setPadding(0, 0, 0, 0)
 
                     }
                     MushroomsViewModel.Category.SPECIES -> {
-                        searchBarView?.visibility = View.VISIBLE
-                        recyclerView?.setPadding(
+                        binding.mushroomFragmentSearchBarView.visibility = View.VISIBLE
+                        binding.mushroomFragmentRecyclerView.setPadding(
                             0,
                             (resources.getDimension(R.dimen.searchbar_view_height) + resources.getDimension(
                                 R.dimen.searchbar_top_margin
@@ -240,7 +231,7 @@ class MushroomFragment : Fragment() {
                 background.draw(c)
                 icon.draw(c)
 
-                swipeRefreshLayout?.isEnabled = !isCurrentlyActive
+                binding.mushroomFragmentSwipeRefreshLayout.isEnabled = !isCurrentlyActive
 
                 super.onChildDraw(
                     c,
@@ -284,24 +275,15 @@ class MushroomFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initViews()
         setupView()
         setupViewModels()
     }
 
 
-    private fun initViews() {
-        recyclerView = mushroomFragment_recyclerView
-        backgroundView = mushroomFragment_backgroundView
-        searchBarView = mushroomFragment_searchBarView
-        swipeRefreshLayout = mushroomFragment_swipeRefreshLayout
-        tabLayout = mushroomFragment_tabLayout
-    }
-
     private fun setupView() {
-        (requireActivity() as MainActivity).setSupportActionBar(mushroomFragment_toolbar)
+        (requireActivity() as MainActivity).setSupportActionBar(binding.mushroomFragmentToolbar)
 
-        tabLayout?.apply {
+        binding.mushroomFragmentTabLayout.apply {
             MushroomsViewModel.Category.values.forEach {
                 val tab = this.newTab()
 
@@ -323,7 +305,7 @@ class MushroomFragment : Fragment() {
         }
 
 
-        recyclerView?.apply {
+       binding.mushroomFragmentRecyclerView.apply {
             val myHelper = ItemTouchHelper(imageSwipedCallback)
             myHelper.attachToRecyclerView(this)
 
@@ -336,27 +318,27 @@ class MushroomFragment : Fragment() {
             runLayoutAnimation()
         }
 
-        swipeRefreshLayout?.apply {
+       binding.mushroomFragmentSwipeRefreshLayout.apply {
             setOnRefreshListener(onRefreshListener)
         }
 
-        searchBarView?.apply {
+        binding.mushroomFragmentSearchBarView.apply {
             setListener(searchBarListener)
         }
     }
 
     private fun setupViewModels() {
         mushroomsViewModel.selectedCategory.observe(viewLifecycleOwner, Observer {
-            tabLayout?.getTabAt(it.ordinal)?.select()
+            binding.mushroomFragmentTabLayout.getTabAt(it.ordinal)?.select()
         })
 
         mushroomsViewModel.mushroomsState.observe(viewLifecycleOwner, Observer {
-            backgroundView?.reset()
+           binding.mushroomFragmentBackgroundView.reset()
 
             when (it) {
                 is State.Loading -> {
                     mushroomListAdapter.updateData(listOf())
-                    backgroundView?.setLoading()
+                    binding.mushroomFragmentBackgroundView.setLoading()
                 }
                 is State.Items -> {
                     runLayoutAnimation()
@@ -365,7 +347,7 @@ class MushroomFragment : Fragment() {
                 }
 
                 is State.Error -> {
-                    backgroundView?.setError(it.error)
+                    binding.mushroomFragmentBackgroundView.setError(it.error)
                 }
                 else -> {}
             }
@@ -375,14 +357,14 @@ class MushroomFragment : Fragment() {
             when (it) {
                 is State.Error -> {
                     mushroomsViewModel.resetFavoritizingState()
-                    val bitmap = BitmapFactory.decodeResource(resources, R.drawable.icon_elmessageview_failure).changeColor(ResourcesCompat.getColor(resources, R.color.colorRed, null))
-                    createToast(it.error.title, it.error.message, bitmap)
+                    BitmapFactory.decodeResource(resources, R.drawable.icon_elmessageview_failure).changeColor(ResourcesCompat.getColor(resources, R.color.colorRed, null))
+                    handleSuccess(it.error.title, it.error.message)
                 }
 
                 is State.Items -> {
                     mushroomsViewModel.resetFavoritizingState()
-                    val bitmap = BitmapFactory.decodeResource(resources, R.drawable.icon_elmessageview_failure).changeColor(ResourcesCompat.getColor(resources, R.color.colorGreen, null))
-                    createToast(getString(R.string.mushroomVC_favoriteSucces_title, it.items.localizedName ?: it.items.fullName.italized()), getString(R.string.mushroomVC_favoriteSucces_message), bitmap)
+                    BitmapFactory.decodeResource(resources, R.drawable.icon_elmessageview_failure).changeColor(ResourcesCompat.getColor(resources, R.color.colorGreen, null))
+                    handleSuccess(getString(R.string.mushroomVC_favoriteSucces_title, it.items.localizedName ?: it.items.fullName.italized()), getString(R.string.mushroomVC_favoriteSucces_message))
                 }
                 else -> {}
             }
@@ -392,36 +374,7 @@ class MushroomFragment : Fragment() {
     private fun runLayoutAnimation() {
         val controller = AnimationUtils.loadLayoutAnimation(requireContext(), R.anim.item_animation)
 
-        recyclerView?.layoutAnimation = controller
-        recyclerView?.scheduleLayoutAnimation()
+        binding.mushroomFragmentRecyclerView.layoutAnimation = controller
+        binding.mushroomFragmentRecyclerView.scheduleLayoutAnimation()
     }
-
-    private fun createToast(title: String, message: String, bitmap: Bitmap) {
-
-        val container = custom_toast_container
-        val layout = layoutInflater.inflate(R.layout.custom_toast, container)
-
-        layout.customToast_titleTextView.text = title
-        layout.customToast_messageTextView.text = message
-        layout.customToast_imageView.setImageBitmap(bitmap)
-
-        with(Toast(context)) {
-
-            setGravity(Gravity.BOTTOM, 0, 16.pxToDp(context))
-            duration = Toast.LENGTH_LONG
-            view = layout
-            show()
-        }
-    }
-
-override fun onDestroyView() {
-    recyclerView?.adapter = null
-    recyclerView = null
-    backgroundView = null
-    searchBarView = null
-    swipeRefreshLayout = null
-    swipeRefreshLayout = null
-    tabLayout = null
-    super.onDestroyView()
-}
 }

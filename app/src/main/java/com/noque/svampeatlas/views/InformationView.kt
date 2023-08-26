@@ -9,14 +9,11 @@ import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.widget.TextViewCompat
 import com.noque.svampeatlas.R
-import kotlinx.android.synthetic.main.view_information.view.*
+import com.noque.svampeatlas.databinding.ViewInformationBinding
 
 class InformationView(context: Context?, val attrs: AttributeSet?) : LinearLayout(context, attrs) {
 
-    init {
-        val inflater = LayoutInflater.from(getContext())
-        inflater.inflate(R.layout.view_information, this)
-    }
+    private val binding = ViewInformationBinding.inflate(LayoutInflater.from(context), this, false)
 
     fun configure(information: List<Pair<String, String>>) {
         fun addInformation(info: Pair<String, String>) {
@@ -54,10 +51,10 @@ class InformationView(context: Context?, val attrs: AttributeSet?) : LinearLayou
                 this.addView(textViewRight)
             }
 
-            informationView_linearLayout.addView(linearLayout)
+            binding.informationViewLinearLayout.addView(linearLayout)
         }
 
-        informationView_linearLayout.removeAllViews()
+        binding.informationViewLinearLayout.removeAllViews()
 
         information.forEach {
             addInformation(it)

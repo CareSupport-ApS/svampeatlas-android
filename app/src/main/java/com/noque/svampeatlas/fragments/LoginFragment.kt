@@ -1,29 +1,25 @@
 package com.noque.svampeatlas.fragments
 
 
-import android.os.Bundle
-import androidx.fragment.app.Fragment
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import android.widget.Button
-import android.widget.EditText
-import com.noque.svampeatlas.models.State
-
-import com.noque.svampeatlas.R
-import com.noque.svampeatlas.views.BackgroundView
-import com.noque.svampeatlas.views.MainActivity
-import kotlinx.android.synthetic.main.fragment_login.*
-import androidx.core.content.ContextCompat.getSystemService
-import android.view.inputmethod.InputMethodManager
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
-import android.widget.ImageView
+import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
+import androidx.core.content.ContextCompat.getSystemService
+import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
-import com.noque.svampeatlas.utilities.ToastHelper
+import com.noque.svampeatlas.R
+import com.noque.svampeatlas.databinding.FragmentLoginBinding
+import com.noque.svampeatlas.models.State
+import com.noque.svampeatlas.utilities.ToastHelper.handleError
+import com.noque.svampeatlas.utilities.autoClearedViewBinding
 import com.noque.svampeatlas.view_models.Session
+import com.noque.svampeatlas.views.MainActivity
 
 
 class LoginFragment : Fragment() {
@@ -33,23 +29,18 @@ class LoginFragment : Fragment() {
     }
 
     // Views
-    private lateinit var backgroundView: BackgroundView
-    private lateinit var initialsEditText: EditText
-    private lateinit var passwordEditText: EditText
-    private lateinit var loginButton: Button
-    private lateinit var createAccountButton: Button
-    private lateinit var bg: ImageView
+    private val binding by autoClearedViewBinding(FragmentLoginBinding::bind)
 
     // Listeners
 
     private val loginButtonClickListener = View.OnClickListener {
 
-        if (initialsEditText.text.isNullOrEmpty()) {
-            initialsEditText.error = resources.getString(R.string.loginVC_initialsTextField_error)
-        } else if (passwordEditText.text.isNullOrEmpty()) {
-            passwordEditText.error = resources.getString(R.string.loginVC_passwordTextField_error)
+        if (binding.loginFragmentInitialsEditText.text.isNullOrEmpty()) {
+            binding.loginFragmentInitialsEditText.error = resources.getString(R.string.loginVC_initialsTextField_error)
+        } else if (binding.loginFragmentPasswordEditText.text.isNullOrEmpty()) {
+            binding.loginFragmentPasswordEditText.error = resources.getString(R.string.loginVC_passwordTextField_error)
         } else {
-            Session.login(initialsEditText.text.toString(), passwordEditText.text.toString())
+            Session.login(binding.loginFragmentInitialsEditText.text.toString(), binding.loginFragmentPasswordEditText.text.toString())
         }
 
         getSystemService(requireContext(), InputMethodManager::class.java)?.hideSoftInputFromWindow(
@@ -76,36 +67,26 @@ class LoginFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initViews()
         setupViews()
         setupViewModels()
 
     }
 
-    private fun initViews() {
-        backgroundView = loginFragment_backgroundView
-        initialsEditText = loginFragment_initialsEditText
-        passwordEditText = loginFragment_passwordEditText
-        loginButton = loginFragment_loginButton
-        createAccountButton = loginFragment_createAccountButton
-        bg = loginFragment_bg
-    }
-
     private fun setupViews() {
-        (requireActivity() as MainActivity).setSupportActionBar(loginFragment_toolbar)
+        (requireActivity() as MainActivity).setSupportActionBar(binding.loginFragmentToolbar)
 
-        loginButton.setOnClickListener(loginButtonClickListener)
-        createAccountButton.setOnClickListener(createAccountButtonPressed)
-        Glide.with(requireContext()).load(R.drawable.background).transition(DrawableTransitionOptions.withCrossFade()).into(bg)
+        binding.loginFragmentLoginButton.setOnClickListener(loginButtonClickListener)
+        binding.loginFragmentCreateAccountButton.setOnClickListener(createAccountButtonPressed)
+        Glide.with(requireContext()).load(R.drawable.background).transition(DrawableTransitionOptions.withCrossFade()).into(binding.loginFragmentBg)
     }
 
     private fun setupViewModels() {
         Session.loggedInState.observe(viewLifecycleOwner) {
-            backgroundView.reset()
+            binding.loginFragmentBackgroundView.reset()
 
             when (it) {
-                is State.Error -> ToastHelper.handleError(requireActivity(), it.error)
-                is State.Loading -> backgroundView.setLoading()
+                is State.Error -> handleError(it.error)
+                is State.Loading -> binding.loginFragmentBackgroundView.setLoading()
                 else -> {}
             }
         }

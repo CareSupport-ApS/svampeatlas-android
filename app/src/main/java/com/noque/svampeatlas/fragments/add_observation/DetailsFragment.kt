@@ -4,30 +4,25 @@ import android.app.DatePickerDialog
 import android.content.pm.ActivityInfo
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.noque.svampeatlas.adapters.add_observation.DetailsAdapter
 import com.noque.svampeatlas.R
-import com.noque.svampeatlas.utilities.autoCleared
+import com.noque.svampeatlas.adapters.add_observation.DetailsAdapter
+import com.noque.svampeatlas.databinding.FragmentAddObservationDetailsBinding
+import com.noque.svampeatlas.utilities.autoClearedViewBinding
 import com.noque.svampeatlas.view_models.NewObservationViewModel
-import kotlinx.android.synthetic.main.fragment_add_observation_details.*
-import java.util.*
+import java.util.Calendar
 
 class DetailsFragment : Fragment() {
 
     companion object {
-        val TAG = "AddObs.DetailsFragment"
+        const val TAG = "AddObs.DetailsFragment"
     }
 
     enum class Categories {
@@ -45,9 +40,8 @@ class DetailsFragment : Fragment() {
     }
 
     // Views
-
-    private var recyclerView by autoCleared<RecyclerView> {
-        it?.adapter = null
+    private val binding by autoClearedViewBinding(FragmentAddObservationDetailsBinding::bind) {
+        it?.addObservationFragmentDetailsRecyclerView?.adapter = null
     }
 
     // View Models
@@ -104,13 +98,12 @@ class DetailsFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        recyclerView = addObservationFragment_details_recyclerView
         setupView()
         setupViewModels()
     }
 
     private fun setupView() {
-        recyclerView.apply {
+        binding.addObservationFragmentDetailsRecyclerView.apply {
             adapter = this@DetailsFragment.adapter
             layoutManager = LinearLayoutManager(context)
 

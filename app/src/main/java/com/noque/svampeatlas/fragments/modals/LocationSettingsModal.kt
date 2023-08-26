@@ -5,13 +5,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Button
-import android.widget.CompoundButton
-import android.widget.ImageButton
 import androidx.fragment.app.DialogFragment
-import com.google.android.material.switchmaterial.SwitchMaterial
 import com.noque.svampeatlas.R
-import kotlinx.android.synthetic.main.fragment_modal_locality_settings.*
+import com.noque.svampeatlas.databinding.FragmentModalLocalitySettingsBinding
+import com.noque.svampeatlas.utilities.autoClearedViewBinding
+
 
 class LocationSettingsModal(
     private val lockedLocality: Boolean,
@@ -24,10 +22,7 @@ class LocationSettingsModal(
         fun lockLocationSet(value: Boolean)
     }
 
-    private lateinit var saveButton: Button
-    private lateinit var cancelButton: ImageButton
-    private lateinit var locationSwitch: SwitchMaterial
-    private lateinit var localitySwitch: SwitchMaterial
+    private val binding by autoClearedViewBinding(FragmentModalLocalitySettingsBinding::bind)
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -39,11 +34,6 @@ class LocationSettingsModal(
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        saveButton = localitySettingsFragment_saveButton
-        cancelButton = localitySettingsFragment_cancelButton
-        locationSwitch = localitySettingsFragment_locationSwitch
-        localitySwitch = localitySettingsFragment_localitySwitch
-
         setupViews()
     }
 
@@ -55,22 +45,22 @@ class LocationSettingsModal(
     }
 
     private fun setupViews() {
-        locationSwitch.isChecked = lockedLocation
-        localitySwitch.isChecked = lockedLocality
+        binding.localitySettingsFragmentLocationSwitch.isChecked = lockedLocation
+        binding.localitySettingsFragmentLocalitySwitch.isChecked = lockedLocality
 
-        if (!allowLockingLocality) localitySwitch.visibility = View.GONE
+        if (!allowLockingLocality) binding.localitySettingsFragmentLocalitySwitch.visibility = View.GONE
 
-        locationSwitch.setOnCheckedChangeListener { _, newValue ->
-            if (newValue && localitySwitch.visibility == View.VISIBLE) localitySwitch.isChecked = true
+        binding.localitySettingsFragmentLocationSwitch.setOnCheckedChangeListener { _, newValue ->
+            if (newValue &&    binding.localitySettingsFragmentLocalitySwitch.visibility == View.VISIBLE)    binding.localitySettingsFragmentLocalitySwitch.isChecked = true
         }
 
-        saveButton.setOnClickListener {
-            (targetFragment as? Listener)?.lockLocalitySet(localitySwitch.isChecked)
-            (targetFragment as? Listener)?.lockLocationSet(locationSwitch.isChecked)
+        binding.localitySettingsFragmentSaveButton.setOnClickListener {
+            (targetFragment as? Listener)?.lockLocalitySet(   binding.localitySettingsFragmentLocalitySwitch.isChecked)
+            (targetFragment as? Listener)?.lockLocationSet( binding.localitySettingsFragmentLocationSwitch.isChecked)
             dismiss()
         }
 
-        cancelButton.apply {
+        binding.cancelButton.apply {
             setOnClickListener {
                 dismiss()
             }

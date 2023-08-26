@@ -1,12 +1,5 @@
 package com.noque.svampeatlas.models
 
-import android.util.Log
-import androidx.annotation.MainThread
-import androidx.arch.core.util.Function
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MediatorLiveData
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.Transformations
 import com.noque.svampeatlas.BuildConfig
 import com.noque.svampeatlas.R
 import com.noque.svampeatlas.extensions.Date
@@ -20,7 +13,6 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
 import java.util.*
-import kotlin.properties.Delegates
 
 
 class UserObservation(private val creationDate: Date = Date()) {

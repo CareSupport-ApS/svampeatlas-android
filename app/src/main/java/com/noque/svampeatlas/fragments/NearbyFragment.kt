@@ -3,22 +3,18 @@ package com.noque.svampeatlas.fragments
 import android.location.Location
 import android.os.Bundle
 import android.transition.TransitionManager
-import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.TextView
-import androidx.appcompat.widget.Toolbar
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.navigation.fragment.findNavController
 import com.google.android.gms.maps.model.LatLng
-
 import com.noque.svampeatlas.R
+import com.noque.svampeatlas.databinding.FragmentNearbyBinding
 import com.noque.svampeatlas.extensions.openSettings
 import com.noque.svampeatlas.models.Locality
 import com.noque.svampeatlas.models.Observation
@@ -26,11 +22,9 @@ import com.noque.svampeatlas.models.RecoveryAction
 import com.noque.svampeatlas.models.State
 import com.noque.svampeatlas.services.LocationService
 import com.noque.svampeatlas.utilities.autoCleared
+import com.noque.svampeatlas.utilities.autoClearedViewBinding
 import com.noque.svampeatlas.view_models.NearbyObservationsViewModel
 import com.noque.svampeatlas.views.MainActivity
-import com.noque.svampeatlas.views.ObservationView
-import kotlinx.android.synthetic.main.fragment_nearby.*
-
 
 class NearbyFragment : Fragment(), MapSettingsFragment.Listener {
     override fun newSearch() {
@@ -62,7 +56,7 @@ class NearbyFragment : Fragment(), MapSettingsFragment.Listener {
     }
 
     companion object {
-        val TAG = "NearbyFragment"
+        const val TAG = "NearbyFragment"
     }
 
     data class Settings(var radius: Int, var ageInYears: Int, var clearAll: Boolean)
@@ -88,16 +82,10 @@ class NearbyFragment : Fragment(), MapSettingsFragment.Listener {
 
 
     // Views
-
-    private var toolbar: Toolbar? = null
-    private var mapFragment: MapFragment? = null
-    private var observationView: ObservationView? = null
-    private var settingsButton: ImageButton? = null
-    private var markerImageView: ImageView? = null
-    private var distanceLabel: TextView? = null
-    private var ageLabel: TextView? = null
-
-
+    private val binding by autoClearedViewBinding(FragmentNearbyBinding::bind)
+    private var mapFragment by autoCleared<MapFragment>() {
+        it?.setListener(null)
+    }
     // View models
 
     private val nearbyObservationsViewModel by lazy {
@@ -135,7 +123,7 @@ class NearbyFragment : Fragment(), MapSettingsFragment.Listener {
 
     private val observationViewOnClick by lazy {
         View.OnClickListener {
-            observationView?.observation?.let {
+            binding.nearbyFragmentObservationView?.observation?.let {
                 val action = NearbyFragmentDirections.actionGlobalMushroomDetailsFragment(
                     it.id,
                     DetailsFragment.TakesSelection.NO,
@@ -185,8 +173,8 @@ class NearbyFragment : Fragment(), MapSettingsFragment.Listener {
                         val deltaX =  x -originX
                         val deltaY = y - originY
 
-                        markerImageView?.translationX = deltaX
-                        markerImageView?.translationY = deltaY
+                        binding.nearbyFragmentMarkerImageView.translationX = deltaX
+                        binding.nearbyFragmentMarkerImageView.translationY = deltaY
                     }
 
                     MotionEvent.ACTION_UP -> {
@@ -195,8 +183,8 @@ class NearbyFragment : Fragment(), MapSettingsFragment.Listener {
                            nearbyObservationsViewModel.getObservationsNearby(it, settings)
                        }
 
-                        markerImageView?.translationX = 0F
-                        markerImageView?.translationY = 0F
+                        binding.nearbyFragmentMarkerImageView.translationX = 0F
+                        binding.nearbyFragmentMarkerImageView.translationY = 0F
                     }
                 }
 
@@ -217,34 +205,25 @@ class NearbyFragment : Fragment(), MapSettingsFragment.Listener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initViews()
+        mapFragment = childFragmentManager.findFragmentById(binding.nearbyFragmentMapFragment.id) as MapFragment
+
         setupViews()
         setupViewModels()
 
         locationService = LocationService(requireContext().applicationContext).apply { setListener(locationServiceListener) }
     }
 
-    private fun initViews() {
-        toolbar = nearbyFragment_toolbar
-        mapFragment = childFragmentManager.findFragmentById(R.id.nearbyFragment_mapFragment) as MapFragment
-        observationView = nearbyFragment_observationView
-        settingsButton = nearbyFragment_settingsButton
-        markerImageView = nearbyFragment_markerImageView
-        distanceLabel = nearbyFragment_distanceLabel
-        ageLabel = nearbyFragment_ageLabel
-
-    }
 
     private fun setupViews() {
-        (requireActivity() as MainActivity).setSupportActionBar(toolbar)
-        mapFragment?.showStyleSelector(true)
-        mapFragment?.setListener(mapFragmentListener)
-        observationView?.apply {
+        (requireActivity() as MainActivity).setSupportActionBar(binding.nearbyFragmentToolbar)
+        mapFragment.showStyleSelector(true)
+        mapFragment.setListener(mapFragmentListener)
+        binding.nearbyFragmentObservationView?.apply {
             setOnClickListener(observationViewOnClick)
         }
 
-        settingsButton?.setOnClickListener(settingsButtonOnClick)
-        markerImageView?.setOnTouchListener(markerOnTouchListener)
+        binding.nearbyFragmentSettingsButton.setOnClickListener(settingsButtonOnClick)
+        binding.nearbyFragmentMarkerImageView.setOnTouchListener(markerOnTouchListener)
 
         setDistanceLabel()
         setAgeLabel()
@@ -256,9 +235,9 @@ class NearbyFragment : Fragment(), MapSettingsFragment.Listener {
                 is State.Loading -> { mapFragment?.setLoading() }
                 is State.Error -> { mapFragment?.setError(it.error, null) }
                 is State.Items -> {
-                    mapFragment?.clearCircleOverlays()
-                    mapFragment?.addObservationMarkers(it.items.first)
-                    mapFragment?.setRegion(it.items.second.last().coordinate, (it.items.second.last().radius * 1.1).toInt())
+                    mapFragment.clearCircleOverlays()
+                    mapFragment.addObservationMarkers(it.items.first)
+                    mapFragment.setRegion(it.items.second.last().coordinate, (it.items.second.last().radius * 1.1).toInt())
                     it.items.second.forEach {  mapFragment?.addCircleOverlay(it.coordinate, it.radius) }
                 }
                 is State.Empty -> { locationService.start() }
@@ -268,34 +247,22 @@ class NearbyFragment : Fragment(), MapSettingsFragment.Listener {
 
 
     private fun showObservationView(observation: Observation) {
-        observationView?.configure(observation, true)
-        TransitionManager.beginDelayedTransition(nearbyFragment_root)
-        observationConstraintSet.applyTo(nearbyFragment_root)
+        binding.nearbyFragmentObservationView?.configure(observation, true)
+        TransitionManager.beginDelayedTransition(binding.nearbyFragmentRoot)
+        observationConstraintSet.applyTo(binding.nearbyFragmentRoot)
     }
 
    private fun hideObservationView() {
-        TransitionManager.beginDelayedTransition(nearbyFragment_root)
-        rootConstraintSet.applyTo(nearbyFragment_root)
+        TransitionManager.beginDelayedTransition(binding.nearbyFragmentRoot)
+        rootConstraintSet.applyTo(binding.nearbyFragmentRoot)
     }
 
     private fun setDistanceLabel() {
-        distanceLabel?.text = "${String.format("%.1f", settings.radius.toDouble() / 1000)} km."
+        binding.nearbyFragmentDistanceLabel?.text = "${String.format("%.1f", settings.radius.toDouble() / 1000)} km."
     }
 
 
     private fun setAgeLabel() {
-        ageLabel?.text = resources.getString(R.string.mapViewSettingsView_year, settings.ageInYears)
-    }
-
-    override fun onDestroyView() {
-        toolbar = null
-        mapFragment?.setListener(null)
-        mapFragment = null
-        observationView = null
-        settingsButton = null
-        markerImageView = null
-        distanceLabel = null
-        ageLabel = null
-        super.onDestroyView()
+        binding.nearbyFragmentAgeLabel?.text = resources.getString(R.string.mapViewSettingsView_year, settings.ageInYears)
     }
 }

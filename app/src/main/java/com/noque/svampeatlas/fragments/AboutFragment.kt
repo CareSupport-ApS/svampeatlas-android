@@ -6,42 +6,33 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import com.noque.svampeatlas.R
+import com.noque.svampeatlas.databinding.FragmentAboutBinding
 import com.noque.svampeatlas.extensions.dpToPx
-import com.noque.svampeatlas.utilities.autoCleared
-import com.noque.svampeatlas.views.MainActivity
+import com.noque.svampeatlas.utilities.autoClearedViewBinding
 import com.noque.svampeatlas.views.HeaderView
-import kotlinx.android.synthetic.main.fragment_about.*
+import com.noque.svampeatlas.views.MainActivity
 
 class AboutFragment: Fragment() {
 
-
-    private var linearLayout: LinearLayout? = null
-    private var toolbar by autoCleared<Toolbar>()
+    private val binding by autoClearedViewBinding(FragmentAboutBinding::bind)
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        return inflater.inflate(R.layout.fragment_about, container, false)
+        return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initView()
         setupView()
     }
 
-    private fun initView() {
-        toolbar = aboutFragment_toolbar
-        linearLayout = aboutFragment_linearLayout
-    }
-
     private fun setupView() {
-        (requireActivity() as MainActivity).setSupportActionBar(toolbar)
+        (requireActivity() as MainActivity).setSupportActionBar(binding.aboutFragmentToolbar)
         createText(getString(R.string.aboutVC_recognition_title), getString(R.string.aboutVC_recognition_message))
         createText(getString(R.string.aboutVC_general_title), getString(R.string.aboutVC_general_message))
         createText(getString(R.string.aboutVC_generalTerms_title), getString(R.string.aboutVC_generalTerms_message))
@@ -62,7 +53,7 @@ class AboutFragment: Fragment() {
         params.bottomMargin = 16.dpToPx(context)
         textView.layoutParams = params
 
-        linearLayout?.addView(headerView)
-        linearLayout?.addView(textView)
+        binding.aboutFragmentLinearLayout.addView(headerView)
+        binding.aboutFragmentLinearLayout.addView(textView)
     }
 }

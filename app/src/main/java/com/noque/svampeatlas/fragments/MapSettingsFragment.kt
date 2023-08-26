@@ -8,7 +8,8 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.fragment.app.DialogFragment
 import com.noque.svampeatlas.R
-import kotlinx.android.synthetic.main.fragment_map_settings.*
+import com.noque.svampeatlas.databinding.FragmentMapSettingsBinding
+import com.noque.svampeatlas.utilities.autoClearedViewBinding
 
 class MapSettingsFragment : DialogFragment() {
     companion object {
@@ -30,13 +31,7 @@ class MapSettingsFragment : DialogFragment() {
 
 
     // Views
-    private lateinit var cancelButton: ImageButton
-    private lateinit var switch: Switch
-    private lateinit var radiusLabel: TextView
-    private lateinit var radiusSlider: SeekBar
-    private lateinit var ageLabel: TextView
-    private lateinit var ageSlider: SeekBar
-    private lateinit var searchButton: Button
+    private val binding by autoClearedViewBinding(FragmentMapSettingsBinding::bind)
 
     // Listeners
     private val onSeekBarChangeListener by lazy {
@@ -90,39 +85,29 @@ class MapSettingsFragment : DialogFragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initViews()
         setupViews()
     }
 
-    private fun initViews() {
-        cancelButton = mapSettingsFragment_cancelButton
-        switch = mapSettingsFragment_switch
-        radiusLabel = mapSettingFragment_radiusLabel
-        radiusSlider = mapSettingsFragment_radiusSlider
-        ageLabel = mapSettingFragment_ageLabel
-        ageSlider = mapSettingsFragment_ageSlider
-        searchButton = mapSettingsFragment_searchButton
-    }
 
     private fun setupViews() {
-        cancelButton.setOnClickListener(onExitButtonPressed)
-        radiusSlider.setOnSeekBarChangeListener(onSeekBarChangeListener)
-        ageSlider.setOnSeekBarChangeListener(onSeekBarChangeListener)
-        searchButton.setOnClickListener(onSearchButtonPressed)
-        switch.setOnCheckedChangeListener(onSwitchValueChanged)
+        binding.mapSettingsFragmentCancelButton.setOnClickListener(onExitButtonPressed)
+        binding.mapSettingsFragmentRadiusSlider.setOnSeekBarChangeListener(onSeekBarChangeListener)
+        binding.mapSettingsFragmentAgeSlider.setOnSeekBarChangeListener(onSeekBarChangeListener)
+        binding.mapSettingsFragmentSearchButton.setOnClickListener(onSearchButtonPressed)
+        binding.mapSettingsFragmentSwitch.setOnCheckedChangeListener(onSwitchValueChanged)
 
         setRadiusLabel()
         setAgeLabel()
 
-        radiusSlider.progress = radius - 1000
-        ageSlider.progress = age - 1
+        binding.mapSettingsFragmentRadiusSlider.progress = radius - 1000
+        binding.mapSettingsFragmentAgeSlider.progress = age - 1
     }
 
     private fun setRadiusLabel() {
-        radiusLabel.text = "${radius.toDouble() / 1000} km."
+        binding.mapSettingFragmentRadiusLabel.text = "${radius.toDouble() / 1000} km."
     }
 
     private fun setAgeLabel() {
-        ageLabel.text = getString(R.string.mapViewSettingsView_year, age)
+        binding.mapSettingFragmentAgeLabel.text = getString(R.string.mapViewSettingsView_year, age)
     }
 }

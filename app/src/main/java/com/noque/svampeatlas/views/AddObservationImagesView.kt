@@ -5,28 +5,23 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.noque.svampeatlas.adapters.add_observation.AddImagesAdapter
-import com.noque.svampeatlas.R
-import kotlinx.android.synthetic.main.view_add_observation_images.view.*
+import com.noque.svampeatlas.databinding.ViewAddObservationImagesBinding
 
 class AddObservationImagesView(context: Context?, attrs: AttributeSet?) : LinearLayout(context, attrs) {
 
-    private val recyclerView: RecyclerView
+    private val binding = ViewAddObservationImagesBinding.inflate(LayoutInflater.from(context), this, false)
 
     private val adapter by lazy {
         AddImagesAdapter()
     }
 
     init {
-        val inflater = LayoutInflater.from(getContext())
-        inflater.inflate(R.layout.view_add_observation_images, this)
-        recyclerView = addObservationImagesView_recyclerView
         setupView()
     }
 
     private fun setupView() {
-        recyclerView.layoutManager = LinearLayoutManager(context)
-        recyclerView.adapter = adapter
+        binding.addObservationImagesViewRecyclerView.layoutManager = LinearLayoutManager(context)
+        binding.addObservationImagesViewRecyclerView.adapter = adapter
     }
 }

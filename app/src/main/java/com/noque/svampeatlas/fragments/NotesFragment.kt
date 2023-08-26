@@ -4,9 +4,13 @@ import android.graphics.Canvas
 import android.graphics.Rect
 import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
 import android.widget.LinearLayout
-import androidx.appcompat.widget.Toolbar
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -17,18 +21,18 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.noque.svampeatlas.R
 import com.noque.svampeatlas.adapters.NotebookAdapter
-import com.noque.svampeatlas.extensions.*
+import com.noque.svampeatlas.databinding.FragmentNotebookBinding
+import com.noque.svampeatlas.extensions.dpToPx
+import com.noque.svampeatlas.extensions.removeTime
+import com.noque.svampeatlas.extensions.toReadableDate
 import com.noque.svampeatlas.fragments.modals.DownloaderFragment
 import com.noque.svampeatlas.models.NewObservation
 import com.noque.svampeatlas.models.Section
 import com.noque.svampeatlas.models.State
-import com.noque.svampeatlas.utilities.autoCleared
+import com.noque.svampeatlas.utilities.autoClearedViewBinding
 import com.noque.svampeatlas.view_models.NotesFragmentViewModel
-import com.noque.svampeatlas.views.BackgroundView
 import com.noque.svampeatlas.views.MainActivity
-import kotlinx.android.synthetic.main.action_view_add_notebook_button.view.*
-import kotlinx.android.synthetic.main.fragment_notebook.*
-import java.util.*
+import java.util.Date
 
 class NotesFragment: Fragment(), PromptFragment.Listener {
 
@@ -37,11 +41,9 @@ class NotesFragment: Fragment(), PromptFragment.Listener {
     }
 
     // Views
-    private var toolbar by autoCleared<Toolbar>()
-    private var recyclerView by autoCleared<RecyclerView> {
-        it?.adapter = null
+    private val binding by autoClearedViewBinding(FragmentNotebookBinding::bind) {
+        it?.notebookFragmentRecyclerView?.adapter = null
     }
-    private var backgroundView by autoCleared<BackgroundView>()
 
     private val notebookAdapter by lazy {
         NotebookAdapter().apply {
@@ -66,7 +68,6 @@ class NotesFragment: Fragment(), PromptFragment.Listener {
 
     private val viewModel by viewModels<NotesFragmentViewModel>()
 
-
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -81,10 +82,10 @@ class NotesFragment: Fragment(), PromptFragment.Listener {
 
         menu.findItem(R.id.menu_notebookFragment_addEntry)?.let {
             (it.actionView as? LinearLayout)?.apply {
-                actionView_addNotebookEntry.setOnClickListener {
+                /*actionView_addNotebookEntry.setOnClickListener {
                     val action = NotesFragmentDirections.actionNotesFragmentToAddObservationFragment().setContext(AddObservationFragment.Context.Note)
                     findNavController().navigate(action)
-                }
+                }*/
             }
         }
         super.onCreateOptionsMenu(menu, inflater)
@@ -99,17 +100,14 @@ class NotesFragment: Fragment(), PromptFragment.Listener {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        toolbar = notebookFragment_toolbar
-        recyclerView = notebookFragment_recyclerView
-        backgroundView = notebookFragment_backgroundView
         setupViews()
         setupViewModel()
     }
 
 
     private fun setupViews() {
-        (requireActivity() as MainActivity).setSupportActionBar(toolbar)
-        recyclerView.apply {
+        (requireActivity() as MainActivity).setSupportActionBar(binding.notebookFragmentToolbar)
+        binding.notebookFragmentRecyclerView.apply {
             val myHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
                 override fun onChildDrawOver(
                     c: Canvas,

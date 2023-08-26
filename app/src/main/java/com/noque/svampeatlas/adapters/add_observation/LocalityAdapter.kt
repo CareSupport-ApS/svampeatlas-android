@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.noque.svampeatlas.models.Locality
 import com.noque.svampeatlas.R
+import com.noque.svampeatlas.databinding.ItemLocalityBinding
 import com.noque.svampeatlas.models.AppError2
 import com.noque.svampeatlas.view_holders.LocalityViewHolder
 
@@ -43,8 +44,8 @@ class LocalityAdapter(): RecyclerView.Adapter<LocalityViewHolder>() {
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): LocalityViewHolder {
-        val view = LayoutInflater.from(parent.context).inflate(R.layout.item_locality, parent, false)
-        val localityViewHolder = LocalityViewHolder(view)
+        val binding = ItemLocalityBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val localityViewHolder = LocalityViewHolder(binding)
         localityViewHolder.setListener(onClickListener)
         return localityViewHolder
     }

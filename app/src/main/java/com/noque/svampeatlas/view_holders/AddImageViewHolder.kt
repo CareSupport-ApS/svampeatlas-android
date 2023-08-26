@@ -2,9 +2,11 @@ package com.noque.svampeatlas.view_holders
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
+import com.noque.svampeatlas.databinding.ItemAddImageBinding
 
-class AddImageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+class AddImageViewHolder(binding: ItemAddImageBinding) : RecyclerView.ViewHolder(binding.root) {
 
+    // TODO
 //    private var rootLayout = ConstraintSet()
 //    private var collapsedLayout = ConstraintSet()
 //    private var isCollapsed: Boolean = false

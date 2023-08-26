@@ -3,9 +3,8 @@ package com.noque.svampeatlas.adapters
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.gms.common.util.CollectionUtils
+import com.noque.svampeatlas.databinding.ItemMushroomBinding
 import com.noque.svampeatlas.models.Mushroom
-import com.noque.svampeatlas.R
 import com.noque.svampeatlas.view_holders.MushroomViewHolder
 
 class MushroomListAdapter():
@@ -28,7 +27,7 @@ class MushroomListAdapter():
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MushroomViewHolder {
         val inflater = LayoutInflater.from(parent.context)
-        val view = inflater.inflate(R.layout.item_mushroom, parent, false)
+        val view = ItemMushroomBinding.inflate(inflater, parent, false)
         return MushroomViewHolder(onClickListener, view)
     }
 

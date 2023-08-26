@@ -1,14 +1,11 @@
 package com.noque.svampeatlas.view_holders
 
-import android.view.View
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.item_header.view.*
+import com.noque.svampeatlas.databinding.ItemHeaderBinding
 
-class HeaderViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-
-    private val headerView = itemView.headerItem_headerView
+class HeaderViewHolder(private val binding: ItemHeaderBinding) : RecyclerView.ViewHolder(binding.root) {
 
     fun configure(title: String, extraMessage: String? = null) {
-        headerView.configure(title, extraMessage)
+        binding.headerItemHeaderView.configure(title, extraMessage)
     }
 }

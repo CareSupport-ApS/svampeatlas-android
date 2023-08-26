@@ -7,7 +7,7 @@
     android:layout_height="match_parent">
 
     <Button
-        android:id="@+id/cameraControlsView_noPhotoButton"
+        android:id="@+id/action_button"
         style="@style/Widget.AppCompat.Button.Borderless"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -37,7 +37,7 @@
         app:layout_constraintHorizontal_weight="3"
         android:src="@drawable/selector_capture_button"
         android:background="@null"
-        app:layout_constraintEnd_toStartOf="@id/cameraControlsView_noPhotoButton"
+        app:layout_constraintEnd_toStartOf="@id/action_button"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintHeight_max="80dp"
         app:layout_constraintDimensionRatio="W,1:1"

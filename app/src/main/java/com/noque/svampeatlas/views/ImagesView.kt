@@ -9,12 +9,15 @@ import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.PagerSnapHelper
 import androidx.recyclerview.widget.RecyclerView
-import com.noque.svampeatlas.adapters.ImagesAdapter
-import com.noque.svampeatlas.models.Image
 import com.noque.svampeatlas.R
-import kotlinx.android.synthetic.main.view_images.view.*
+import com.noque.svampeatlas.adapters.ImagesAdapter
+import com.noque.svampeatlas.databinding.ViewImagesBinding
+import com.noque.svampeatlas.models.Image
 
 class ImagesView(context: Context, attrs: AttributeSet?) : ConstraintLayout(context, attrs) {
+
+    private val binding = ViewImagesBinding.inflate(LayoutInflater.from(context), this, false)
+
 
     private val imagesAdapter by lazy {
         val adapter = ImagesAdapter()
@@ -26,18 +29,11 @@ class ImagesView(context: Context, attrs: AttributeSet?) : ConstraintLayout(cont
     }
 
     init {
-        val inflater = LayoutInflater.from(getContext())
-        inflater.inflate(R.layout.view_images, this)
-        initViews()
         setupView()
     }
 
-    private fun initViews() {
-
-    }
-
     private fun setupView() {
-        imagesView_recyclerView.apply {
+        binding.imagesViewRecyclerView.apply {
             val gridLayout = GridLayoutManager(context, 1)
             gridLayout.orientation = RecyclerView.HORIZONTAL
             layoutManager = gridLayout
@@ -54,11 +50,11 @@ class ImagesView(context: Context, attrs: AttributeSet?) : ConstraintLayout(cont
         }
 
         val pageSnap = PagerSnapHelper()
-        pageSnap.attachToRecyclerView(imagesView_recyclerView)
+        pageSnap.attachToRecyclerView(binding.imagesViewRecyclerView)
     }
 
     fun configure(images: List<Image>, beginningPosition: Int = 0,  scaleType: ImageView.ScaleType = ImageView.ScaleType.CENTER_CROP) {
         imagesAdapter.configure(images, scaleType)
-        imagesView_recyclerView.scrollToPosition(beginningPosition)
+        binding.imagesViewRecyclerView.scrollToPosition(beginningPosition)
     }
 }

@@ -9,7 +9,7 @@
     android:id="@+id/nearbyFragment_root"
     tools:context=".fragments.NearbyFragment">
 
-    <fragment
+    <androidx.fragment.app.FragmentContainerView
         android:id="@+id/nearbyFragment_mapFragment"
         android:name="com.noque.svampeatlas.fragments.MapFragment"
         android:layout_width="0dp"

@@ -6,8 +6,6 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.noque.svampeatlas.R
 import com.noque.svampeatlas.models.*
-import com.noque.svampeatlas.utilities.SharedPreferences
-import com.noque.svampeatlas.view_holders.DownloadTaxonViewHolder
 import com.noque.svampeatlas.view_holders.NoteItemViewHolder
 
 class NotebookAdapter: BaseAdapter<NotebookAdapter.Items, NotebookAdapter.Items.ViewTypes>() {
@@ -42,17 +40,19 @@ class NotebookAdapter: BaseAdapter<NotebookAdapter.Items, NotebookAdapter.Items.
         inflater: LayoutInflater,
         parent: ViewGroup,
         viewTypeOrdinal: Int
-    ): Pair<View, RecyclerView.ViewHolder> {
-        when (Items.ViewTypes.values()[viewTypeOrdinal]) {
-            Items.ViewTypes.NewObservation -> {
-                val view = inflater.inflate(R.layout.item_new_observation, parent, false)
-                return Pair(
-                    view,
-                    NoteItemViewHolder(view)
-                )
-
-            }
-        }
+    ): Pair<View, RecyclerView.ViewHolder>? {
+        // TODO
+        return null
+//        when (Items.ViewTypes.values()[viewTypeOrdinal]) {
+//            Items.ViewTypes.NewObservation -> {
+//                val view = inflater.inflate(R.layout.item_new_observation, parent, false)
+//                return Pair(
+//                   view,
+//                   NoteItemViewHolder(view)
+//                )
+//
+//            }
+//        }
     }
 
     override fun bindViewHolder(holder: RecyclerView.ViewHolder, item: Items) {

@@ -7,6 +7,12 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.noque.svampeatlas.models.*
 import com.noque.svampeatlas.R
+import com.noque.svampeatlas.databinding.ItemErrorBinding
+import com.noque.svampeatlas.databinding.ItemHeaderBinding
+import com.noque.svampeatlas.databinding.ItemLoaderBinding
+import com.noque.svampeatlas.databinding.ItemNotificationBinding
+import com.noque.svampeatlas.databinding.ItemObservationBinding
+import com.noque.svampeatlas.databinding.ItemReloaderBinding
 import com.noque.svampeatlas.extensions.difDays
 import com.noque.svampeatlas.utilities.SharedPreferences
 import com.noque.svampeatlas.view_holders.*
@@ -124,39 +130,39 @@ class MyPageAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
-        val view: View
         val viewHolder: RecyclerView.ViewHolder
         when (sections.getSectionViewType(viewType)) {
             Section.ViewType.HEADER -> {
-                view = layoutInflater.inflate(R.layout.item_header, parent, false)
-                viewHolder = HeaderViewHolder(view)
+                val binding = ItemHeaderBinding.inflate(layoutInflater, parent, false)
+                viewHolder = HeaderViewHolder(binding)
             }
             Section.ViewType.ERROR -> {
-                view = layoutInflater.inflate(R.layout.item_error, parent, false)
-                viewHolder = ErrorViewHolder(view)
+                val binding = ItemErrorBinding.inflate(layoutInflater, parent, false)
+                viewHolder = ErrorViewHolder(binding)
             }
             Section.ViewType.LOADER -> {
-                view = layoutInflater.inflate(R.layout.item_reloader, parent, false)
-                viewHolder = ReloaderViewHolder(view)
+                val binding = ItemReloaderBinding.inflate(layoutInflater, parent, false)
+                viewHolder = ReloaderViewHolder(binding)
             }
             Section.ViewType.ITEM -> {
                 when (Item.ViewType.values[viewType - Section.ViewType.values.count()]) {
                     Item.ViewType.NOTIFICATION -> {
-                        view = layoutInflater.inflate(R.layout.item_notification, parent, false)
-                        viewHolder = NotificationViewHolder(view)
+                        val binding = ItemNotificationBinding.inflate(layoutInflater, parent, false)
+                        viewHolder = NotificationViewHolder(binding)
                     }
                     Item.ViewType.OBSERVATION -> {
-                        view = layoutInflater.inflate(R.layout.item_observation, parent, false)
-                        viewHolder = ObservationViewHolder(view)
+                        val binding = ItemObservationBinding.inflate(layoutInflater, parent, false)
+                        viewHolder = ObservationViewHolder(binding)
                     }
                     Item.ViewType.LOADMORE -> {
-                        view = layoutInflater.inflate(R.layout.item_reloader, parent, false)
-                        viewHolder = ReloaderViewHolder(view)
+                        val binding = ItemReloaderBinding.inflate(layoutInflater, parent, false)
+                        viewHolder = ReloaderViewHolder(binding)
                     }
                 }
 
-                view.setOnClickListener(onClickListener)
-                view.tag = viewHolder
+                // TODO
+//                view.setOnClickListener(onClickListener)
+//                view.tag = viewHolder
             }
         }
 

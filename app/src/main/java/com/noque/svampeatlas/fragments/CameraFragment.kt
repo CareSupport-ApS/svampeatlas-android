@@ -16,14 +16,10 @@ import android.media.ExifInterface
 import android.os.Build
 import android.os.Bundle
 import android.view.*
-import android.widget.ImageView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
-import androidx.appcompat.widget.Toolbar
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
-import androidx.camera.view.PreviewView
-import androidx.constraintlayout.motion.widget.MotionLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
@@ -37,6 +33,7 @@ import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.noque.svampeatlas.R
 import com.noque.svampeatlas.adapters.ResultsAdapter
+import com.noque.svampeatlas.databinding.FragmentCameraBinding
 import com.noque.svampeatlas.extensions.openSettings
 import com.noque.svampeatlas.models.AppError
 import com.noque.svampeatlas.models.Prediction
@@ -45,11 +42,10 @@ import com.noque.svampeatlas.models.State
 import com.noque.svampeatlas.services.FileManager
 import com.noque.svampeatlas.utilities.DeviceOrientation
 import com.noque.svampeatlas.utilities.SharedPreferences
-import com.noque.svampeatlas.utilities.autoCleared
+import com.noque.svampeatlas.utilities.autoClearedViewBinding
 import com.noque.svampeatlas.view_models.CameraViewModel
 import com.noque.svampeatlas.view_models.factories.CameraViewModelFactory
 import com.noque.svampeatlas.views.*
-import kotlinx.android.synthetic.main.fragment_camera.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -57,12 +53,6 @@ import java.io.File
 
 
 class CameraFragment : Fragment(), PromptFragment.Listener, MenuProvider {
-
-    companion object {
-        private const val TAG = "CameraFragment"
-        private const val CODE_PERMISSION = 200
-    }
-
     enum class Context {
         NEW_OBSERVATION,
         IMAGE_CAPTURE,
@@ -88,7 +78,7 @@ class CameraFragment : Fragment(), PromptFragment.Listener, MenuProvider {
     private val permissionRequest =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
             permissions.entries.forEach {
-                if (it.key == Manifest.permission.CAMERA) cameraView.post { startSessionIfNeeded() }
+                if (it.key == Manifest.permission.CAMERA) binding.cameraFragmentCameraView.post { startSessionIfNeeded() }
             }
         }
 
@@ -126,15 +116,7 @@ class CameraFragment : Fragment(), PromptFragment.Listener, MenuProvider {
     private var sensorManager: SensorManager? = null
 
     // Views
-    private var toolbar by autoCleared<Toolbar>()
-    private var container by autoCleared<MotionLayout>()
-    private var cameraView by autoCleared<PreviewView>()
-    private var resultsView by autoCleared<ResultsView>()
-    private var cameraControlsView by autoCleared<CameraControlsView>()
-    private var backgroundView by autoCleared<BackgroundView>()
-    private var imageView by autoCleared<ImageView>()
-    private var zoomControlsView by autoCleared<ZoomControlsView>()
-
+    private val binding by autoClearedViewBinding(FragmentCameraBinding::bind)
 
     // View models
 
@@ -252,7 +234,7 @@ class CameraFragment : Fragment(), PromptFragment.Listener, MenuProvider {
     @SuppressLint("ClickableViewAccessibility")
     private val cameraViewTouchListener = View.OnTouchListener { _, motionEvent ->
             if (motionEvent.action == MotionEvent.ACTION_DOWN) {
-                val point = cameraView.meteringPointFactory.createPoint(motionEvent.x, motionEvent.y)
+                val point = binding.cameraFragmentCameraView.meteringPointFactory.createPoint(motionEvent.x, motionEvent.y)
                 val action = FocusMeteringAction.Builder(point).build()
                 cameraControl?.startFocusAndMetering(action)
                 true
@@ -271,17 +253,17 @@ class CameraFragment : Fragment(), PromptFragment.Listener, MenuProvider {
 
     private fun takePicture(metadata: ImageCapture.Metadata) {
         photoFile = FileManager.createTempFile(requireContext()).also {
-            cameraControlsView.configureState(CameraControlsView.State.LOADING)
+            binding.cameraFragmentCameraControlsView.configureState(CameraControlsView.State.LOADING)
             imageCaptureUseCase?.takePicture(
                 ImageCapture.OutputFileOptions.Builder(it).setMetadata(metadata).build(),
                 ContextCompat.getMainExecutor(requireContext()),
                 onImageSavedCallback
             )
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                container.postDelayed(
+                binding.cameraFragmentRoot.postDelayed(
                     {
-                        container.foreground = ColorDrawable(Color.WHITE)
-                        container.postDelayed({ container.foreground = null }, 150)
+                        binding.cameraFragmentRoot.foreground = ColorDrawable(Color.WHITE)
+                        binding.cameraFragmentRoot.postDelayed({ binding.cameraFragmentRoot.foreground = null }, 150)
                     }, 400
                 )
             }
@@ -358,7 +340,6 @@ class CameraFragment : Fragment(), PromptFragment.Listener, MenuProvider {
                 )
             }
 
-            initViews()
             setupViews()
             setupViewModels()
         }
@@ -401,40 +382,29 @@ class CameraFragment : Fragment(), PromptFragment.Listener, MenuProvider {
             super.onStop()
         }
 
-        private fun initViews() {
-            zoomControlsView = cameraFragment_zoomControlsView
-            toolbar = cameraFragment_toolbar
-            container = cameraFragment_root
-            imageView = cameraFragment_imageView
-            cameraView = cameraFragment_cameraView
-            cameraControlsView = cameraFragment_cameraControlsView
-            backgroundView = cameraFragment_backgroundView
-            resultsView = cameraFragment_resultsView
-        }
-
         @SuppressLint("ClickableViewAccessibility")
         private fun setupViews() {
             when (args.context) {
                 Context.IMAGE_CAPTURE -> {
-                    toolbar.setNavigationIcon(R.drawable.glyph_cancel)
-                    toolbar.setNavigationOnClickListener {
+                    binding.cameraFragmentToolbar.setNavigationIcon(R.drawable.glyph_cancel)
+                    binding.cameraFragmentToolbar.setNavigationOnClickListener {
                         findNavController().navigateUp()
                     }
                 }
                 Context.IDENTIFY -> {
-                    (requireActivity() as MainActivity).setSupportActionBar(toolbar)
-                    cameraControlsView.configureState(CameraControlsView.State.CAPTURE)
+                    (requireActivity() as MainActivity).setSupportActionBar(binding.cameraFragmentToolbar)
+                    binding.cameraFragmentCameraControlsView.configureState(CameraControlsView.State.CAPTURE)
                 }
                 Context.NEW_OBSERVATION -> {
-                    (requireActivity() as MainActivity).setSupportActionBar(toolbar)
-                    cameraControlsView.configureState(CameraControlsView.State.CAPTURE_NEW)
+                    (requireActivity() as MainActivity).setSupportActionBar(binding.cameraFragmentToolbar)
+                    binding.cameraFragmentCameraControlsView.configureState(CameraControlsView.State.CAPTURE_NEW)
                 }
             }
 
-            cameraControlsView.setListener(cameraControlsViewListener)
-            zoomControlsView.setListener(zoomControlsViewListener)
-            resultsView.setListener(resultsAdapterListener)
-            cameraView.setOnTouchListener(cameraViewTouchListener)
+            binding.cameraFragmentCameraControlsView.setListener(cameraControlsViewListener)
+            binding.cameraFragmentZoomControlsView.setListener(zoomControlsViewListener)
+            binding.cameraFragmentResultsView.setListener(resultsAdapterListener)
+            binding.cameraFragmentCameraView.setOnTouchListener(cameraViewTouchListener)
         }
 
 
@@ -453,20 +423,20 @@ class CameraFragment : Fragment(), PromptFragment.Listener, MenuProvider {
             cameraViewModel.predictionResultsState.observe(viewLifecycleOwner) { state ->
                 when (state) {
                     is State.Loading -> {
-                        cameraControlsView.configureState(CameraControlsView.State.LOADING)
+                        binding.cameraFragmentCameraControlsView.configureState(CameraControlsView.State.LOADING)
                     }
                     is State.Error -> {
-                        container.transitionToEnd()
-                        resultsView.showError(state.error)
+                        binding.cameraFragmentRoot.transitionToEnd()
+                        binding.cameraFragmentResultsView.showError(state.error)
                     }
                     is State.Items -> {
-                        container.transitionToEnd()
-                        resultsView.showResults(state.items.first, state.items.second)
+                        binding.cameraFragmentRoot.transitionToEnd()
+                        binding.cameraFragmentResultsView.showResults(state.items.first, state.items.second)
                     }
 
                     is State.Empty -> {
-                        resultsView.reset()
-                        container.transitionToStart()
+                        binding.cameraFragmentResultsView.reset()
+                        binding.cameraFragmentRoot.transitionToStart()
                     }
                 }
             }
@@ -482,7 +452,7 @@ class CameraFragment : Fragment(), PromptFragment.Listener, MenuProvider {
                     it.show(childFragmentManager, null)
                 }
             } else if (ContextCompat.checkSelfPermission(requireContext(), Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) {
-                cameraView.post {
+                binding.cameraFragmentCameraView.post {
                     startSessionIfNeeded()
                 }
             } else {
@@ -491,12 +461,12 @@ class CameraFragment : Fragment(), PromptFragment.Listener, MenuProvider {
         }
 
         private fun reset() {
-            backgroundView.reset()
-            imageView.setImageResource(android.R.color.transparent)
-            imageView.setBackgroundResource(android.R.color.transparent)
+            binding.cameraFragmentBackgroundView.reset()
+            binding.cameraFragmentImageView.setImageResource(android.R.color.transparent)
+            binding.cameraFragmentImageView.setBackgroundResource(android.R.color.transparent)
             when (args.context) {
-                Context.IMAGE_CAPTURE, Context.IDENTIFY -> cameraControlsView.configureState(CameraControlsView.State.CAPTURE)
-                Context.NEW_OBSERVATION -> cameraControlsView.configureState(CameraControlsView.State.CAPTURE_NEW)
+                Context.IMAGE_CAPTURE, Context.IDENTIFY -> binding.cameraFragmentCameraControlsView.configureState(CameraControlsView.State.CAPTURE)
+                Context.NEW_OBSERVATION -> binding.cameraFragmentCameraControlsView.configureState(CameraControlsView.State.CAPTURE_NEW)
             }
         }
 
@@ -522,7 +492,7 @@ class CameraFragment : Fragment(), PromptFragment.Listener, MenuProvider {
                                 previewUseCase,
                                 imageCaptureUseCase
                             )
-                            previewUseCase?.setSurfaceProvider(cameraView.surfaceProvider)
+                            previewUseCase?.setSurfaceProvider(binding.cameraFragmentCameraView.surfaceProvider)
                             cameraControl = camera.cameraControl
                         } catch (error: Exception) {
                             cameraViewModel.setImageFileError(Error.CaptureError(resources))
@@ -534,19 +504,19 @@ class CameraFragment : Fragment(), PromptFragment.Listener, MenuProvider {
         }
 
         private fun setImageState(file: File) {
-            backgroundView.reset()
-            imageView.setBackgroundResource(android.R.color.black)
-            imageView.apply {
+            binding.cameraFragmentBackgroundView.reset()
+            binding.cameraFragmentImageView.setBackgroundResource(android.R.color.black)
+            binding.cameraFragmentImageView.apply {
                 Glide.with(this)
                     .load(file)
                     .into(this)
             }
 
-            if (args.context == Context.IMAGE_CAPTURE || args.context == Context.NEW_OBSERVATION) cameraControlsView.configureState(CameraControlsView.State.CONFIRM)
+            if (args.context == Context.IMAGE_CAPTURE || args.context == Context.NEW_OBSERVATION) binding.cameraFragmentCameraControlsView.configureState(CameraControlsView.State.CONFIRM)
         }
 
         private fun setError(error: AppError) {
-            backgroundView.setErrorWithHandler(error, error.recoveryAction) {
+            binding.cameraFragmentBackgroundView.setErrorWithHandler(error, error.recoveryAction) {
                 if (error.recoveryAction == RecoveryAction.OPENSETTINGS) openSettings()
                 else if (error.recoveryAction == RecoveryAction.TRYAGAIN) cameraViewModel.reset()
             }
@@ -560,8 +530,8 @@ class CameraFragment : Fragment(), PromptFragment.Listener, MenuProvider {
                 Surface.ROTATION_270 -> -90F
                 else -> 0F
             }
-                cameraControlsView.rotate(transform, 350)
-                zoomControlsView.rotate(transform, 350)
+            binding.cameraFragmentCameraControlsView.rotate(transform, 350)
+            binding.cameraFragmentZoomControlsView.rotate(transform, 350)
         }
 
         override fun onDestroyView() {

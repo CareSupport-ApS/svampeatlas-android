@@ -7,6 +7,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.noque.svampeatlas.R
+import com.noque.svampeatlas.databinding.ItemAddImageBinding
+import com.noque.svampeatlas.databinding.ItemAddImageExpandedBinding
+import com.noque.svampeatlas.databinding.ItemAddedImageBinding
 import com.noque.svampeatlas.models.UserObservation
 import com.noque.svampeatlas.view_holders.AddImageViewHolder
 import com.noque.svampeatlas.view_holders.AddedImageViewHolder
@@ -64,28 +67,28 @@ class AddImagesAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        val view: View
         val viewHolder: RecyclerView.ViewHolder
         val layoutInflater = LayoutInflater.from(parent.context)
 
         when (ViewType.values[viewType]) {
             ViewType.ADDIMAGEVIEW -> {
-                view = layoutInflater.inflate(R.layout.item_add_image, parent, false)
-                viewHolder = AddImageViewHolder(view)
+                val binding = ItemAddImageBinding.inflate(layoutInflater, parent, false)
+                viewHolder = AddImageViewHolder(binding)
                 viewHolder.itemView.setOnClickListener(onClickListener)
             }
 
             ViewType.ADDIMAGEVIEWEXPANDED -> {
-                view = layoutInflater.inflate(R.layout.item_add_image_expanded, parent, false)
-                viewHolder = AddImageViewHolder(view)
+                val binding = ItemAddImageBinding.inflate(layoutInflater, parent, false)
+                viewHolder = AddImageViewHolder(binding)
                 viewHolder.itemView.setOnClickListener(onClickListener)
             }
 
             ViewType.ADDEDIMAGEVIEW -> {
-                view = layoutInflater.inflate(R.layout.item_added_image, parent, false)
-                viewHolder = AddedImageViewHolder(view)
+                val binding = ItemAddedImageBinding.inflate(layoutInflater, parent, false)
+                viewHolder = AddedImageViewHolder(binding)
             }
         }
+
 
         return viewHolder
     }

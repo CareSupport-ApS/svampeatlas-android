@@ -5,13 +5,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import androidx.appcompat.widget.Toolbar
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.navArgs
 import com.noque.svampeatlas.R
+import com.noque.svampeatlas.databinding.FragmentImageBinding
+import com.noque.svampeatlas.utilities.autoClearedViewBinding
 import com.noque.svampeatlas.views.MainActivity
-import com.noque.svampeatlas.views.ImagesView
-import kotlinx.android.synthetic.main.fragment_image.*
 
 class ImageFragment: Fragment() {
 
@@ -20,9 +19,8 @@ class ImageFragment: Fragment() {
     private val args: ImageFragmentArgs by navArgs()
 
     // Views
+    private val binding by autoClearedViewBinding(FragmentImageBinding::bind)
 
-    private lateinit var toolbar: Toolbar
-    private lateinit var imagesView: ImagesView
 
     // Adapters
 
@@ -37,10 +35,7 @@ class ImageFragment: Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initViews()
         setupViews()
-        imagesView.configure(args.images.toList(), args.selectedIndex, ImageView.ScaleType.FIT_CENTER)
-
     }
 
     override fun onResume() {
@@ -58,12 +53,10 @@ class ImageFragment: Fragment() {
         (requireActivity() as MainActivity).showSystemBars()
     }
 
-    private fun initViews() {
-        toolbar = imageFragment_toolbar
-        imagesView = imageFragment_imagesView
-    }
 
     private fun setupViews() {
-        (requireActivity() as MainActivity).setSupportActionBar(toolbar)
+        (requireActivity() as MainActivity).setSupportActionBar(binding.imageFragmentToolbar)
+        binding.imageFragmentImagesView.configure(args.images.toList(), args.selectedIndex, ImageView.ScaleType.FIT_CENTER)
+
     }
 }

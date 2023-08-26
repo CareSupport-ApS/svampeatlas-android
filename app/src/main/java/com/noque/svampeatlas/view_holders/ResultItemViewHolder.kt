@@ -1,14 +1,13 @@
 package com.noque.svampeatlas.view_holders
 
-import android.view.View
 import androidx.recyclerview.widget.RecyclerView
+import com.noque.svampeatlas.databinding.ItemResultBinding
 import com.noque.svampeatlas.models.Mushroom
 import com.noque.svampeatlas.views.ResultView
-import kotlinx.android.synthetic.main.item_result.view.*
 
-class ResultItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+class ResultItemViewHolder(binding: ItemResultBinding) : RecyclerView.ViewHolder(binding.root) {
 
-    private val resultView: ResultView = itemView.resultItem_resultView
+    private val resultView: ResultView = binding.resultItemResultView
 
     fun configure(mushroom: Mushroom) {
        resultView.configure(mushroom)

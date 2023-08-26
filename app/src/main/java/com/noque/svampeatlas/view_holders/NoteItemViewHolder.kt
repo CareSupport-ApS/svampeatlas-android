@@ -1,55 +1,44 @@
 package com.noque.svampeatlas.view_holders
 
 import android.annotation.SuppressLint
-import android.content.Context
-import android.util.Log
 import android.view.View
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.noque.svampeatlas.R
+import com.noque.svampeatlas.databinding.ItemNewObservationBinding
 import com.noque.svampeatlas.extensions.toReadableDate
-import com.noque.svampeatlas.extensions.toTimeString
 import com.noque.svampeatlas.models.NewObservation
-import kotlinx.android.synthetic.main.item_new_observation.view.*
 
-class NoteItemViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-
-    private val imageViewLayout = itemView.newObservationItem_imageLayout
-    private val imageView = itemView.newObservationItem_imageView
-    private val imageLabel = itemView.newObservationItem_imageLabel
-    private val smallLabel = itemView.newObservationItem_smallLabel
-    private val primaryLabel = itemView.newObservationItem_primaryLabel
-    private val newObservationUploadButton = itemView.newObservationItem_uploadButton
+class NoteItemViewHolder(private val binding: ItemNewObservationBinding) : RecyclerView.ViewHolder(binding.root) {
 
     @SuppressLint("SetTextI18n")
     fun configure(newObservation: NewObservation, onUploadButtonClick: (() -> Unit)) {
-        newObservationUploadButton.setOnClickListener {
+        binding.newObservationItemUploadButton.setOnClickListener {
             onUploadButtonClick()
         }
 
         if (!newObservation.images.isEmpty()) {
-            imageViewLayout.visibility = View.VISIBLE
+            binding.newObservationItemImageLayout.visibility = View.VISIBLE
 
-            Glide.with(imageView)
+            Glide.with(binding.newObservationItemImageView)
                 .load(newObservation.images.first())
 
-                .into(imageView)
+                .into(binding.newObservationItemImageView)
 
             if (newObservation.images.count() > 1) {
-                imageLabel.text = "+ ${newObservation.images.count() - 1}"
-                imageLabel.visibility = View.VISIBLE
+                binding.newObservationItemImageLabel.text = "+ ${newObservation.images.count() - 1}"
+                binding.newObservationItemImageLabel.visibility = View.VISIBLE
             } else {
-                imageLabel.visibility = View.GONE
+                binding.newObservationItemImageLabel.visibility = View.GONE
             }
         } else {
-            imageViewLayout.visibility = View.GONE
+            binding.newObservationItemImageLayout.visibility = View.GONE
         }
 
-        smallLabel.text = itemView.resources.getString(R.string.observationDetailsScrollView_observationDate) + " " + newObservation.observationDate.toReadableDate(
+        binding.newObservationItemSmallLabel.text = itemView.resources.getString(R.string.observationDetailsScrollView_observationDate) + " " + newObservation.observationDate.toReadableDate(
             recentFormatting = false,
             ignoreTime = true
         ) + ", " +  (newObservation.locality?.name ?: itemView.resources.getString(R.string.common_localityNotSelected))
-        primaryLabel.text = newObservation.species?.localizedName ?: newObservation.species?.fullName ?: "-"
+        binding.newObservationItemPrimaryLabel.text = newObservation.species?.localizedName ?: newObservation.species?.fullName ?: "-"
     }
 }

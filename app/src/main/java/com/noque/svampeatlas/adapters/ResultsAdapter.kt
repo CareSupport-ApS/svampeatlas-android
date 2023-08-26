@@ -6,6 +6,12 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.noque.svampeatlas.R
 import com.noque.svampeatlas.adapters.add_observation.SpeciesAdapter
+import com.noque.svampeatlas.databinding.ItemCreditationBinding
+import com.noque.svampeatlas.databinding.ItemErrorBinding
+import com.noque.svampeatlas.databinding.ItemHeaderBinding
+import com.noque.svampeatlas.databinding.ItemLoaderBinding
+import com.noque.svampeatlas.databinding.ItemTitleBinding
+import com.noque.svampeatlas.databinding.ViewHeaderBinding
 import com.noque.svampeatlas.models.*
 import com.noque.svampeatlas.view_holders.*
 
@@ -118,52 +124,49 @@ class ResultsAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         val view: View
         val viewHolder: RecyclerView.ViewHolder
 
-        when (sections.getSectionViewType(viewType)) {
-            Section.ViewType.HEADER -> {
-                view = layoutInflater.inflate(R.layout.item_header, parent, false)
-                viewHolder = HeaderViewHolder(view)
-            }
-            Section.ViewType.ERROR -> {
-                view = layoutInflater.inflate(R.layout.item_error, parent, false)
-                viewHolder = ErrorViewHolder(view)
-            }
-            Section.ViewType.LOADER -> {
-                view = layoutInflater.inflate(R.layout.item_loader, parent, false)
-                viewHolder = LoaderViewHolder(view)
-            }
-            Section.ViewType.ITEM -> {
-                when (Item.ViewType.values[viewType - Section.ViewType.values.count()]) {
-                    Item.ViewType.RESULTVIEW -> {
-                        view = layoutInflater.inflate(R.layout.item_result, parent, false)
-                        viewHolder = ResultItemViewHolder(view)
-                    }
-
-                    Item.ViewType.CREDITATION -> {
-                        view = layoutInflater.inflate(R.layout.item_creditation, parent, false)
-                        viewHolder = CreditationViewHolder(view)
-                    }
-
-                    Item.ViewType.RETRYVIEW -> {
-                        view = layoutInflater.inflate(R.layout.item_reloader, parent, false)
-                        viewHolder = ReloaderViewHolder(view)
-                    }
-
-                    Item.ViewType.CAUTIONVIEW -> {
-                        view = layoutInflater.inflate(R.layout.item_caution, parent, false)
-                        viewHolder = CautionViewHolder(view)
-                    }
-                    Item.ViewType.Title_View -> {
-                        view = layoutInflater.inflate(R.layout.item_title, parent, false)
-                        viewHolder = TitleViewHolder(view)
-                    }
-                }
-            }
-        }
+//        when (sections.getSectionViewType(viewType)) {
+//            Section.ViewType.HEADER ->
+//                viewHolder = HeaderViewHolder(ItemHeaderBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+//            Section.ViewType.ERROR -> {
+//                viewHolder = ErrorViewHolder(ItemErrorBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+//            }
+//            Section.ViewType.LOADER -> {
+//                view = layoutInflater.inflate(R.layout.item_loader, parent, false)
+//                viewHolder = LoaderViewHolder(view)
+//            }
+//            Section.ViewType.ITEM -> {
+//                when (Item.ViewType.values[viewType - Section.ViewType.values.count()]) {
+//                    Item.ViewType.RESULTVIEW -> {
+//                        view = layoutInflater.inflate(R.layout.item_result, parent, false)
+//                        viewHolder = ResultItemViewHolder(view)
+//                    }
+//
+//                    Item.ViewType.CREDITATION -> {
+//                        view = layoutInflater.inflate(R.layout.item_creditation, parent, false)
+//                        viewHolder = CreditationViewHolder(ItemCreditationBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+//                    }
+//
+//                    Item.ViewType.RETRYVIEW -> {
+//                        view = layoutInflater.inflate(R.layout.item_reloader, parent, false)
+//                        viewHolder = ReloaderViewHolder(view)
+//                    }
+//
+//                    Item.ViewType.CAUTIONVIEW -> {
+//                        view = layoutInflater.inflate(R.layout.item_caution, parent, false)
+//                        viewHolder = CautionViewHolder(view)
+//                    }
+//                    Item.ViewType.Title_View -> {
+//                        view = layoutInflater.inflate(R.layout.item_title, parent, false)
+//                        viewHolder = TitleViewHolder(ItemTitleBinding.inflate(LayoutInflater.from(parent.context), parent, false))
+//                    }
+//                }
+//            }
+//        }
 
 
-        view.tag = viewHolder
-        view.setOnClickListener(onItemClickListener)
-        return viewHolder
+//        view.tag = viewHolder
+//        view.setOnClickListener(onItemClickListener)
+        return  LoaderViewHolder(ItemLoaderBinding.inflate(layoutInflater, parent, false))
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {

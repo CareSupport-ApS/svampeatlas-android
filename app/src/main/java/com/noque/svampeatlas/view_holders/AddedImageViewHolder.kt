@@ -7,14 +7,14 @@ import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.noque.svampeatlas.R
+import com.noque.svampeatlas.databinding.ItemAddedImageBinding
 import com.noque.svampeatlas.models.UserObservation
-import com.noque.svampeatlas.view_models.NewObservationViewModel
-import kotlinx.android.synthetic.main.item_added_image.view.*
 
-class AddedImageViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
-    private var imageView: ImageView = itemView.addedImageItem_imageView
-    private var lock: ImageView = itemView.addedImageItem_lock
+class AddedImageViewHolder(binding: ItemAddedImageBinding) : RecyclerView.ViewHolder(binding.root) {
+
+    private var imageView: ImageView = binding.addedImageItemImageView
+    private var lock: ImageView = binding.addedImageItemLock
 
     val isLocked: Boolean get() {
         return lock.visibility == View.VISIBLE

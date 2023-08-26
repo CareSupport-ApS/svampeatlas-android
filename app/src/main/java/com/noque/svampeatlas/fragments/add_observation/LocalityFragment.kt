@@ -2,29 +2,34 @@ package com.noque.svampeatlas.fragments.add_observation
 
 import android.content.pm.ActivityInfo
 import android.os.Bundle
-import android.view.*
-import android.widget.ImageButton
-import android.widget.ImageView
-import android.widget.TextView
+import android.view.LayoutInflater
+import android.view.MotionEvent
+import android.view.View
+import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import androidx.core.view.marginBottom
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.noque.svampeatlas.adapters.add_observation.LocalityAdapter
 import com.noque.svampeatlas.R
+import com.noque.svampeatlas.adapters.add_observation.LocalityAdapter
+import com.noque.svampeatlas.databinding.FragmentAddObservationLocalityBinding
 import com.noque.svampeatlas.extensions.openSettings
 import com.noque.svampeatlas.fragments.AddObservationFragment
 import com.noque.svampeatlas.fragments.MapFragment
-import com.noque.svampeatlas.fragments.modals.LocationSettingsModal
 import com.noque.svampeatlas.fragments.TermsFragment
-import com.noque.svampeatlas.models.*
-import com.noque.svampeatlas.utilities.autoCleared
+import com.noque.svampeatlas.fragments.modals.LocationSettingsModal
+import com.noque.svampeatlas.models.Locality
+import com.noque.svampeatlas.models.Location
+import com.noque.svampeatlas.models.Observation
+import com.noque.svampeatlas.models.RecoveryAction
+import com.noque.svampeatlas.models.State
+import com.noque.svampeatlas.utilities.autoClearedViewBinding
 import com.noque.svampeatlas.utilities.safeAutoCleared
 import com.noque.svampeatlas.view_models.NewObservationViewModel
-import kotlinx.android.synthetic.main.fragment_add_observation_locality.*
-import java.util.*
+import java.util.Date
 
 class LocalityFragment: Fragment(), LocationSettingsModal.Listener {
 
@@ -35,19 +40,15 @@ class LocalityFragment: Fragment(), LocationSettingsModal.Listener {
     private var onGlobalLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
 
     // Views
+    private val binding by autoClearedViewBinding(FragmentAddObservationLocalityBinding::bind) {
+        it?.localityFragmentRecyclerView?.viewTreeObserver?.removeOnGlobalLayoutListener(onGlobalLayoutListener)
+        it?.localityFragmentRecyclerView?.adapter = null
+        onGlobalLayoutListener = null
+    }
+
     private var mapFragment by safeAutoCleared<MapFragment> {
         it?.setListener(null)
     }
-    private var recyclerView  by autoCleared<RecyclerView>() {
-        it?.viewTreeObserver?.removeOnGlobalLayoutListener(onGlobalLayoutListener)
-        onGlobalLayoutListener = null
-        it?.adapter = null
-    }
-    private var retryButton by autoCleared<ImageButton>()
-    private var markerImageView by autoCleared<ImageView>()
-    private var locationLabel by autoCleared<TextView>()
-    private var locationLockedImage by autoCleared<ImageView>()
-    private var settingsButton by autoCleared<ImageButton>()
 
     // View models
     private val newObservationViewModel: NewObservationViewModel by viewModels({ requireParentFragment() })
@@ -98,11 +99,11 @@ class LocalityFragment: Fragment(), LocationSettingsModal.Listener {
                     MotionEvent.ACTION_MOVE -> {
                         if ((x - originX > 500 || y - originY > 500) || hasStarted) {
                             hasStarted = true
-                            markerImageView.translationX = x - (originX + ((markerImageView.width.toFloat())))
-                            markerImageView.translationY = y - (originY + ((markerImageView.height.toFloat()) * 2))
+                            binding.localityFragmentMarkerImageView.translationX = x - (originX + ((binding.localityFragmentMarkerImageView.width.toFloat())))
+                            binding.localityFragmentMarkerImageView.translationY = y - (originY + ((binding.localityFragmentMarkerImageView.height.toFloat()) * 2))
                         } else {
-                            markerImageView.translationX = x / 4 - originX
-                            markerImageView.translationY = (y - (originY + ((markerImageView.height.toFloat())))) * 0.2.toFloat()
+                            binding.localityFragmentMarkerImageView.translationX = x / 4 - originX
+                            binding.localityFragmentMarkerImageView.translationY = (y - (originY + ((binding.localityFragmentMarkerImageView.height.toFloat())))) * 0.2.toFloat()
                         }
                     }
 
@@ -124,8 +125,8 @@ class LocalityFragment: Fragment(), LocationSettingsModal.Listener {
                             dialog.show(childFragmentManager, null)
                         }
 
-                        markerImageView.translationX = 0F
-                        markerImageView.translationY = 0F
+                        binding.localityFragmentMarkerImageView.translationX = 0F
+                        binding.localityFragmentMarkerImageView.translationY = 0F
                         hasStarted = false
                     }
                 }
@@ -152,17 +153,11 @@ class LocalityFragment: Fragment(), LocationSettingsModal.Listener {
     }
 
     private fun initViews() {
-        settingsButton = localityFragment_settingsButton
-        recyclerView = localityFragment_recyclerView
         mapFragment = childFragmentManager.findFragmentById(R.id.localityFragment_mapView) as MapFragment
-        retryButton = localityFragment_retryButton
-        markerImageView = localityFragment_markerImageView
-        locationLabel = localityFragment_precisionLabel
-        locationLockedImage = localityFragment_lockedLocation
     }
 
     private fun setupViews() {
-        recyclerView.apply {
+        binding.localityFragmentRecyclerView.apply {
             onGlobalLayoutListener = object: ViewTreeObserver.OnGlobalLayoutListener {
                 override fun onGlobalLayout() {
                     mapFragment?.setPadding(0, 0, 0, this@apply.height + this@apply.marginBottom)
@@ -177,10 +172,10 @@ class LocalityFragment: Fragment(), LocationSettingsModal.Listener {
 
         mapFragment?.setListener(mapFragmentListener)
         mapFragment?.setType(MapFragment.Category.REGULAR)
-        retryButton.setOnClickListener(retryButtonClicked)
-        markerImageView.setOnTouchListener(markerOnTouchListener)
+        binding.localityFragmentRetryButton.setOnClickListener(retryButtonClicked)
+        binding.localityFragmentMarkerImageView.setOnTouchListener(markerOnTouchListener)
 
-        settingsButton.setOnClickListener {
+        binding.localityFragmentSettingsButton.setOnClickListener {
            val localityLockPossible = when (newObservationViewModel.context) {
                 AddObservationFragment.Context.Note, AddObservationFragment.Context.EditNote, AddObservationFragment.Context.Edit -> false
                 else -> true
@@ -216,7 +211,7 @@ class LocalityFragment: Fragment(), LocationSettingsModal.Listener {
             newObservationViewModel.locality.observe(viewLifecycleOwner) {
 
                 it?.first?.let { locality ->
-                    recyclerView.scrollToPosition(localityAdapter.setSelected(locality, it.second))
+                    binding.localityFragmentRecyclerView.scrollToPosition(localityAdapter.setSelected(locality, it.second))
                     mapFragment?.setSelectedLocalityAnnotation(locality.location)
                 }
             }
@@ -224,15 +219,15 @@ class LocalityFragment: Fragment(), LocationSettingsModal.Listener {
         newObservationViewModel.coordinateState.observe(viewLifecycleOwner, Observer {
                 when (it) {
                     is State.Items -> {
-                        locationLockedImage.visibility = if (it.items.second) View.VISIBLE else View.GONE
+                        binding.localityFragmentLockedLocation.visibility = if (it.items.second) View.VISIBLE else View.GONE
                         mapFragment?.addLocationMarker(it.items.first.latLng, resources.getString(R.string.locationAnnotation_title), it.items.first.accuracy.toDouble())
                         mapFragment?.setRegion(it.items.first.latLng)
-                        locationLabel.text = resources.getString(R.string.precision, it.items.first.accuracy) + ", lat: ${String.format("%.2f", it.items.first.latLng.latitude)}, lon: ${String.format("%.2f", it.items.first.latLng.longitude)}"
+                        binding.localityFragmentPrecisionLabel.text = resources.getString(R.string.precision, it.items.first.accuracy) + ", lat: ${String.format("%.2f", it.items.first.latLng.latitude)}, lon: ${String.format("%.2f", it.items.first.latLng.longitude)}"
                     }
 
                     is State.Loading -> {
                         mapFragment?.setLoading()
-                        locationLabel.text = "Finder placering..."
+                        binding.localityFragmentPrecisionLabel.text = "Finder placering..."
                     }
 
                     is State.Empty -> {

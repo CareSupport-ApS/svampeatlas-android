@@ -8,11 +8,11 @@ import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.ColorUtils
 import com.noque.svampeatlas.R
-import kotlinx.android.synthetic.main.view_spinner.view.*
+import com.noque.svampeatlas.databinding.ViewSpinnerBinding
 
 class SpinnerView(context: Context, attrs: AttributeSet?) : ConstraintLayout(context, attrs) {
 
-    private val progressBar by lazy { spinnerView_progressBar }
+    private val binding = ViewSpinnerBinding.inflate(LayoutInflater.from(context), this, false)
 
     init {
         val inflater = LayoutInflater.from(getContext())
@@ -24,7 +24,7 @@ class SpinnerView(context: Context, attrs: AttributeSet?) : ConstraintLayout(con
         isFocusable = true
         val color = ColorUtils.setAlphaComponent(Color.BLACK, 150)
         setBackgroundColor(color)
-        progressBar.visibility = View.VISIBLE
+        binding.spinnerViewProgressBar.visibility = View.VISIBLE
     }
 
     fun stopLoading() {
@@ -32,6 +32,6 @@ class SpinnerView(context: Context, attrs: AttributeSet?) : ConstraintLayout(con
         isFocusable = false
 
         setBackgroundColor(Color.TRANSPARENT)
-        progressBar.visibility = View.GONE
+        binding.spinnerViewProgressBar.visibility = View.GONE
     }
 }

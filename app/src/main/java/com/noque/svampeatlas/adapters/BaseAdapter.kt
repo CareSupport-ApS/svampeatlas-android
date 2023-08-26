@@ -8,6 +8,9 @@ import androidx.annotation.NonNull
 import androidx.core.view.doOnLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.noque.svampeatlas.R
+import com.noque.svampeatlas.databinding.ItemErrorBinding
+import com.noque.svampeatlas.databinding.ItemHeaderBinding
+import com.noque.svampeatlas.databinding.ItemLoaderBinding
 import com.noque.svampeatlas.models.Item
 import com.noque.svampeatlas.models.Section
 import com.noque.svampeatlas.models.Sections
@@ -42,35 +45,34 @@ abstract class BaseAdapter<I, V>: RecyclerView.Adapter<RecyclerView.ViewHolder>(
 
     final override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
-        val view: View
         val viewHolder: RecyclerView.ViewHolder
         when (sections.getSectionViewType(viewType)) {
             Section.ViewType.HEADER -> {
-                view = layoutInflater.inflate(R.layout.item_header, parent, false)
-                viewHolder = HeaderViewHolder(view)
+                val binding = ItemHeaderBinding.inflate(layoutInflater, parent, false)
+                viewHolder = HeaderViewHolder(binding)
             }
             Section.ViewType.ERROR -> {
-                view = layoutInflater.inflate(R.layout.item_error, parent, false)
-                viewHolder = ErrorViewHolder(view)
+                val binding = ItemErrorBinding.inflate(layoutInflater, parent, false)
+                viewHolder = ErrorViewHolder(binding)
             }
-            Section.ViewType.LOADER -> {
-                view = layoutInflater.inflate(R.layout.item_loader, parent, false)
-                viewHolder = LoaderViewHolder(view)
+            Section.ViewType.LOADER, Section.ViewType.ITEM -> {
+                val binding = ItemLoaderBinding.inflate(layoutInflater, parent, false)
+                viewHolder = LoaderViewHolder(binding)
             }
-            Section.ViewType.ITEM -> {
-                createViewTypeViewHolder(layoutInflater, parent, viewType - Section.ViewType.values.count()).also {
-                    view = it.first
-                    viewHolder = it.second
-                    view.tag = viewHolder
-                    view.setOnClickListener(onClickListener)
-                }
-            }
+//            Section.ViewType.ITEM -> {
+//                createViewTypeViewHolder(layoutInflater, parent, viewType - Section.ViewType.values.count()).also {
+//                    view = it.first
+//                    viewHolder = it.second
+//                    view.tag = viewHolder
+//                    view.setOnClickListener(onClickListener)
+//                }
+//            }
         }
         return viewHolder
     }
 
-    @NonNull
-    abstract fun createViewTypeViewHolder(inflater: LayoutInflater, parent: ViewGroup, viewTypeOrdinal: Int): Pair<View, RecyclerView.ViewHolder>
+    // TODO
+    abstract fun createViewTypeViewHolder(inflater: LayoutInflater, parent: ViewGroup, viewTypeOrdinal: Int): Pair<View, RecyclerView.ViewHolder>?
 
     final override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         fun expandUtil(position: Int, itemView: View) {

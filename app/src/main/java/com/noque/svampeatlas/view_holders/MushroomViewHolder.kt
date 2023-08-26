@@ -1,13 +1,12 @@
 package com.noque.svampeatlas.view_holders
 
-import android.view.View
 import androidx.recyclerview.widget.RecyclerView
+import com.noque.svampeatlas.databinding.ItemMushroomBinding
 import com.noque.svampeatlas.models.Mushroom
-import kotlinx.android.synthetic.main.item_mushroom.view.*
 
-class MushroomViewHolder(private val itemClick: ((Mushroom) -> Unit)?, var view: View): RecyclerView.ViewHolder(view) {
+class MushroomViewHolder(private val itemClick: ((Mushroom) -> Unit)?, var binding: ItemMushroomBinding): RecyclerView.ViewHolder(binding.root) {
 
-    private val mushroomView = itemView.item_mushroom_mushroomView
+    private val mushroomView = binding.itemMushroomMushroomView
 
     init {
         mushroomView.round(false)

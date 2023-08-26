@@ -17,13 +17,13 @@ import com.google.android.gms.maps.model.*
 import com.google.maps.android.heatmaps.HeatmapTileProvider
 import com.noque.svampeatlas.extensions.toRectanglePolygon
 import com.noque.svampeatlas.R
-import kotlinx.android.synthetic.main.fragment_map.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLngBounds
 import com.google.android.gms.maps.model.Marker
 import com.google.android.material.tabs.TabLayout
 import com.google.maps.android.clustering.ClusterItem
 import com.google.maps.android.clustering.ClusterManager
+import com.noque.svampeatlas.databinding.FragmentMapBinding
 import com.noque.svampeatlas.extensions.changeColor
 import com.noque.svampeatlas.extensions.dpToPx
 import com.noque.svampeatlas.models.*
@@ -45,29 +45,6 @@ data class ObservationItem(val observation: Observation) : ClusterItem {
 
     override fun hashCode(): Int {
         var result = observation.id
-       /* result = 31 * result + location.hashCode()
-        if (name.isNotEmpty()) {
-            result = 31 * result + name.hashCode()
-        }
-        if (addressRegion.isNotEmpty()) {
-            result = 31 * result + addressRegion.hashCode()
-        }
-        if (addressLocality.isNotEmpty()) {
-            result = 31 * result + addressLocality.hashCode()
-        }
-        if (streetAddress.isNotEmpty()) {
-            result = 31 * result + streetAddress.hashCode()
-        }
-        if (postalCode.isNotEmpty()) {
-            result = 31 * result + postalCode.hashCode()
-        }
-        if (category.isNotEmpty()) {
-            result = 31 * result + category.hashCode()
-        }
-        if (products.isNotEmpty()) {
-            result = 31 * result + products.hashCode()
-        }*/
-
         return result
     }
 }
@@ -75,10 +52,10 @@ data class ObservationItem(val observation: Observation) : ClusterItem {
 class MapFragment : Fragment(), ViewTreeObserver.OnGlobalLayoutListener {
 
     companion object {
-        val TAG = "MapFragment"
+        const val TAG = "MapFragment"
 
-        val LOCALITY_TAG = "locality"
-        val LOCATION_TAG = "location"
+        const val LOCALITY_TAG = "locality"
+        const val LOCATION_TAG = "location"
     }
 
     enum class Category {
@@ -111,11 +88,9 @@ class MapFragment : Fragment(), ViewTreeObserver.OnGlobalLayoutListener {
     private var circleOverlays = mutableListOf<Circle>()
 
     // Views
-    private var styleSelector by autoCleared<TabLayout>()
-    private var backgroundView by autoCleared<BackgroundView>()
-    private var mapView by safeAutoCleared<MapView> {
-        it?.viewTreeObserver?.removeOnGlobalLayoutListener(this)
-        it?.onDestroy()
+    private val binding by autoClearedViewBinding(FragmentMapBinding::bind) {
+       it?.fragmentMapMapView?.viewTreeObserver?.removeOnGlobalLayoutListener { this }
+       it?.fragmentMapMapView?.onDestroy()
     }
 
     private var googleMap by autoCleared<GoogleMap> {
@@ -179,8 +154,8 @@ class MapFragment : Fragment(), ViewTreeObserver.OnGlobalLayoutListener {
 
     // Forced to put the whole fragment as listener, as it was impossible to remove just a listener var/object within the callback
     override fun onGlobalLayout() {
-        if (viewLifecycleOwnerLiveData.value?.lifecycle?.currentState != Lifecycle.State.DESTROYED && mapView?.height != 0 && mapView?.width != 0) {
-            mapView?.viewTreeObserver?.removeOnGlobalLayoutListener(this)
+        if (viewLifecycleOwnerLiveData.value?.lifecycle?.currentState != Lifecycle.State.DESTROYED && binding.fragmentMapMapView?.height != 0 && binding.fragmentMapMapView?.width != 0) {
+            binding.fragmentMapMapView?.viewTreeObserver?.removeOnGlobalLayoutListener(this)
             dispatchGroup?.leave()
         }
     }
@@ -207,34 +182,33 @@ class MapFragment : Fragment(), ViewTreeObserver.OnGlobalLayoutListener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         dispatchGroup = DispatchGroup("MapFragment")
-        initViews()
         setupViews()
     }
 
     override fun onStart() {
         super.onStart()
         dispatchGroup?.notify(Runnable {
-            mapView?.onStart()
+            binding.fragmentMapMapView?.onStart()
         })
     }
 
     override fun onResume() {
         super.onResume()
         dispatchGroup?.notify(Runnable {
-            mapView?.onResume()
+            binding.fragmentMapMapView?.onResume()
         })
     }
 
     override fun onPause() {
         dispatchGroup?.notify(Runnable {
-            mapView?.onPause()
+            binding.fragmentMapMapView.onPause()
         })
         super.onPause()
     }
 
     override fun onStop() {
         dispatchGroup?.notify(Runnable {
-            mapView?.onStop()
+            binding.fragmentMapMapView.onStop()
         })
         super.onStop()
     }
@@ -242,31 +216,24 @@ class MapFragment : Fragment(), ViewTreeObserver.OnGlobalLayoutListener {
     override fun onLowMemory() {
         super.onLowMemory()
         dispatchGroup?.notify(Runnable {
-            mapView?.onLowMemory()
+            binding.fragmentMapMapView.onLowMemory()
         })
     }
-
-    private fun initViews() {
-        styleSelector = mapFragment_tabLayout
-        backgroundView = fragmentMap_backgroundView
-        mapView = fragmentMap_mapView
-    }
-
     private fun setupViews() {
 
         dispatchGroup?.enter()
         dispatchGroup?.enter()
-        backgroundView.setLoading()
-        mapView?.viewTreeObserver?.addOnGlobalLayoutListener(this)
-        mapView?.onCreate(null)
-        mapView?.postDelayed({
-            mapView?.getMapAsync(onMapReadyCallBack)
+        binding.fragmentMapBackgroundView.setLoading()
+        binding.fragmentMapMapView.viewTreeObserver?.addOnGlobalLayoutListener(this)
+        binding.fragmentMapMapView.onCreate(null)
+        binding.fragmentMapMapView.postDelayed({
+            binding.fragmentMapMapView.getMapAsync(onMapReadyCallBack)
         }, 10)
     }
 
     fun showStyleSelector(show: Boolean) {
-        styleSelector.visibility = if (show) View.VISIBLE else View.GONE
-        styleSelector.addOnTabSelectedListener(onTabChangeListener)
+        binding.mapFragmentTabLayout.visibility = if (show) View.VISIBLE else View.GONE
+        binding.mapFragmentTabLayout.addOnTabSelectedListener(onTabChangeListener)
     }
 
     fun setType(category: Category) {
@@ -307,25 +274,25 @@ class MapFragment : Fragment(), ViewTreeObserver.OnGlobalLayoutListener {
 //         Putting this in notify, as the fragment itself shows a spinner before Google map is ready.
 //         By putting it in notify, this function called by the developer is not stopped in OnMapReadyCallback.
         dispatchGroup?.notify(Runnable {
-            backgroundView.reset()
-            backgroundView.setLoading()
+            binding.fragmentMapBackgroundView.reset()
+            binding.fragmentMapBackgroundView.setLoading()
         })
     }
 
     fun stopLoading() {
         dispatchGroup?.notify(Runnable {
-            backgroundView.reset()
+            binding.fragmentMapBackgroundView.reset()
         })
     }
 
     fun setError(error: AppError, handler: ((RecoveryAction?) -> Unit)?) {
         dispatchGroup?.notify(Runnable {
-            backgroundView.reset()
-            mapView?.alpha = 0.3f
+            binding.fragmentMapBackgroundView.reset()
+            binding.fragmentMapMapView?.alpha = 0.3f
             if (error.recoveryAction != null && handler != null) {
-                backgroundView.setErrorWithHandler(error, error.recoveryAction, handler)
+                binding.fragmentMapBackgroundView.setErrorWithHandler(error, error.recoveryAction, handler)
             } else {
-                backgroundView.setError(error)
+                binding.fragmentMapBackgroundView.setError(error)
             }
         })
     }
@@ -577,7 +544,7 @@ class MapFragment : Fragment(), ViewTreeObserver.OnGlobalLayoutListener {
 
     fun getCoordinatesFor(x: Float, y: Float): LatLng? {
             val location: IntArray = IntArray(2)
-            mapView?.getLocationInWindow(location)
+            binding.fragmentMapMapView.getLocationInWindow(location)
             return googleMap.projection?.fromScreenLocation(Point(x.toInt() - location.first(), y.toInt() - location.last()))
     }
 
@@ -595,8 +562,8 @@ class MapFragment : Fragment(), ViewTreeObserver.OnGlobalLayoutListener {
 
 
     private fun reset() {
-        backgroundView.reset()
-        mapView?.alpha = 1f
+        binding.fragmentMapBackgroundView.reset()
+        binding.fragmentMapMapView.alpha = 1f
     }
 
     override fun onDestroyView() {

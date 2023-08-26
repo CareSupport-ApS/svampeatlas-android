@@ -4,15 +4,14 @@ import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
 import android.widget.EditText
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import kotlinx.android.synthetic.main.item_text_input.view.*
+import com.noque.svampeatlas.databinding.ItemTextInputBinding
 
-class InputTypeViewHolder(private val onTextInputChanged: (view: View, text: String?) -> Unit, itemView: View) :
-    RecyclerView.ViewHolder(itemView) {
+class InputTypeViewHolder(private val onTextInputChanged: (view: View, text: String?) -> Unit, binding: ItemTextInputBinding) :
+    RecyclerView.ViewHolder(binding.root) {
 
-    private var editText: EditText = itemView.textInputItem_editText
-    private var titleTextView: TextView
+    private var editText: EditText = binding.textInputItemEditText
+    private var titleTextView = binding.textInputItemTitleTextView
 
     private val textWatcher = object: TextWatcher {
         override fun afterTextChanged(p0: Editable?) {
@@ -26,7 +25,6 @@ class InputTypeViewHolder(private val onTextInputChanged: (view: View, text: Str
 
     init {
         editText.addTextChangedListener(textWatcher)
-        titleTextView = itemView.textInputItem_titleTextView
     }
 
     fun configure(title: String, placeholder: String?, content: String?) {
