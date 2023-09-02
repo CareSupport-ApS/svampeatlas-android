@@ -10,17 +10,9 @@ import com.noque.svampeatlas.databinding.FragmentSettingsBinding
 import com.noque.svampeatlas.utilities.autoClearedViewBinding
 import com.noque.svampeatlas.views.MainActivity
 
-class SettingsFragment: Fragment() {
+class SettingsFragment: Fragment(R.layout.fragment_settings) {
 
     private val binding by autoClearedViewBinding(FragmentSettingsBinding::bind)
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_settings, container, false)
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

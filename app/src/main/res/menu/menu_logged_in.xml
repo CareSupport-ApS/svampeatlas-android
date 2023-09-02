@@ -24,7 +24,7 @@
             android:title=""/>
 
         <item
-            android:id="@+id/nearbyFragment"
+            android:id="@+id/nearby_fragment_nav"
             android:icon="@drawable/icon_location"
             android:title="@string/navigationItem_nearbyVC"/>
         <item

@@ -24,6 +24,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
@@ -120,14 +121,10 @@ class CameraFragment : Fragment(R.layout.fragment_camera), PromptFragment.Listen
 
     // View models
 
-    private val cameraViewModel by lazy {
-        ViewModelProvider(
-            this, CameraViewModelFactory(
-                args.context,
-                requireActivity().application
-            )
-        )[CameraViewModel::class.java]
-    }
+    private val cameraViewModel by viewModels<CameraViewModel> { CameraViewModelFactory(
+        args.context,
+        requireActivity().application
+    ) }
 
     // Listeners
     override fun positiveButtonPressed() {

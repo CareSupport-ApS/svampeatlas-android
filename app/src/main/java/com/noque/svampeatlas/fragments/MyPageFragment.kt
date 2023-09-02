@@ -52,12 +52,12 @@ class MyPageFragment : Fragment(R.layout.fragment_my_page), MenuProvider {
                     findNavController().navigate(action)
                 }
 
-                override fun getAdditionalData(category: MyPageAdapter.Item.Category, atOffset: Int) {
+                override fun getAdditionalData(category: MyPageAdapter.Items.Category, atOffset: Int) {
                     when (category) {
-                        MyPageAdapter.Item.Category.NOTIFICATIONS -> Session.getAdditionalNotifications(
+                        MyPageAdapter.Items.Category.NOTIFICATIONS -> Session.getAdditionalNotifications(
                             atOffset
                         )
-                        MyPageAdapter.Item.Category.OBSERVATIONS -> Session.getAdditionalObservations(
+                        MyPageAdapter.Items.Category.OBSERVATIONS -> Session.getAdditionalObservations(
                             atOffset
                         )
                     }
@@ -130,8 +130,8 @@ class MyPageFragment : Fragment(R.layout.fragment_my_page), MenuProvider {
                             adapter.configureNotificationsState(State.Error(AppError(resources.getString(R.string.sessionError_noNotifications_title),
                                 resources.getString(R.string.sessionError_noNotifications_message), null)), getString(R.string.myPageScrollView_notificationsHeader))
                         } else {
-                            val items: MutableList<MyPageAdapter.Item> = state.items.first.map { MyPageAdapter.Item.Notification(it) }.toMutableList()
-                            if (items.count() != state.items.second) items.add(MyPageAdapter.Item.LoadMore(MyPageAdapter.Item.Category.NOTIFICATIONS, items.lastIndex))
+                            val items: MutableList<MyPageAdapter.Items> = state.items.first.map { MyPageAdapter.Items.Notification(it) }.toMutableList()
+                            if (items.count() != state.items.second) items.add(MyPageAdapter.Items.LoadMore(MyPageAdapter.Items.Category.NOTIFICATIONS, items.lastIndex))
                             adapter.configureNotificationsState(State.Items(items), "${state.items.second} ${getText(R.string.myPageScrollView_notificationsHeader)}")
                         }
                     }
@@ -158,8 +158,8 @@ class MyPageFragment : Fragment(R.layout.fragment_my_page), MenuProvider {
                                 resources.getString(R.string.sessionError_noObservations_message), null
                             )), getString(R.string.myPageScrollView_observationsHeader))
                         } else {
-                            val items: MutableList<MyPageAdapter.Item> = state.items.first.map { MyPageAdapter.Item.Observation(it) }.toMutableList()
-                            if (items.count() != state.items.second) items.add(MyPageAdapter.Item.LoadMore(MyPageAdapter.Item.Category.OBSERVATIONS, items.lastIndex))
+                            val items: MutableList<MyPageAdapter.Items> = state.items.first.map { MyPageAdapter.Items.Observation(it) }.toMutableList()
+                            if (items.count() != state.items.second) items.add(MyPageAdapter.Items.LoadMore(MyPageAdapter.Items.Category.OBSERVATIONS, items.lastIndex))
                             adapter.configureObservationsState(State.Items(items), "${state.items.second} ${getText(
                                 R.string.myPageScrollView_observationsHeader
                             )}")

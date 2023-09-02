@@ -57,12 +57,6 @@
     </fragment>
 
     <fragment
-        android:id="@+id/nearbyFragment"
-        android:name="com.noque.svampeatlas.fragments.NearbyFragment"
-        android:label="fragment_nearby"
-        tools:layout="@layout/fragment_nearby" />
-
-    <fragment
         android:id="@+id/cameraFragment"
         android:name="com.noque.svampeatlas.fragments.CameraFragment"
         android:label="fragment_camera"
@@ -91,7 +85,7 @@
         tools:layout="@layout/fragment_login" />
     <action
         android:id="@+id/action_global_nearbyFragment"
-        app:destination="@id/nearbyFragment"
+        app:destination="@id/nearby_fragment_nav"
         app:popUpTo="@id/nearbyFragment"
         app:popUpToInclusive="true" />
     <action
@@ -155,6 +149,8 @@
             android:id="@+id/action_notesFragment_to_addObservationFragment"
             app:destination="@id/add_observation_nav" />
     </fragment>
+
+
     <navigation
         android:id="@+id/add_observation_nav"
         app:startDestination="@id/addObservationFragment">
@@ -223,6 +219,20 @@
                 app:argType="com.noque.svampeatlas.fragments.add_observation.DetailsPickerFragment$Type" />
         </dialog>
     </navigation>
-
-
+    <navigation android:id="@+id/nearby_fragment_nav"
+        app:startDestination="@id/nearbyFragment">
+        <dialog
+            android:id="@+id/mapSettingsFragment"
+            android:name="com.noque.svampeatlas.fragments.MapSettingsFragment"
+            android:label="MapSettingsFragment" />
+        <fragment
+            android:id="@+id/nearbyFragment"
+            android:name="com.noque.svampeatlas.fragments.NearbyFragment"
+            android:label="fragment_nearby"
+            tools:layout="@layout/fragment_nearby" >
+            <action
+                android:id="@+id/action_nearbyFragment_to_mapSettingsFragment"
+                app:destination="@id/mapSettingsFragment" />
+        </fragment>
+    </navigation>
 </navigation>

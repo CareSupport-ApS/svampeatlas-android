@@ -5,8 +5,10 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.noque.svampeatlas.databinding.ItemAddImageBinding
+import com.noque.svampeatlas.databinding.ItemAddImageExpandedBinding
 import com.noque.svampeatlas.databinding.ItemAddedImageBinding
 import com.noque.svampeatlas.models.UserObservation
+import com.noque.svampeatlas.view_holders.AddImageExpandedViewHolder
 import com.noque.svampeatlas.view_holders.AddImageViewHolder
 import com.noque.svampeatlas.view_holders.AddedImageViewHolder
 
@@ -57,30 +59,24 @@ class AddImagesAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        val viewHolder: RecyclerView.ViewHolder
         val layoutInflater = LayoutInflater.from(parent.context)
 
         when (ViewType.values[viewType]) {
             ViewType.ADDIMAGEVIEW -> {
                 val binding = ItemAddImageBinding.inflate(layoutInflater, parent, false)
-                viewHolder = AddImageViewHolder(binding)
-                viewHolder.itemView.setOnClickListener(onClickListener)
+                return  AddImageViewHolder(binding).apply { itemView.setOnClickListener(onClickListener)  }
             }
 
             ViewType.ADDIMAGEVIEWEXPANDED -> {
-                val binding = ItemAddImageBinding.inflate(layoutInflater, parent, false)
-                viewHolder = AddImageViewHolder(binding)
-                viewHolder.itemView.setOnClickListener(onClickListener)
+                val binding = ItemAddImageExpandedBinding.inflate(layoutInflater, parent, false)
+                return AddImageExpandedViewHolder(binding).apply { itemView.setOnClickListener(onClickListener) }
             }
 
             ViewType.ADDEDIMAGEVIEW -> {
                 val binding = ItemAddedImageBinding.inflate(layoutInflater, parent, false)
-                viewHolder = AddedImageViewHolder(binding)
+                return AddedImageViewHolder(binding)
             }
         }
-
-
-        return viewHolder
     }
 
     override fun getItemCount(): Int {
@@ -90,15 +86,6 @@ class AddImagesAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         if (position < images.count()) {
             (holder as? AddedImageViewHolder)?.configure(images[position])
-        } else {
-//            val holder = holder as? AddImageViewHolder
-//
-//            if (images.getCount() == 0) {
-//                holder?.collapse()
-//            } else {
-//                holder?.expand()
-//            }
-        }
-
+        } else { }
     }
 }

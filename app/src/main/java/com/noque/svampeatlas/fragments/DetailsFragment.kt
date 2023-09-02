@@ -11,6 +11,7 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
@@ -41,7 +42,7 @@ import com.noque.svampeatlas.views.*
 import kotlin.math.abs
 
 
-class DetailsFragment : Fragment(R.layout.fragment_details) {
+class DetailsFragment : Fragment(R.layout.fragment_details), AppBarLayout.OnOffsetChangedListener {
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -117,6 +118,7 @@ class DetailsFragment : Fragment(R.layout.fragment_details) {
     // Views
     private val binding by autoClearedViewBinding(FragmentDetailsBinding::bind) {
         it?.detailsFragmentRecyclerView?.adapter = null
+        it?.detailsFragmentAppBarLayout?.removeOnOffsetChangedListener(this)
     }
 
     private var mapFragment by autoCleared<MapFragment> {
@@ -124,19 +126,13 @@ class DetailsFragment : Fragment(R.layout.fragment_details) {
     }
 
     // View models
-    private val speciesViewModel by lazy {
-        ViewModelProvider(this, SpeciesViewModelFactory(args.id, requireActivity().application))[SpeciesViewModel::class.java]
-    }
+    private val speciesViewModel by viewModels<SpeciesViewModel> { SpeciesViewModelFactory(args.id, requireActivity().application) }
 
-    private val observationViewModel by lazy {
-        ViewModelProvider(
-            this, ObservationsViewModelFactory(
-                args.id,
-                args.context == Context.OBSERVATION_WITH_SPECIES,
-                requireActivity().application
-            )
-        )[ObservationViewModel::class.java]
-    }
+    private val observationViewModel: ObservationViewModel by viewModels { ObservationsViewModelFactory(
+            args.id,
+            args.context == Context.OBSERVATION_WITH_SPECIES,
+            requireActivity().application
+        )}
 
     // Adapters
     private val commentsAdapter: CommentsAdapter by lazy {
@@ -442,18 +438,18 @@ class DetailsFragment : Fragment(R.layout.fragment_details) {
     }
 
     private fun setupViewModels() {
-        Session.commentUploadState.observe(viewLifecycleOwner, Observer {
+        Session.commentUploadState.observe(viewLifecycleOwner) {
             binding.detailsFragmentBackgroundView.reset()
             when (it) {
                 is State.Items -> {
                     commentsAdapter.addComment(it.items)
                     observationViewModel.addComment(it.items)
                 }
-                is State.Error -> { handleError(it.error) }
+                is State.Error -> handleError(it.error)
                 is State.Loading -> binding.detailsFragmentBackgroundView.setLoading()
                 else -> {}
             }
-        })
+        }
 
         when (args.context) {
             Context.SPECIES -> {
@@ -468,9 +464,7 @@ class DetailsFragment : Fragment(R.layout.fragment_details) {
                             binding.detailsFragmentAppBarLayout.setExpanded(false, false)
                             binding.detailsFragmentBackgroundView.setLoading()
                         }
-                        is State.Error -> {
-                            binding.detailsFragmentBackgroundView.setError(it.error)
-                        }
+                        is State.Error -> binding.detailsFragmentBackgroundView.setError(it.error)
                         else -> {}
                     }
                 })
@@ -677,6 +671,7 @@ class DetailsFragment : Fragment(R.layout.fragment_details) {
         binding.detailsFragmentCollapsingToolbarLayout.title = title
         binding.detailsFragmentNestedScrollView.isNestedScrollingEnabled = true
         binding.detailsFragmentImagesView.configure(images)
+        binding.detailsFragmentAppBarLayout.addOnOffsetChangedListener(this)
 
         if (!hasExpanded) {
             binding.detailsFragmentImagesView.visibility = View.VISIBLE
@@ -709,6 +704,19 @@ class DetailsFragment : Fragment(R.layout.fragment_details) {
                 }
             }
             else -> {}
+        }
+    }
+
+    override fun onOffsetChanged(appBarLayout: AppBarLayout?, verticalOffset: Int) {
+        if (!hasExpanded) {
+            if (verticalOffset == 0)  {
+                hasExpanded = true
+                binding.detailsFragmentCollapsingToolbarLayout.title = title
+            }
+        } else {
+            if (abs(verticalOffset) < binding.detailsFragmentAppBarLayout.totalScrollRange && binding.detailsFragmentImagesView.visibility == View.GONE) {
+                binding.detailsFragmentImagesView.visibility = View.VISIBLE
+            }
         }
     }
 }

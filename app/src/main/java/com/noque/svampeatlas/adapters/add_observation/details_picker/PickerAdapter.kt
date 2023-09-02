@@ -7,13 +7,14 @@ import androidx.recyclerview.widget.RecyclerView
 import com.noque.svampeatlas.models.Section
 import com.noque.svampeatlas.R
 import com.noque.svampeatlas.adapters.BaseAdapter
+import com.noque.svampeatlas.databinding.ItemItemBinding
 import com.noque.svampeatlas.models.Item
 import com.noque.svampeatlas.models.Sections
 import com.noque.svampeatlas.models.ViewType
 import com.noque.svampeatlas.view_holders.HeaderViewHolder
 import com.noque.svampeatlas.view_holders.ItemViewHolder
 
-abstract class PickerAdapter<T>() : BaseAdapter<PickerAdapter.PickerItem<T>, PickerAdapter.PickerItem.ViewTypes>() {
+abstract class PickerAdapter<T> : BaseAdapter<PickerAdapter.PickerItem<T>, PickerAdapter.PickerItem.ViewTypes>() {
 
     interface Listener<T> {
         fun itemSelected(item: T)
@@ -54,12 +55,8 @@ abstract class PickerAdapter<T>() : BaseAdapter<PickerAdapter.PickerItem<T>, Pic
         inflater: LayoutInflater,
         parent: ViewGroup,
         viewTypeOrdinal: Int
-    ): Pair<View, RecyclerView.ViewHolder>? {
-        // TODO
-        return null
-
-    //inflater.inflate(R.layout.item_item,parent,false).apply {
-          //  return Pair(this, ItemViewHolder(this))
-        //}
+    ): RecyclerView.ViewHolder {
+        val binding = ItemItemBinding.inflate(inflater, parent, false)
+        return ItemViewHolder(binding)
     }
 }

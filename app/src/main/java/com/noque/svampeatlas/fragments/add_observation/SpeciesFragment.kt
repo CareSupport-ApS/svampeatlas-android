@@ -163,14 +163,14 @@ class SpeciesFragment : Fragment() {
                     }
                 }
 
-                val items = mutableListOf<SpeciesAdapter.Item>()
+                val items = mutableListOf<SpeciesAdapter.AdapterItem>()
 
                 if (highestConfidence < 50.0) {
-                    items.add(SpeciesAdapter.Item.Caution())
+                    items.add(SpeciesAdapter.AdapterItem.Caution())
                 }
 
-                items.addAll(state.items.map { SpeciesAdapter.Item.SelectableMushroom(it.mushroom, it.score) })
-                items.add(SpeciesAdapter.Item.Creditation())
+                items.addAll(state.items.map { SpeciesAdapter.AdapterItem.SelectableMushroom(it.mushroom, it.score) })
+                items.add(SpeciesAdapter.AdapterItem.Creditation())
                 speciesAdapter.configureLowerSectionState(State.Items(items), getString(R.string.observationSpeciesCell_predictionsHeader))
             }
 
@@ -194,7 +194,7 @@ class SpeciesFragment : Fragment() {
 
         when (state) {
             is State.Items -> {
-                val items = state.items.map { SpeciesAdapter.Item.SelectableMushroom(it) }
+                val items = state.items.map { SpeciesAdapter.AdapterItem.SelectableMushroom(it) }
 
                 if (defaultState) {
                     speciesAdapter.configureMiddleSectionState(State.Items(items), getString(R.string.observationSpeciesCell_myFavorites))
@@ -237,7 +237,7 @@ class SpeciesFragment : Fragment() {
                 speciesAdapter.configureUpperSection(
                     State.Items(
                         listOf(
-                            SpeciesAdapter.Item.SelectedMushroom(
+                            SpeciesAdapter.AdapterItem.SelectedMushroom(
                                 it.first,
                                 it.second
                             )
@@ -263,7 +263,7 @@ class SpeciesFragment : Fragment() {
                 speciesAdapter.configureUpperSection(
                     State.Items(
                         listOf(
-                            SpeciesAdapter.Item.UnknownSpecies()
+                            SpeciesAdapter.AdapterItem.UnknownSpecies()
                         )
                     ),
                     null

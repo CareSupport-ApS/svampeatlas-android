@@ -39,10 +39,6 @@ abstract class BaseAdapter<I, V>: RecyclerView.Adapter<RecyclerView.ViewHolder>(
         super.onDetachedFromRecyclerView(recyclerView)
     }
 
-//    fun setSections(sections: Sections<V,I>) {
-//        this.sections = sections
-//    }
-
     final override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
         val viewHolder: RecyclerView.ViewHolder
@@ -55,24 +51,22 @@ abstract class BaseAdapter<I, V>: RecyclerView.Adapter<RecyclerView.ViewHolder>(
                 val binding = ItemErrorBinding.inflate(layoutInflater, parent, false)
                 viewHolder = ErrorViewHolder(binding)
             }
-            Section.ViewType.LOADER, Section.ViewType.ITEM -> {
+            Section.ViewType.LOADER -> {
                 val binding = ItemLoaderBinding.inflate(layoutInflater, parent, false)
                 viewHolder = LoaderViewHolder(binding)
             }
-//            Section.ViewType.ITEM -> {
-//                createViewTypeViewHolder(layoutInflater, parent, viewType - Section.ViewType.values.count()).also {
-//                    view = it.first
-//                    viewHolder = it.second
-//                    view.tag = viewHolder
-//                    view.setOnClickListener(onClickListener)
-//                }
-//            }
+            Section.ViewType.ITEM -> {
+                createViewTypeViewHolder(layoutInflater, parent, viewType - Section.ViewType.values.count()).also {
+                    viewHolder = it
+                    it.itemView.tag = it
+                    it.itemView.setOnClickListener(onClickListener)
+                }
+            }
         }
         return viewHolder
     }
 
-    // TODO
-    abstract fun createViewTypeViewHolder(inflater: LayoutInflater, parent: ViewGroup, viewTypeOrdinal: Int): Pair<View, RecyclerView.ViewHolder>?
+    abstract fun createViewTypeViewHolder(inflater: LayoutInflater, parent: ViewGroup, viewTypeOrdinal: Int): RecyclerView.ViewHolder
 
     final override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         fun expandUtil(position: Int, itemView: View) {

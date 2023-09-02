@@ -7,6 +7,7 @@ import android.graphics.drawable.ColorDrawable
 import android.location.Location
 import android.os.Bundle
 import android.view.*
+import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.annotation.StringRes
@@ -312,44 +313,27 @@ class AddObservationFragment : Fragment(), ActivityCompat.OnRequestPermissionsRe
         }
 
         menu.findItem(R.id.menu_addObservationFragment_continueButton)?.let {
-        // TODO
-        /*(it.actionView as? LinearLayout)?.apply {
-                actionView_continue.setOnClickListener {
-                    when (Category.values[binding.addObservationFragmentViewPager.currentItem]) {
-                        Category.SPECIES -> newObservationViewModel.uploadNew()
-                        Category.DETAILS -> if (newObservationViewModel.substrate.value != null && newObservationViewModel.vegetationType.value != null) viewPager.currentItem =
-                            Category.SPECIES.ordinal else newObservationViewModel.uploadNew()
-                        Category.LOCALITY -> if (newObservationViewModel.coordinateState.value?.item?.first != null && newObservationViewModel.locality.value != null) viewPager.currentItem = Category.DETAILS.ordinal else newObservationViewModel.uploadNew()
-                    }
-                }
-            }*/
-        }
+            it.actionView?.findViewById<Button>(R.id.actionView_continue)?.setOnClickListener {
+                when (Category.values[binding.addObservationFragmentViewPager.currentItem]) {
+                    Category.SPECIES -> newObservationViewModel.uploadNew()
+                    Category.DETAILS -> if (newObservationViewModel.substrate.value != null && newObservationViewModel.vegetationType.value != null) binding.addObservationFragmentViewPager.currentItem =
+                        Category.SPECIES.ordinal else newObservationViewModel.uploadNew()
 
-        menu.findItem(R.id.menu_addObservationFragment_note_save)?.let {
-        //TODO
-        /* (it.actionView as? LinearLayout)?.apply {
-                actionView_saveNotebookEntry.setOnClickListener {
-                    newObservationViewModel.saveAsNote()
+                    Category.LOCALITY -> if (newObservationViewModel.coordinateState.value?.item?.first != null && newObservationViewModel.locality.value != null) binding.addObservationFragmentViewPager.currentItem =
+                        Category.DETAILS.ordinal else newObservationViewModel.uploadNew()
                 }
-            }*/
+            }
+        }
+        menu.findItem(R.id.menu_addObservationFragment_note_save)?.let {
+            it.actionView?.findViewById<Button>(R.id.actionView_saveNotebookEntry)?.setOnClickListener { newObservationViewModel.saveAsNote() }
         }
 
         menu.findItem(R.id.menu_addObservationFragment_uploadButton)?.let {
-            //TODO
-           /* (it.actionView as? LinearLayout)?.apply {
-                actionView_upload.setOnClickListener {
-                    newObservationViewModel.uploadNew()
-                }
-            }*/
+            it.actionView?.findViewById<Button>(R.id.actionView_upload)?.setOnClickListener { newObservationViewModel.uploadNew() }
         }
 
         menu.findItem(R.id.menu_addObservationFragment_uploadChanges)?.let {
-          //TODO
-           /* (it.actionView as? LinearLayout)?.apply {
-                actionView_upload.setOnClickListener {
-                    newObservationViewModel.uploadChanges()
-                }
-            }*/
+            it.actionView?.findViewById<Button>(R.id.actionView_upload)?.setOnClickListener {  newObservationViewModel.uploadChanges() }
         }
     }
 

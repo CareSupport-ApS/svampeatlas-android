@@ -15,30 +15,40 @@ class NearbyObservationsViewModel(application: Application) : AndroidViewModel(a
 
     companion object {
         val TAG = "NearbyObservationsViewModel"
+        const val defaultRadius = 1000
+        const val defaultAgeInYears = 1
     }
 
     private val observations = mutableListOf<Observation>()
     private val geometries = mutableListOf<Geometry>()
 
     private val _observationsState by lazy { MutableLiveData<State<Pair<List<Observation>, List<Geometry>>>>() }
+    private val _radius = MutableLiveData(1000)
+    private val _ageInYears = MutableLiveData(1)
+
+     val radius: LiveData<Int> = _radius
+     val ageInYears: LiveData<Int> = _ageInYears
     val observationsState: LiveData<State<Pair<List<Observation>, List<Geometry>>>> get() = _observationsState
 
     init {
         _observationsState.value = State.Empty()
     }
 
-    fun getObservationsNearby(latLng: LatLng, settings: NearbyFragment.Settings) {
-
-        if (settings.clearAll) {
+    fun reset(clearAll: Boolean) {
+        if (clearAll) {
             observations.clear()
             geometries.clear()
         }
 
+        _observationsState.value = State.Empty()
+    }
+
+    fun getObservationsNearby(latLng: LatLng) {
         _observationsState.value = State.Loading()
 
-        val geometry = Geometry(latLng, settings.radius, Geometry.Type.CIRCLE)
+        val geometry = Geometry(latLng, radius.value ?: defaultRadius, Geometry.Type.CIRCLE)
 
-        DataService.getInstance(getApplication()).getObservationsWithin(TAG, geometry, null, settings.ageInYears) {
+        DataService.getInstance(getApplication()).getObservationsWithin(TAG, geometry, null, ageInYears.value ?: defaultAgeInYears) {
             it.onSuccess {
                 observations.addAll(it)
                 geometries.add(geometry)
@@ -51,4 +61,11 @@ class NearbyObservationsViewModel(application: Application) : AndroidViewModel(a
         }
     }
 
+    fun setRadius(newRadius: Int) {
+        _radius.value = newRadius
+    }
+
+    fun setAgeInYears(newAge: Int) {
+        _ageInYears.value = newAge
+    }
 }

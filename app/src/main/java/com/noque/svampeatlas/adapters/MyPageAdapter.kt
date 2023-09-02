@@ -17,7 +17,7 @@ import com.noque.svampeatlas.extensions.difDays
 import com.noque.svampeatlas.utilities.SharedPreferences
 import com.noque.svampeatlas.view_holders.*
 
-class MyPageAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+class MyPageAdapter : BaseAdapter<MyPageAdapter.Items, MyPageAdapter.Items.ViewType>() {
 
 
     companion object {
@@ -26,11 +26,11 @@ class MyPageAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     interface Listener {
         fun observationSelected(observation: Observation)
-        fun getAdditionalData(category: Item.Category, atOffset: Int)
+        fun getAdditionalData(category: Items.Category, atOffset: Int)
         fun notificationSelected(notification: Notification)
     }
 
-    sealed class Item(viewType: ViewType) : com.noque.svampeatlas.models.Item<Item.ViewType>(viewType) {
+    sealed class Items(viewType: ViewType) : Item<Items.ViewType>(viewType) {
 
         enum class ViewType : com.noque.svampeatlas.models.ViewType {
             NOTIFICATION,
@@ -48,27 +48,25 @@ class MyPageAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         }
 
         class Notification(val notification: com.noque.svampeatlas.models.Notification) :
-            Item(ViewType.NOTIFICATION)
+            Items(ViewType.NOTIFICATION)
 
         class Observation(val observation: com.noque.svampeatlas.models.Observation) :
-            Item(ViewType.OBSERVATION)
+            Items(ViewType.OBSERVATION)
 
-        class LoadMore(val category: Category, val offset: Int) : Item(ViewType.LOADMORE)
+        class LoadMore(val category: Category, val offset: Int) : Items(ViewType.LOADMORE)
     }
-
-    private val sections = Sections<Item.ViewType, Item>()
 
     private var listener: Listener? = null
 
-    private var notifications = Section<Item>(null)
-    private var observations = Section<Item>(null)
+    private var notifications = Section<Items>(null)
+    private var observations = Section<Items>(null)
 
 
-    private val onClickListener = View.OnClickListener { view ->
+    override val onClickListener = View.OnClickListener { view ->
         when (val viewHolder = view.tag) {
             is ReloaderViewHolder -> {
                 when (val item = sections.getItem(viewHolder.adapterPosition)) {
-                    is Item.LoadMore -> {
+                    is Items.LoadMore -> {
                         listener?.getAdditionalData(item.category, item.offset)
                     }
                     else -> {}
@@ -76,7 +74,7 @@ class MyPageAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             }
             is NotificationViewHolder -> {
                 when (val item = sections.getItem(viewHolder.adapterPosition)) {
-                    is Item.Notification -> {
+                    is Items.Notification -> {
                         listener?.notificationSelected(item.notification)
                     }
                     else -> {}
@@ -85,7 +83,7 @@ class MyPageAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
             is ObservationViewHolder -> {
                 when (val item = sections.getItem(viewHolder.adapterPosition)) {
-                    is Item.Observation -> {
+                    is Items.Observation -> {
                         listener?.observationSelected(item.observation)
                     }
                     else -> {}
@@ -103,79 +101,51 @@ class MyPageAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         this.listener = listener
     }
 
-    fun configureNotificationsState(state: State<List<Item>>, title: String? = null) {
+    fun configureNotificationsState(state: State<List<Items>>, title: String? = null) {
         this.notifications.setTitle(title)
         this.notifications.setState(state)
         notifyDataSetChanged()
     }
 
-    fun configureObservationsState(state: State<List<Item>>, title: String? = null) {
+    fun configureObservationsState(state: State<List<Items>>, title: String? = null) {
         this.observations.setTitle(title)
         this.observations.setState(state)
         notifyDataSetChanged()
     }
 
-
-    override fun getItemCount(): Int = sections.getCount()
-
-    override fun getItemViewType(position: Int): Int = sections.getViewTypeOrdinal(position)
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        val layoutInflater = LayoutInflater.from(parent.context)
-        val viewHolder: RecyclerView.ViewHolder
-        when (sections.getSectionViewType(viewType)) {
-            Section.ViewType.HEADER -> {
-                val binding = ItemHeaderBinding.inflate(layoutInflater, parent, false)
-                viewHolder = HeaderViewHolder(binding)
+    override fun createViewTypeViewHolder(
+        inflater: LayoutInflater,
+        parent: ViewGroup,
+        viewTypeOrdinal: Int
+    ): RecyclerView.ViewHolder {
+        return when (Items.ViewType.values[viewTypeOrdinal]) {
+            Items.ViewType.NOTIFICATION -> {
+                val binding = ItemNotificationBinding.inflate(inflater, parent, false)
+                NotificationViewHolder(binding)
             }
-            Section.ViewType.ERROR -> {
-                val binding = ItemErrorBinding.inflate(layoutInflater, parent, false)
-                viewHolder = ErrorViewHolder(binding)
-            }
-            Section.ViewType.LOADER -> {
-                val binding = ItemReloaderBinding.inflate(layoutInflater, parent, false)
-                viewHolder = ReloaderViewHolder(binding)
-            }
-            Section.ViewType.ITEM -> {
-                viewHolder = when (Item.ViewType.values[viewType - Section.ViewType.values.count()]) {
-                    Item.ViewType.NOTIFICATION -> {
-                        val binding = ItemNotificationBinding.inflate(layoutInflater, parent, false)
-                        NotificationViewHolder(binding)
-                    }
 
-                    Item.ViewType.OBSERVATION -> {
-                        val binding = ItemObservationBinding.inflate(layoutInflater, parent, false)
-                        ObservationViewHolder(binding)
-                    }
+            Items.ViewType.OBSERVATION -> {
+                val binding = ItemObservationBinding.inflate(inflater, parent, false)
+                ObservationViewHolder(binding)
+            }
 
-                    Item.ViewType.LOADMORE -> {
-                        val binding = ItemReloaderBinding.inflate(layoutInflater, parent, false)
-                        ReloaderViewHolder(binding)
-                    }
-                }
+            Items.ViewType.LOADMORE -> {
+                val binding = ItemReloaderBinding.inflate(inflater, parent, false)
+                ReloaderViewHolder(binding)
             }
         }
-
-        return viewHolder
     }
 
-
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+    override fun bindViewHolder(holder: RecyclerView.ViewHolder, item: Items) {
         when (holder) {
-            is HeaderViewHolder -> { sections.getTitle(position)?.let { holder.configure(it) } }
-            is ObservationViewHolder -> { when (val item = sections.getItem(position)) {
-                is Item.Observation -> { holder.configure(item.observation, true) }
+            is ObservationViewHolder -> { when (item) {
+                is Items.Observation -> { holder.configure(item.observation, true) }
                 else -> {}
             } }
-
-            is NotificationViewHolder -> {when (val item = sections.getItem(position)) {
-                is Item.Notification -> { holder.configure(item.notification) }
+            is NotificationViewHolder -> {when (item) {
+                is Items.Notification -> { holder.configure(item.notification) }
                 else -> {}
             }}
-
-            is ErrorViewHolder -> { sections.getError(position)?.let { holder.configure(it) } }
-
-            is ReloaderViewHolder -> { holder.configure(ReloaderViewHolder.Type.LOAD) }
         }
     }
 }

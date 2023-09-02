@@ -31,6 +31,7 @@ import com.noque.svampeatlas.fragments.modals.DownloaderFragment
 import com.noque.svampeatlas.models.NewObservation
 import com.noque.svampeatlas.models.Section
 import com.noque.svampeatlas.models.State
+import com.noque.svampeatlas.utilities.SwipeToDeleteCallback
 import com.noque.svampeatlas.utilities.autoClearedViewBinding
 import com.noque.svampeatlas.view_models.NotesFragmentViewModel
 import com.noque.svampeatlas.views.MainActivity
@@ -45,6 +46,7 @@ class NotesFragment: Fragment(R.layout.fragment_notebook), PromptFragment.Listen
     // Views
     private val binding by autoClearedViewBinding(FragmentNotebookBinding::bind) {
         it?.notebookFragmentRecyclerView?.adapter = null
+        deletedCallback.attachToRecyclerView(null)
     }
 
     private val notebookAdapter by lazy {
@@ -63,10 +65,23 @@ class NotesFragment: Fragment(R.layout.fragment_notebook), PromptFragment.Listen
                     action.id = newObservation.creationDate.time
                     findNavController().navigate(action)
                 }
-
             }
         }
     }
+
+private val deletedCallback by lazy {
+    ItemTouchHelper(
+        SwipeToDeleteCallback(
+            { viewHolder ->
+                notebookAdapter.sections.getItem(viewHolder.adapterPosition).let {
+                    viewModel.deleteNote((it as NotebookAdapter.Items.Note).newObservation, viewHolder.adapterPosition)
+                }
+            },
+            requireContext(),
+            resources
+        )
+    )
+}
 
     private val viewModel by viewModels<NotesFragmentViewModel>()
     override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
@@ -84,7 +99,7 @@ class NotesFragment: Fragment(R.layout.fragment_notebook), PromptFragment.Listen
     override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
         if (menuItem.itemId == R.id.menu_notebookFragment_redownloadOffline)
             DownloaderFragment().show(parentFragmentManager, null)
-        return true
+        return false
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -95,89 +110,10 @@ class NotesFragment: Fragment(R.layout.fragment_notebook), PromptFragment.Listen
 
 
     private fun setupViews() {
-        requireActivity().addMenuProvider(this, viewLifecycleOwner)
         (requireActivity() as MainActivity).setSupportActionBar(binding.notebookFragmentToolbar)
+        requireActivity().addMenuProvider(this, viewLifecycleOwner)
+        deletedCallback.attachToRecyclerView(binding.notebookFragmentRecyclerView)
         binding.notebookFragmentRecyclerView.apply {
-            val myHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
-                override fun onChildDrawOver(
-                    c: Canvas,
-                    recyclerView: RecyclerView,
-                    viewHolder: RecyclerView.ViewHolder?,
-                    dX: Float,
-                    dY: Float,
-                    actionState: Int,
-                    isCurrentlyActive: Boolean
-                ) {
-                    super.onChildDrawOver(
-                        c,
-                        recyclerView,
-                        viewHolder,
-                        dX,
-                        dY,
-                        actionState,
-                        isCurrentlyActive
-                    )
-                }
-
-                override fun onChildDraw(
-                    c: Canvas,
-                    recyclerView: RecyclerView,
-                    viewHolder: RecyclerView.ViewHolder,
-                    dX: Float,
-                    dY: Float,
-                    actionState: Int,
-                    isCurrentlyActive: Boolean
-                ) {
-                    val rightMargin = 32.dpToPx(requireContext())
-                    val iconSize = 16.dpToPx(requireContext())
-                    val icon = ResourcesCompat.getDrawable(resources, R.drawable.ic_delete_black_24dp, null)
-                    val background = ColorDrawable(ResourcesCompat.getColor(resources, R.color.colorRed, null))
-
-                    icon?.bounds = Rect(
-                        viewHolder.itemView.right - iconSize * 2 - rightMargin,
-                        viewHolder.itemView.top + (viewHolder.itemView.height / 2) - iconSize,
-                        viewHolder.itemView.right - rightMargin,
-                        viewHolder.itemView.bottom - (viewHolder.itemView.height / 2) + iconSize
-                    )
-
-
-                    background.bounds = Rect(
-                        viewHolder.itemView.right + dX.toInt(),
-                        viewHolder.itemView.top + resources.getDimension(R.dimen.item_mushroom_top_margin).toInt(),
-                        viewHolder.itemView.right,
-                        viewHolder.itemView.bottom - resources.getDimension(R.dimen.item_mushroom_bottom_margin).toInt()
-                    )
-
-                    background.draw(c)
-                    icon?.draw(c)
-
-                    super.onChildDraw(
-                        c,
-                        recyclerView,
-                        viewHolder,
-                        dX,
-                        dY,
-                        actionState,
-                        isCurrentlyActive
-                    )
-                }
-
-
-                override fun onMove(
-                    recyclerView: RecyclerView,
-                    viewHolder: RecyclerView.ViewHolder,
-                    target: RecyclerView.ViewHolder
-                ): Boolean {
-                    return false
-                }
-
-                override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                    notebookAdapter.sections.getItem(viewHolder.adapterPosition).let {
-                        viewModel.deleteNote((it as NotebookAdapter.Items.Note).newObservation, viewHolder.adapterPosition)
-                    }
-                }
-            })
-            myHelper.attachToRecyclerView(this)
             adapter = notebookAdapter
             layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         }

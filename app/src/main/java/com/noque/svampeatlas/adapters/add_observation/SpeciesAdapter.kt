@@ -4,13 +4,25 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.noque.svampeatlas.R
-import com.noque.svampeatlas.databinding.ItemLoaderBinding
-import com.noque.svampeatlas.models.*
-import com.noque.svampeatlas.view_holders.*
-import com.noque.svampeatlas.view_models.NewObservationViewModel
+import com.noque.svampeatlas.adapters.BaseAdapter
+import com.noque.svampeatlas.databinding.ItemCautionBinding
+import com.noque.svampeatlas.databinding.ItemCreditationBinding
+import com.noque.svampeatlas.databinding.ItemResultBinding
+import com.noque.svampeatlas.databinding.ItemSelectedResultBinding
+import com.noque.svampeatlas.databinding.ItemUnknownSpeciesBinding
+import com.noque.svampeatlas.models.DeterminationConfidence
+import com.noque.svampeatlas.models.Item
+import com.noque.svampeatlas.models.Mushroom
+import com.noque.svampeatlas.models.Section
+import com.noque.svampeatlas.models.State
+import com.noque.svampeatlas.models.ViewType
+import com.noque.svampeatlas.view_holders.CautionViewHolder
+import com.noque.svampeatlas.view_holders.CreditationViewHolder
+import com.noque.svampeatlas.view_holders.ResultItemViewHolder
+import com.noque.svampeatlas.view_holders.SelectedResultItemViewHolder
+import com.noque.svampeatlas.view_holders.UnknownSpeciesViewHolder
 
-class SpeciesAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+ class SpeciesAdapter: BaseAdapter<SpeciesAdapter.AdapterItem, SpeciesAdapter.AdapterItem.ViewTypes>() {
 
     interface Listener {
         fun mushroomSelected(mushroom: Mushroom)
@@ -24,43 +36,36 @@ class SpeciesAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             Mushroom(60212, "Fungi Sp.", null,  null, null, 0, null, null, null,null, null, null, null)
     }
 
-    sealed class Item(viewType: ViewType) :
-        com.noque.svampeatlas.models.Item<Item.ViewType>(viewType) {
-        class Caution: Item(ViewType.CAUTIONCELL)
-        class Creditation: Item(ViewType.CREDITATIONCELL)
-        class UnknownSpecies: Item(ViewType.UNKNOWNSPECIES)
-        class SelectableMushroom(val mushroom: Mushroom, val score: Double? = null) : Item(ViewType.SELECTABLE)
+    sealed class AdapterItem(viewType: ViewTypes) : Item<AdapterItem.ViewTypes>(viewType) {
+        class Caution: AdapterItem(ViewTypes.CAUTIONCELL)
+        class Creditation: AdapterItem(ViewTypes.CREDITATIONCELL)
+        class UnknownSpecies: AdapterItem(ViewTypes.UNKNOWNSPECIES)
+        class SelectableMushroom(val mushroom: Mushroom, val score: Double? = null) : AdapterItem(ViewTypes.SELECTABLE)
         class SelectedMushroom(
             val mushroom: Mushroom,
             val confidence: DeterminationConfidence
-        ) : Item(ViewType.SELECTEDSPECIES)
+        ) : AdapterItem(ViewTypes.SELECTEDSPECIES)
 
-        enum class ViewType : com.noque.svampeatlas.models.ViewType {
+        enum class ViewTypes : ViewType {
             UNKNOWNSPECIES,
             SELECTEDSPECIES,
             SELECTABLE,
             CAUTIONCELL,
             CREDITATIONCELL;
-
-            companion object {
-                val values = values()
-            }
         }
     }
 
-    private val sections = Sections<Item.ViewType, Item>()
-
-    private val upperSection = Section<Item>(null)
-    private val middleSection = Section<Item>(null)
-    private val lowerSection = Section<Item>(null)
+    private val upperSection = Section<AdapterItem>(null)
+    private val middleSection = Section<AdapterItem>(null)
+    private val lowerSection = Section<AdapterItem>(null)
 
     private var listener: Listener? = null
 
-    private val onClickListener = View.OnClickListener { view ->
+    override val onClickListener = View.OnClickListener { view ->
         when (val viewHolder = view.tag) {
             is SelectedResultItemViewHolder -> {
                 when (val item = sections.getItem(viewHolder.adapterPosition)) {
-                    is Item.SelectedMushroom -> {
+                    is AdapterItem.SelectedMushroom -> {
                         listener?.mushroomSelected(item.mushroom)
                     }
                     else -> {}
@@ -71,7 +76,7 @@ class SpeciesAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             }
             is ResultItemViewHolder -> {
                 when (val item = sections.getItem(viewHolder.adapterPosition)) {
-                    is Item.SelectableMushroom -> {
+                    is AdapterItem.SelectableMushroom -> {
                         listener?.mushroomSelected(item.mushroom)
                     }
                     else -> {}
@@ -91,111 +96,63 @@ class SpeciesAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         this.listener = listener
     }
 
-    fun configureUpperSection(state: State<List<Item>>, title: String?) {
+    fun configureUpperSection(state: State<List<AdapterItem>>, title: String?) {
         upperSection.setTitle(title)
         upperSection.setState(state)
         notifyDataSetChanged()
     }
 
-    fun configureMiddleSectionState(state: State<List<Item>>, title: String?) {
+    fun configureMiddleSectionState(state: State<List<AdapterItem>>, title: String?) {
         middleSection.setTitle(title)
         middleSection.setState(state)
         notifyDataSetChanged()
     }
 
-    fun configureLowerSectionState(state: State<List<Item>>, title: String?) {
+    fun configureLowerSectionState(state: State<List<AdapterItem>>, title: String?) {
         lowerSection.setTitle(title)
         lowerSection.setState(state)
         notifyDataSetChanged()
     }
 
-    override fun getItemCount(): Int {
-        return sections.getCount()
-    }
-
-    override fun getItemViewType(position: Int): Int {
-        return sections.getViewTypeOrdinal(position)
-    }
-
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-                val layoutInflater = LayoutInflater.from(parent.context)
-        
-        //TODO
-        return  LoaderViewHolder(ItemLoaderBinding.inflate(layoutInflater, parent, false))
-
-
-//        val view: View
-//        val viewHolder: RecyclerView.ViewHolder
-//
-//        when (sections.getSectionViewType(viewType)) {
-//            Section.ViewType.HEADER -> {
-//                view = layoutInflater.inflate(R.layout.item_header, parent, false)
-//                viewHolder = HeaderViewHolder(view)
-//            }
-//            Section.ViewType.ERROR -> {
-//                view = layoutInflater.inflate(R.layout.item_error, parent, false)
-//                viewHolder = ErrorViewHolder(view)
-//            }
-//            Section.ViewType.LOADER -> {
-//                view = layoutInflater.inflate(R.layout.item_loader, parent, false)
-//                viewHolder = LoaderViewHolder(view)
-//            }
-//            Section.ViewType.ITEM -> {
-//                when (Item.ViewType.values[viewType - Section.ViewType.values.count()]) {
-//                    Item.ViewType.UNKNOWNSPECIES -> {
-//                        view = layoutInflater.inflate(R.layout.item_unknown_species, parent, false)
-//                        view.setOnClickListener(onClickListener)
-//                        viewHolder = UnknownSpeciesViewHolder(view)
-//                    }
-//                    Item.ViewType.SELECTEDSPECIES -> {
-//                        view = layoutInflater.inflate(R.layout.item_selected_result, parent, false)
-//                        val selectedResultItemViewHolder = SelectedResultItemViewHolder(view)
-//                        selectedResultItemViewHolder.confidenceSet = {
-//                            listener?.confidenceSet(it)
-//                        }
-//
-//                        selectedResultItemViewHolder.deselectClicked = {
-//                            listener?.deselectPressed()
-//                        }
-//
-//                        viewHolder = selectedResultItemViewHolder
-//                    }
-//
-//                    Item.ViewType.SELECTABLE -> {
-//                        view = layoutInflater.inflate(R.layout.item_result, parent, false)
-//                        view.setOnClickListener(onClickListener)
-//                        viewHolder = ResultItemViewHolder(view)
-//                    }
-//
-//                    Item.ViewType.CAUTIONCELL -> {
-//                        view = layoutInflater.inflate(R.layout.item_caution, parent, false)
-//                        viewHolder = CautionViewHolder(view)
-//                    }
-//
-//                    Item.ViewType.CREDITATIONCELL -> {
-//                        view = layoutInflater.inflate(R.layout.item_creditation, parent, false)
-//                        val creditationViewHolder = CreditationViewHolder(view)
-//                        creditationViewHolder.configure(CreditationViewHolder.Type.AINEWOBSERVATION)
-//                        viewHolder = creditationViewHolder
-//                    }
-//                }
-//            }
-//        }
-//
-//        view.tag = viewHolder
-//        return viewHolder
-    }
-
-
-    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        when (holder) {
-            is HeaderViewHolder -> {
-                sections.getTitle(position)?.let { holder.configure(it) }
+    override fun createViewTypeViewHolder(
+        inflater: LayoutInflater,
+        parent: ViewGroup,
+        viewTypeOrdinal: Int
+    ): RecyclerView.ViewHolder {
+        when (AdapterItem.ViewTypes.values()[viewTypeOrdinal]) {
+            AdapterItem.ViewTypes.UNKNOWNSPECIES -> {
+                val binding = ItemUnknownSpeciesBinding.inflate(inflater, parent, false)
+                return UnknownSpeciesViewHolder(binding)
             }
+            AdapterItem.ViewTypes.SELECTEDSPECIES -> {
+                val binding = ItemSelectedResultBinding.inflate(inflater, parent, false)
+                return SelectedResultItemViewHolder(binding).apply {
+                    confidenceSet = { listener?.confidenceSet(it) }
+                    deselectClicked = { listener?.deselectPressed() }
+                }
+            }
+            AdapterItem.ViewTypes.SELECTABLE -> {
+                val binding = ItemResultBinding.inflate(inflater, parent, false)
+                return ResultItemViewHolder(binding)
+            }
+            AdapterItem.ViewTypes.CAUTIONCELL -> {
+                val binding = ItemCautionBinding.inflate(inflater, parent, false)
+                return CautionViewHolder(binding)
+            }
+            AdapterItem.ViewTypes.CREDITATIONCELL -> {
+                val binding = ItemCreditationBinding.inflate(inflater, parent, false)
+                return CreditationViewHolder(binding).apply {
+                    configure(CreditationViewHolder.Type.AINEWOBSERVATION)
+                }
+            }
+        }
+    }
 
+    override fun bindViewHolder(holder: RecyclerView.ViewHolder, item: AdapterItem) {
+        when (holder) {
             is ResultItemViewHolder -> {
-                when (val item = sections.getItem(position)) {
-                    is Item.SelectableMushroom -> {
+                when (item) {
+                    is AdapterItem.SelectableMushroom -> {
                         holder.configure(item.mushroom)
                     }
                     else -> {}
@@ -203,16 +160,12 @@ class SpeciesAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
             }
 
             is SelectedResultItemViewHolder -> {
-                when (val item = sections.getItem(position)) {
-                    is Item.SelectedMushroom -> {
+                when (item) {
+                    is AdapterItem.SelectedMushroom -> {
                         holder.configure(item.mushroom, item.confidence)
                     }
                     else -> {}
                 }
-            }
-
-            is ErrorViewHolder -> {
-                sections.getError(position)?.let { holder.configure(it) }
             }
         }
     }

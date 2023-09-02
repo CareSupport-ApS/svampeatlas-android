@@ -41,6 +41,6 @@ class ObservationLocationFragment : Fragment(R.layout.fragment_observation_locat
 
     private fun setupViews() {
         (requireActivity() as MainActivity).setSupportActionBar(binding.observationLocationFragmentToolbar)
-        mapFragment.showStyleSelector(true)
+        mapFragment.showStyleSelector = true
     }
 }

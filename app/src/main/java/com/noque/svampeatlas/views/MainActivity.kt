@@ -44,7 +44,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var userView: UserView
 
     // Listeners
-
     private val onDestinationChangedListener by lazy {
         NavController.OnDestinationChangedListener { _, destination, _ ->
             if (destination.id != R.id.addObservationFragment || destination.id != R.id.cameraFragment) {
@@ -149,7 +148,7 @@ class MainActivity : AppCompatActivity() {
                         newGraph.setStartDestination(R.id.myPageFragment)
                         binding.navigationView.setCheckedItem(R.id.myPageFragment)
                         navController.graph = newGraph
-                    } else if (it.items != isLoggedIn && !it.items) {
+                    } else if (it.items != isLoggedIn) {
                         val newGraph = navController.navInflater.inflate(R.navigation.nav_main)
                         newGraph.setStartDestination(R.id.mushroomFragment)
                         binding.navigationView.setCheckedItem(R.id.mushroomFragment)

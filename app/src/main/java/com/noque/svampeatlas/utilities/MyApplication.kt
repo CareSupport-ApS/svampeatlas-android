@@ -39,7 +39,4 @@ class MyApplication: Application() {
         FileManager.clearTemporaryFiles()
         super.onTerminate()
     }
-
-
-
 }
