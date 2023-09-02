@@ -106,14 +106,14 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         isLoggedIn = savedInstanceState?.getBoolean(KEY_IS_LOGGED_IN)
         binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(R.layout.activity_main)
+        setContentView(binding.root)
         initViews()
         setupView()
         setupViewModels()
     }
 
     private fun initViews() {
-        navController = supportFragmentManager.findFragmentById(R.id.nav_host_container)!!.findNavController()
+        navController = supportFragmentManager.findFragmentById(R.id.nav_host_fragment)!!.findNavController()
         userView = binding.navigationView.getHeaderView(0).findViewById(R.id.navigationHeader_userView)
     }
 
@@ -136,30 +136,30 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupViewModels() {
-//        Session.loggedInState.observe(this, Observer {
-//            when (it) {
-//                is State.Items -> {
-//                    binding.navigationView.menu.clear()
-//                    if (it.items)   binding.navigationView.inflateMenu(R.menu.menu_logged_in) else   binding.navigationView.inflateMenu(
-//                        R.menu.menu_logged_out
-//                    )
-//
-//                    if (it.items != isLoggedIn && it.items) {
-//                        val newGraph = navController.navInflater.inflate(R.navigation.nav_main)
-//                        newGraph.setStartDestination(R.id.myPageFragment)
-//                        binding.navigationView.setCheckedItem(R.id.myPageFragment)
-//                        navController.graph = newGraph
-//                    } else if (it.items != isLoggedIn && !it.items) {
-//                        val newGraph = navController.navInflater.inflate(R.navigation.nav_main)
-//                        newGraph.setStartDestination(R.id.mushroomFragment)
-//                        binding.navigationView.setCheckedItem(R.id.mushroomFragment)
-//                        navController.graph = newGraph
-//                    }
-//                    isLoggedIn = it.items
-//                }
-//                else -> {}
-//            }
-//        })
+        Session.loggedInState.observe(this, Observer {
+            when (it) {
+                is State.Items -> {
+                    binding.navigationView.menu.clear()
+                    if (it.items)   binding.navigationView.inflateMenu(R.menu.menu_logged_in) else   binding.navigationView.inflateMenu(
+                        R.menu.menu_logged_out
+                    )
+
+                    if (it.items != isLoggedIn && it.items) {
+                        val newGraph = navController.navInflater.inflate(R.navigation.nav_main)
+                        newGraph.setStartDestination(R.id.myPageFragment)
+                        binding.navigationView.setCheckedItem(R.id.myPageFragment)
+                        navController.graph = newGraph
+                    } else if (it.items != isLoggedIn && !it.items) {
+                        val newGraph = navController.navInflater.inflate(R.navigation.nav_main)
+                        newGraph.setStartDestination(R.id.mushroomFragment)
+                        binding.navigationView.setCheckedItem(R.id.mushroomFragment)
+                        navController.graph = newGraph
+                    }
+                    isLoggedIn = it.items
+                }
+                else -> {}
+            }
+        })
 
         Session.user.observe(this, Observer {
             if (it != null) userView.configure(it) else userView.configureAsGuest()

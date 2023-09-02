@@ -12,7 +12,7 @@ import com.noque.svampeatlas.services.DataService
 
 class UserView(context: Context?, attrs: AttributeSet?) : LinearLayout(context, attrs) {
 
-    private val binding = ViewUserBinding.inflate(LayoutInflater.from(context), this, false)
+    private val binding = ViewUserBinding.inflate(LayoutInflater.from(context), this, true)
 
     fun configure(user: User) {
         binding.userViewProfileImageView.configure(user.initials, user.imageURL, DataService.ImageSize.FULL)

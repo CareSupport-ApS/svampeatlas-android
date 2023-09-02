@@ -28,7 +28,6 @@ class MyPageAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         fun observationSelected(observation: Observation)
         fun getAdditionalData(category: Item.Category, atOffset: Int)
         fun notificationSelected(notification: Notification)
-        fun logoutButtonSelected()
     }
 
     sealed class Item(viewType: ViewType) : com.noque.svampeatlas.models.Item<Item.ViewType>(viewType) {
@@ -67,9 +66,6 @@ class MyPageAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val onClickListener = View.OnClickListener { view ->
         when (val viewHolder = view.tag) {
-            is LogOutViewHolder -> {
-                listener?.logoutButtonSelected()
-            }
             is ReloaderViewHolder -> {
                 when (val item = sections.getItem(viewHolder.adapterPosition)) {
                     is Item.LoadMore -> {
@@ -120,13 +116,9 @@ class MyPageAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
 
-    override fun getItemCount(): Int {
-       return sections.getCount()
-    }
+    override fun getItemCount(): Int = sections.getCount()
 
-    override fun getItemViewType(position: Int): Int {
-        return sections.getViewTypeOrdinal(position)
-    }
+    override fun getItemViewType(position: Int): Int = sections.getViewTypeOrdinal(position)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
@@ -145,24 +137,22 @@ class MyPageAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 viewHolder = ReloaderViewHolder(binding)
             }
             Section.ViewType.ITEM -> {
-                when (Item.ViewType.values[viewType - Section.ViewType.values.count()]) {
+                viewHolder = when (Item.ViewType.values[viewType - Section.ViewType.values.count()]) {
                     Item.ViewType.NOTIFICATION -> {
                         val binding = ItemNotificationBinding.inflate(layoutInflater, parent, false)
-                        viewHolder = NotificationViewHolder(binding)
+                        NotificationViewHolder(binding)
                     }
+
                     Item.ViewType.OBSERVATION -> {
                         val binding = ItemObservationBinding.inflate(layoutInflater, parent, false)
-                        viewHolder = ObservationViewHolder(binding)
+                        ObservationViewHolder(binding)
                     }
+
                     Item.ViewType.LOADMORE -> {
                         val binding = ItemReloaderBinding.inflate(layoutInflater, parent, false)
-                        viewHolder = ReloaderViewHolder(binding)
+                        ReloaderViewHolder(binding)
                     }
                 }
-
-                // TODO
-//                view.setOnClickListener(onClickListener)
-//                view.tag = viewHolder
             }
         }
 

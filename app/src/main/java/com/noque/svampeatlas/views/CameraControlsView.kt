@@ -29,7 +29,7 @@ class CameraControlsView(context: Context, attrs: AttributeSet?) :
 
     private var listener: Listener? = null
     private var state: State = State.HIDDEN
-    private val binding = ViewCameraControlsBinding.inflate(LayoutInflater.from(context), this, false)
+    private val binding = ViewCameraControlsBinding.inflate(LayoutInflater.from(context), this, true)
 
 
     init {

@@ -22,7 +22,7 @@ import com.noque.svampeatlas.view_models.Session
 import com.noque.svampeatlas.views.MainActivity
 
 
-class LoginFragment : Fragment() {
+class LoginFragment : Fragment(R.layout.fragment_login) {
 
     companion object {
         const val TAG = "LoginFragment"
@@ -58,23 +58,14 @@ class LoginFragment : Fragment() {
         } catch (exception: ActivityNotFoundException) {}
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_login, container, false)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupViews()
         setupViewModels()
-
     }
 
     private fun setupViews() {
         (requireActivity() as MainActivity).setSupportActionBar(binding.loginFragmentToolbar)
-
         binding.loginFragmentLoginButton.setOnClickListener(loginButtonClickListener)
         binding.loginFragmentCreateAccountButton.setOnClickListener(createAccountButtonPressed)
         Glide.with(requireContext()).load(R.drawable.background).transition(DrawableTransitionOptions.withCrossFade()).into(binding.loginFragmentBg)

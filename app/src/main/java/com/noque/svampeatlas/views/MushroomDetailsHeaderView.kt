@@ -12,7 +12,7 @@ import com.noque.svampeatlas.models.Mushroom
 
 class MushroomDetailsHeaderView(context: Context?, attrs: AttributeSet?) : LinearLayout(context, attrs) {
 
-    private val binding = ViewMushroomHeaderBinding.inflate(LayoutInflater.from(context), this, false)
+    private val binding = ViewMushroomHeaderBinding.inflate(LayoutInflater.from(context), this, true)
 
     fun configure(mushroom: Mushroom) {
         binding.mushroomHeaderViewTitleTextView.text =

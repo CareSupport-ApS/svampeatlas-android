@@ -12,26 +12,13 @@ import com.noque.svampeatlas.databinding.FragmentImageBinding
 import com.noque.svampeatlas.utilities.autoClearedViewBinding
 import com.noque.svampeatlas.views.MainActivity
 
-class ImageFragment: Fragment() {
+class ImageFragment: Fragment(R.layout.fragment_image) {
 
     // Objects
-
     private val args: ImageFragmentArgs by navArgs()
 
     // Views
     private val binding by autoClearedViewBinding(FragmentImageBinding::bind)
-
-
-    // Adapters
-
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_image, container, false)
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

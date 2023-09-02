@@ -16,7 +16,7 @@ import com.noque.svampeatlas.services.DataService
 
 class ProfileImageView(context: Context, attrs: AttributeSet?) : ConstraintLayout(context, attrs) {
 
-    private val binding = ViewProfileImageBinding.inflate(LayoutInflater.from(context), this, false)
+    private val binding = ViewProfileImageBinding.inflate(LayoutInflater.from(context), this, true)
 
     init {
         setupView()

@@ -12,9 +12,7 @@ import com.noque.svampeatlas.R
 import com.noque.svampeatlas.databinding.FragmentPromptBinding
 import com.noque.svampeatlas.utilities.autoClearedViewBinding
 
-class PromptFragment: DialogFragment() {
-
-
+class PromptFragment: DialogFragment(R.layout.fragment_prompt) {
     companion object {
         const val KEY_TITLE = "KEY_TITLE"
         const val KEY_MESSAGE = "KEY_MESSAGE"
@@ -29,14 +27,6 @@ class PromptFragment: DialogFragment() {
 
 // Views
 private val binding by autoClearedViewBinding(FragmentPromptBinding::bind)
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_prompt, container, false)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupViews()

@@ -20,6 +20,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
+import androidx.navigation.navGraphViewModels
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -93,13 +94,13 @@ class AddObservationFragment : Fragment(), ActivityCompat.OnRequestPermissionsRe
 
     // Views
     private val binding by autoClearedViewBinding(FragmentAddObservationBinding::bind) {
-        it?.addObservationFragmentAddObservationImagesRecyclerView?.adapter = null
+        it?.observationImagesRecyclerView?.adapter = null
         it?.addObservationFragmentViewPager?.adapter = null
         it?.addObservationFragmentTabLayout?.setupWithViewPager(null)
     }
 
     // View models
-    private val newObservationViewModel by viewModels<NewObservationViewModel> { NewObservationViewModelFactory(args.context, args.id, args.mushroomId, args.imageFilePath,  requireActivity().application) }
+    private val newObservationViewModel: NewObservationViewModel by navGraphViewModels(R.id.add_observation_nav) { NewObservationViewModelFactory(args.context, args.id, args.mushroomId, args.imageFilePath,  requireActivity().application) }
 
     // Adapters
     private val addImagesAdapter by lazy {
@@ -140,7 +141,7 @@ class AddObservationFragment : Fragment(), ActivityCompat.OnRequestPermissionsRe
             super.onPageSelected(position)
             when (Category.values()[position]) {
                 Category.LOCALITY -> {
-                    binding.addObservationFragmentAddObservationImagesRecyclerView.apply {
+                    binding.observationImagesRecyclerView.apply {
                         foreground = null
                         isEnabled = true
                     }
@@ -157,13 +158,13 @@ class AddObservationFragment : Fragment(), ActivityCompat.OnRequestPermissionsRe
                     }
                 }
                 Category.DETAILS -> {
-                    binding.addObservationFragmentAddObservationImagesRecyclerView.apply {
+                    binding.observationImagesRecyclerView.apply {
                         foreground = null
                         isEnabled = true
                     }
                 }
                 Category.SPECIES -> {
-                    binding.addObservationFragmentAddObservationImagesRecyclerView.apply {
+                    binding.observationImagesRecyclerView.apply {
                         foreground = ColorDrawable(resources.getColor(R.color.colorPrimary))
                         isEnabled = true
                     }
@@ -277,8 +278,6 @@ class AddObservationFragment : Fragment(), ActivityCompat.OnRequestPermissionsRe
             findNavController().navigate(action)
             null
         } else {
-            val menuHost: MenuHost = requireActivity()
-            menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
             inflater.inflate(R.layout.fragment_add_observation, container, false)
         }
     }
@@ -370,6 +369,8 @@ class AddObservationFragment : Fragment(), ActivityCompat.OnRequestPermissionsRe
     }
 
     private fun setupView() {
+        requireActivity().addMenuProvider(this, viewLifecycleOwner)
+
         fun setToolbar(@StringRes resId: Int, mSubtitle: String?, navIcon: Int? = null) {
             binding.addObservationFragmentToolbar.apply {
                 setTitle(resId)
@@ -390,7 +391,7 @@ class AddObservationFragment : Fragment(), ActivityCompat.OnRequestPermissionsRe
         }
         (requireActivity() as MainActivity).setSupportActionBar(binding.addObservationFragmentToolbar)
         binding.addObservationFragmentTabLayout.setupWithViewPager(binding.addObservationFragmentViewPager)
-        binding.addObservationFragmentAddObservationImagesRecyclerView.apply {
+        binding.observationImagesRecyclerView.apply {
             val myHelper = ItemTouchHelper(imageSwipedCallback)
             myHelper.attachToRecyclerView(this)
 
@@ -401,7 +402,7 @@ class AddObservationFragment : Fragment(), ActivityCompat.OnRequestPermissionsRe
 
             addOnItemTouchListener(object: RecyclerView.SimpleOnItemTouchListener() {
                 override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
-                    return !binding.addObservationFragmentAddObservationImagesRecyclerView.isEnabled
+                    return !binding.observationImagesRecyclerView.isEnabled
                 }
             })
         }

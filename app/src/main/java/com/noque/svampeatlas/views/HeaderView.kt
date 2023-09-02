@@ -8,7 +8,7 @@ import com.noque.svampeatlas.databinding.ViewHeaderBinding
 
 class HeaderView(context: Context?, attrs: AttributeSet?) : LinearLayout(context, attrs) {
 
-    private val binding = ViewHeaderBinding.inflate(LayoutInflater.from(context), this, false)
+    private val binding = ViewHeaderBinding.inflate(LayoutInflater.from(context), this, true)
 
     fun configure(title: String, extraMessage: String? = null) {
         binding.headerViewTextView .text = title

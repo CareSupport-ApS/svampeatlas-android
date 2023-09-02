@@ -10,6 +10,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.navGraphViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.noque.svampeatlas.R
@@ -51,7 +52,7 @@ class SpeciesFragment : Fragment() {
         )).get(MushroomsViewModel::class.java)
     }
 
-    private val newObservationViewModel: NewObservationViewModel by viewModels({ requireParentFragment() })
+    private val newObservationViewModel: NewObservationViewModel by navGraphViewModels(R.id.add_observation_nav)
     // Adapters
 
     private val speciesAdapter: SpeciesAdapter by lazy {

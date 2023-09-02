@@ -10,8 +10,10 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.LinearLayout
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
@@ -34,7 +36,7 @@ import com.noque.svampeatlas.view_models.NotesFragmentViewModel
 import com.noque.svampeatlas.views.MainActivity
 import java.util.Date
 
-class NotesFragment: Fragment(), PromptFragment.Listener {
+class NotesFragment: Fragment(R.layout.fragment_notebook), PromptFragment.Listener, MenuProvider {
 
     companion object {
         const val RELOAD_DATA_KEY = "RELOAD_DATA_KEY"
@@ -67,35 +69,22 @@ class NotesFragment: Fragment(), PromptFragment.Listener {
     }
 
     private val viewModel by viewModels<NotesFragmentViewModel>()
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        setHasOptionsMenu(true)
-        return inflater.inflate(R.layout.fragment_notebook, container, false)
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.notebook_fragment_menu, menu)
-
+    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) {
+        menuInflater.inflate(R.menu.notebook_fragment_menu, menu)
         menu.findItem(R.id.menu_notebookFragment_addEntry)?.let {
-            (it.actionView as? LinearLayout)?.apply {
-                /*actionView_addNotebookEntry.setOnClickListener {
+            it.actionView?.findViewById<Button>(R.id.actionView_addNotebookEntry)?.apply {
+                setOnClickListener {
                     val action = NotesFragmentDirections.actionNotesFragmentToAddObservationFragment().setContext(AddObservationFragment.Context.Note)
                     findNavController().navigate(action)
-                }*/
+                }
             }
         }
-        super.onCreateOptionsMenu(menu, inflater)
     }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.menu_notebookFragment_redownloadOffline) {
+    override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
+        if (menuItem.itemId == R.id.menu_notebookFragment_redownloadOffline)
             DownloaderFragment().show(parentFragmentManager, null)
-        }
-        return super.onOptionsItemSelected(item)
+        return true
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -106,6 +95,7 @@ class NotesFragment: Fragment(), PromptFragment.Listener {
 
 
     private fun setupViews() {
+        requireActivity().addMenuProvider(this, viewLifecycleOwner)
         (requireActivity() as MainActivity).setSupportActionBar(binding.notebookFragmentToolbar)
         binding.notebookFragmentRecyclerView.apply {
             val myHelper = ItemTouchHelper(object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
@@ -246,6 +236,5 @@ class NotesFragment: Fragment(), PromptFragment.Listener {
     override fun positiveButtonPressed() {
         DownloaderFragment().show(parentFragmentManager, null)
     }
-
-    override fun negativeButtonPressed() { }
+    override fun negativeButtonPressed() {}
 }

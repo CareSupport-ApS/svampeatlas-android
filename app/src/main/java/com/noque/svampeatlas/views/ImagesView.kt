@@ -16,7 +16,7 @@ import com.noque.svampeatlas.models.Image
 
 class ImagesView(context: Context, attrs: AttributeSet?) : ConstraintLayout(context, attrs) {
 
-    private val binding = ViewImagesBinding.inflate(LayoutInflater.from(context), this, false)
+    private val binding = ViewImagesBinding.inflate(LayoutInflater.from(context), this, true)
 
 
     private val imagesAdapter by lazy {

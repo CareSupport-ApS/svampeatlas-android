@@ -1,20 +1,14 @@
 package com.noque.svampeatlas.adapters.add_observation
 
-import android.graphics.Bitmap
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.noque.svampeatlas.R
 import com.noque.svampeatlas.databinding.ItemAddImageBinding
-import com.noque.svampeatlas.databinding.ItemAddImageExpandedBinding
 import com.noque.svampeatlas.databinding.ItemAddedImageBinding
 import com.noque.svampeatlas.models.UserObservation
 import com.noque.svampeatlas.view_holders.AddImageViewHolder
 import com.noque.svampeatlas.view_holders.AddedImageViewHolder
-import com.noque.svampeatlas.view_models.NewObservationViewModel
-import java.io.File
 
 class AddImagesAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
@@ -36,11 +30,7 @@ class AddImagesAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private var images = mutableListOf<UserObservation.Image>()
 
-    private val onClickListener = object: View.OnClickListener {
-        override fun onClick(view: View?) {
-            addImageButtonClicked?.invoke()
-        }
-    }
+    private val onClickListener = View.OnClickListener { addImageButtonClicked?.invoke() }
 
     fun configure(images: List<UserObservation.Image>) {
         this.images = images.toMutableList()
@@ -62,7 +52,7 @@ class AddImagesAdapter: RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         if (position < images.count()) {
             return ViewType.ADDEDIMAGEVIEW.ordinal
         } else {
-            return if (images.count() == 0) ViewType.ADDIMAGEVIEWEXPANDED.ordinal else ViewType.ADDIMAGEVIEW.ordinal
+            return if (images.isEmpty()) ViewType.ADDIMAGEVIEWEXPANDED.ordinal else ViewType.ADDIMAGEVIEW.ordinal
         }
     }
 

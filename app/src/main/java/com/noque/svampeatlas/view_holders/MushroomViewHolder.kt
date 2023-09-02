@@ -6,16 +6,16 @@ import com.noque.svampeatlas.models.Mushroom
 
 class MushroomViewHolder(private val itemClick: ((Mushroom) -> Unit)?, var binding: ItemMushroomBinding): RecyclerView.ViewHolder(binding.root) {
 
-    private val mushroomView = binding.itemMushroomMushroomView
-
     init {
-        mushroomView.round(false)
+        binding.mushroomView.round(false)
     }
 
     fun configure(mushroom: Mushroom) {
-        mushroomView.configure(mushroom)
-        mushroomView.setOnClickListener {
-            itemClick?.invoke(mushroom)
+        binding.mushroomView.apply {
+            configure(mushroom)
+            setOnClickListener {
+                itemClick?.invoke(mushroom)
+            }
         }
     }
 }

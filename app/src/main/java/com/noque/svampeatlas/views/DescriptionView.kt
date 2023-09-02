@@ -8,7 +8,7 @@ import com.noque.svampeatlas.databinding.ViewDescriptionBinding
 
 class DescriptionView(context: Context?, attrs: AttributeSet?) : LinearLayout(context, attrs) {
 
-    private val binding = ViewDescriptionBinding.inflate(LayoutInflater.from(context), this, false)
+    private val binding = ViewDescriptionBinding.inflate(LayoutInflater.from(context), this, true)
 
     fun configure(title: String?, content: String) {
         if (title == null) {

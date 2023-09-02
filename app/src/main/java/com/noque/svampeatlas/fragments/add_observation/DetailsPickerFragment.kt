@@ -9,6 +9,8 @@ import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.navArgs
+import androidx.navigation.navGraphViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.noque.svampeatlas.R
@@ -30,12 +32,7 @@ import com.noque.svampeatlas.view_models.factories.DetailsPickerViewModelFactory
 import com.noque.svampeatlas.views.SearchBarListener
 
 
-class DetailsPickerFragment() : DialogFragment() {
-
-    companion object {
-        const val TYPE_KEY = "DETAILSPICKERFRAGMENT_TYPEKEY"
-    }
-
+class DetailsPickerFragment : DialogFragment(R.layout.fragment_details_picker) {
     enum class Type {
         SUBSTRATEPICKER,
         VEGETATIONTYPEPICKER,
@@ -43,13 +40,12 @@ class DetailsPickerFragment() : DialogFragment() {
     }
 
     // Objects
-    private lateinit var type: Type
+    private val args by navArgs<DetailsPickerFragmentArgs>()
 
     // Views
     private val binding by autoClearedViewBinding(FragmentDetailsPickerBinding::bind)
 
     // Adapters
-
     private val substratesAdapter: SubstratesAdapter by lazy {
         val adapter = SubstratesAdapter()
         adapter.setListener(object: PickerAdapter.Listener<Substrate> {
@@ -80,13 +76,11 @@ class DetailsPickerFragment() : DialogFragment() {
     private val hostsAdapter: HostsAdapter by lazy {
         val adapter = HostsAdapter()
         adapter.setListener(object: PickerAdapter.Listener<Host> {
-            override fun itemSelected(item: Host) {
+            override fun itemSelected(item: Host) =
                 newObservationViewModel.appendHost(item, binding.detailsPickerFragmentSwitch.isChecked)
-            }
 
-            override fun itemDeselected(item: Host) {
+            override fun itemDeselected(item: Host) =
                 newObservationViewModel.removeHost(item, binding.detailsPickerFragmentSwitch.isChecked)
-            }
         })
 
         adapter
@@ -94,22 +88,13 @@ class DetailsPickerFragment() : DialogFragment() {
 
 
     // View models
-    private val newObservationViewModel by viewModels<NewObservationViewModel>({requireParentFragment().requireParentFragment()})
+    private val newObservationViewModel: NewObservationViewModel by navGraphViewModels(R.id.add_observation_nav)
+
     private val observationDetailsPickerViewModel by lazy {
-        ViewModelProvider(this, DetailsPickerViewModelFactory(type, requireActivity().application)).get(DetailsPickerViewModel::class.java)
+        ViewModelProvider(this, DetailsPickerViewModelFactory(args.type, requireActivity().application))[DetailsPickerViewModel::class.java]
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        return inflater.inflate(R.layout.fragment_details_picker, container, false)
-    }
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        type = arguments?.getSerializable(TYPE_KEY) as Type
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?)  {
         super.onViewCreated(view, savedInstanceState)
         setupViews()
         setupViewModels()
@@ -126,7 +111,7 @@ class DetailsPickerFragment() : DialogFragment() {
     private fun setupViews() {
         binding.detailsPickerFragmentCancelButton.apply {
             setOnClickListener {
-                when (type) {
+                when (args.type) {
                     Type.HOSTPICKER -> {
                         newObservationViewModel.setHostsLockedState(binding.detailsPickerFragmentSwitch.isChecked)
                     }
@@ -138,7 +123,7 @@ class DetailsPickerFragment() : DialogFragment() {
 
         binding.detailsPickerFragmentRecyclerView.apply {
             layoutManager = LinearLayoutManager(context)
-            if (type == Type.HOSTPICKER) {
+            if (args.type == Type.HOSTPICKER) {
                 addOnScrollListener(object : RecyclerView.OnScrollListener() {
                     override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                         super.onScrolled(recyclerView, dx, dy)
@@ -152,7 +137,7 @@ class DetailsPickerFragment() : DialogFragment() {
 
             }
 
-            when (type) {
+            when (args.type) {
                 Type.VEGETATIONTYPEPICKER -> {
                     binding.detailsPickerFragmentRecyclerView.adapter = vegetationTypesAdapter
                     binding.detailsPickerFragmentHeaderTextView.text =
@@ -202,7 +187,7 @@ class DetailsPickerFragment() : DialogFragment() {
 
 
     private fun setupViewModels() {
-        when (type) {
+        when (args.type) {
             Type.VEGETATIONTYPEPICKER -> {
                 binding.detailsPickerFragmentSwitch.isChecked = newObservationViewModel.vegetationType.value?.second ?: false
             }

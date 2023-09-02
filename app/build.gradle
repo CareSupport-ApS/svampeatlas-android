@@ -4,7 +4,6 @@ plugins {
     id 'org.jetbrains.kotlin.android'
     id 'androidx.navigation.safeargs'
     id 'com.google.gms.google-services'
-    id 'kotlin-android-extensions'
     id 'com.google.devtools.ksp'
     id "org.jetbrains.kotlin.kapt"
 }

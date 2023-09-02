@@ -19,7 +19,7 @@ class ObservationView(context: Context?, attrs: AttributeSet?) : LinearLayout(co
     private var _observation: Observation? = null
     val observation: Observation? get() = _observation
 
-    private val binding = ViewObservationBinding.inflate(LayoutInflater.from(context), this, false)
+    private val binding = ViewObservationBinding.inflate(LayoutInflater.from(context), this, true)
 
     init {
         val inflater = LayoutInflater.from(getContext())

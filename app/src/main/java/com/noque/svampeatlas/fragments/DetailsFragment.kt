@@ -1,6 +1,7 @@
 package com.noque.svampeatlas.fragments
 
 
+import android.animation.TimeInterpolator
 import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
@@ -18,6 +19,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.material.appbar.AppBarLayout
+import com.google.android.material.appbar.CollapsingToolbarLayout.TITLE_COLLAPSE_MODE_FADE
 import com.noque.svampeatlas.R
 import com.noque.svampeatlas.adapters.CommentsAdapter
 import com.noque.svampeatlas.adapters.ObservationsAdapter
@@ -39,7 +41,7 @@ import com.noque.svampeatlas.views.*
 import kotlin.math.abs
 
 
-class DetailsFragment : Fragment() {
+class DetailsFragment : Fragment(R.layout.fragment_details) {
 
     override fun onRequestPermissionsResult(
         requestCode: Int,
@@ -114,7 +116,6 @@ class DetailsFragment : Fragment() {
 
     // Views
     private val binding by autoClearedViewBinding(FragmentDetailsBinding::bind) {
-        //it?.detailsFragmentAppBarLayout?.removeOnOffsetChangedListener(appBarLayoutOnOffsetChangedListener)
         it?.detailsFragmentRecyclerView?.adapter = null
     }
 
@@ -182,22 +183,6 @@ class DetailsFragment : Fragment() {
 
 
     // Listeners
-
-    private val appBarLayoutOnOffsetChangedListener by lazy {
-        AppBarLayout.OnOffsetChangedListener { appBarLayout, verticalOffset ->
-            if (!hasExpanded) {
-                if (verticalOffset == 0)  {
-                    hasExpanded = true
-                    binding.detailsFragmentCollapsingToolbarLayout.title = title
-                }
-            } else {
-                if (abs(verticalOffset) < appBarLayout.getTotalScrollRange() && binding.detailsFragmentImagesView.visibility == View.GONE) {
-                    binding.detailsFragmentImagesView.visibility = View.VISIBLE
-                }
-            }
-        }
-    }
-
     private val mapFragmentListener by lazy {
         object : MapFragment.Listener {
             override fun observationSelected(observation: Observation) {}
@@ -338,18 +323,9 @@ class DetailsFragment : Fragment() {
         }
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        savedInstanceState?.getBoolean(KEY_HAS_EXPANDED)?.let {
-            hasExpanded = it
-        }
-        return inflater.inflate(R.layout.fragment_details, container, false)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        savedInstanceState?.getBoolean(KEY_HAS_EXPANDED)?.let { hasExpanded = it }
         mapFragment = childFragmentManager.findFragmentById(binding.detailsFragmentMapFragment.id) as MapFragment
 
         setupViews()
@@ -360,10 +336,7 @@ class DetailsFragment : Fragment() {
         }
     }
 
-    private fun reportOffensiveContent() {
-        val dialog = ReportFragment(args.id)
-        dialog.show(childFragmentManager, null)
-    }
+    private fun reportOffensiveContent() = ReportFragment(args.id).show(childFragmentManager, null)
 
     override fun onStart() {
         super.onStart()
@@ -381,7 +354,7 @@ class DetailsFragment : Fragment() {
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
-        outState.putBoolean(KEY_HAS_EXPANDED, hasExpanded)
+        outState.putBoolean(KEY_HAS_EXPANDED, binding.detailsFragmentCollapsingToolbarLayout.scrollY == 0)
         super.onSaveInstanceState(outState)
     }
 
@@ -700,9 +673,10 @@ class DetailsFragment : Fragment() {
         if (images.isNullOrEmpty()) return
 
         this.title = title
+        binding.detailsFragmentCollapsingToolbarLayout.layoutMode = TITLE_COLLAPSE_MODE_FADE
+        binding.detailsFragmentCollapsingToolbarLayout.title = title
         binding.detailsFragmentNestedScrollView.isNestedScrollingEnabled = true
         binding.detailsFragmentImagesView.configure(images)
-        binding.detailsFragmentAppBarLayout.addOnOffsetChangedListener(appBarLayoutOnOffsetChangedListener)
 
         if (!hasExpanded) {
             binding.detailsFragmentImagesView.visibility = View.VISIBLE

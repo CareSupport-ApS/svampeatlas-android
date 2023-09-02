@@ -13,7 +13,7 @@
             android:icon="@drawable/icon_walk"
             android:title="@string/navigationItem_notebook"/>
         <item
-            android:id="@+id/addObservationFragment"
+            android:id="@+id/add_observation_nav"
             android:icon="@drawable/icon_plus"
             android:title="@string/navigationItem_newObservationVC"/>
 

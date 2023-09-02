@@ -19,7 +19,7 @@ import com.noque.svampeatlas.services.DataService
 
 class ResultView(context: Context?, attrs: AttributeSet?) : LinearLayout(context, attrs) {
 
-    private val binding = ViewResultBinding.inflate(LayoutInflater.from(context), this, false)
+    private val binding = ViewResultBinding.inflate(LayoutInflater.from(context), this, true)
 
 
     init {

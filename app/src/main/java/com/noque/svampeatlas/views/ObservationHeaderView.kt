@@ -18,7 +18,7 @@ class ObservationHeaderView(context: Context, attrs: AttributeSet?) :
     }
 
     private var listener: Listener? = null
-    private val binding = ViewObservationHeaderBinding.inflate(LayoutInflater.from(context), this, false)
+    private val binding = ViewObservationHeaderBinding.inflate(LayoutInflater.from(context), this, true)
 
 
     init {

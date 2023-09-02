@@ -49,7 +49,7 @@ data class ObservationItem(val observation: Observation) : ClusterItem {
     }
 }
 
-class MapFragment : Fragment(), ViewTreeObserver.OnGlobalLayoutListener {
+class MapFragment : Fragment(R.layout.fragment_map), ViewTreeObserver.OnGlobalLayoutListener {
 
     companion object {
         const val TAG = "MapFragment"
@@ -173,12 +173,6 @@ class MapFragment : Fragment(), ViewTreeObserver.OnGlobalLayoutListener {
             dispatchGroup?.leave()
         }
     }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? = inflater.inflate(R.layout.fragment_map, container, false)
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         dispatchGroup = DispatchGroup("MapFragment")
@@ -233,7 +227,7 @@ class MapFragment : Fragment(), ViewTreeObserver.OnGlobalLayoutListener {
 
     fun showStyleSelector(show: Boolean) {
         binding.mapFragmentTabLayout.visibility = if (show) View.VISIBLE else View.GONE
-        binding.mapFragmentTabLayout.addOnTabSelectedListener(onTabChangeListener)
+       binding.mapFragmentTabLayout.addOnTabSelectedListener(onTabChangeListener)
     }
 
     fun setType(category: Category) {

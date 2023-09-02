@@ -10,7 +10,7 @@ import com.noque.svampeatlas.databinding.ViewAddObservationImagesBinding
 
 class AddObservationImagesView(context: Context?, attrs: AttributeSet?) : LinearLayout(context, attrs) {
 
-    private val binding = ViewAddObservationImagesBinding.inflate(LayoutInflater.from(context), this, false)
+    private val binding = ViewAddObservationImagesBinding.inflate(LayoutInflater.from(context), this, true)
 
     private val adapter by lazy {
         AddImagesAdapter()

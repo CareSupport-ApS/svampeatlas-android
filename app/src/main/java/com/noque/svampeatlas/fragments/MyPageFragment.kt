@@ -9,7 +9,9 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -27,101 +29,77 @@ import com.noque.svampeatlas.utilities.autoClearedViewBinding
 import com.noque.svampeatlas.view_models.Session
 import com.noque.svampeatlas.views.MainActivity
 
-class MyPageFragment : Fragment(R.layout.fragment_my_page) {
-
+class MyPageFragment : Fragment(R.layout.fragment_my_page), MenuProvider {
     companion object {
         const val TAG = "MyPageFragment"
     }
 
     // Views
-
     private val binding by autoClearedViewBinding(FragmentMyPageBinding::bind)
+
     // Adapters
-
-
     private val adapter by lazy {
-        val adapter = MyPageAdapter()
-
-        adapter.setListener(object: MyPageAdapter.Listener {
-            override fun observationSelected(observation: Observation) {
-                val action = MyPageFragmentDirections.actionGlobalMushroomDetailsFragment(
-                    observation.id,
-                    DetailsFragment.TakesSelection.NO,
-                    DetailsFragment.Context.OBSERVATION_WITH_SPECIES,
-                    null,
-                    null
-                )
-
-                findNavController().navigate(action)
-            }
-
-            override fun getAdditionalData(category: MyPageAdapter.Item.Category, atOffset: Int) {
-                when (category) {
-                    MyPageAdapter.Item.Category.NOTIFICATIONS -> Session.getAdditionalNotifications(
-                        atOffset
+        MyPageAdapter().apply {
+            setListener(object: MyPageAdapter.Listener {
+                override fun observationSelected(observation: Observation) {
+                    val action = MyPageFragmentDirections.actionGlobalMushroomDetailsFragment(
+                        observation.id,
+                        DetailsFragment.TakesSelection.NO,
+                        DetailsFragment.Context.OBSERVATION_WITH_SPECIES,
+                        null,
+                        null
                     )
-                    MyPageAdapter.Item.Category.OBSERVATIONS -> Session.getAdditionalObservations(
-                        atOffset
-                    )
+                    findNavController().navigate(action)
                 }
-            }
 
-            override fun notificationSelected(notification: Notification) {
-                Session.markNotificationAsRead(notification)
-                val action = MyPageFragmentDirections.actionGlobalMushroomDetailsFragment(
-                    notification.observationID,
-                    DetailsFragment.TakesSelection.NO,
-                    DetailsFragment.Context.OBSERVATION_WITH_SPECIES,
-                    null,
-                    null
-                )
+                override fun getAdditionalData(category: MyPageAdapter.Item.Category, atOffset: Int) {
+                    when (category) {
+                        MyPageAdapter.Item.Category.NOTIFICATIONS -> Session.getAdditionalNotifications(
+                            atOffset
+                        )
+                        MyPageAdapter.Item.Category.OBSERVATIONS -> Session.getAdditionalObservations(
+                            atOffset
+                        )
+                    }
+                }
 
-                findNavController().navigate(action)
-            }
-
-            override fun logoutButtonSelected() {
-                Session.logout()
-            }
-
-        })
-
-        adapter
+                override fun notificationSelected(notification: Notification) {
+                    Session.markNotificationAsRead(notification)
+                    val action = MyPageFragmentDirections.actionGlobalMushroomDetailsFragment(
+                        notification.observationID,
+                        DetailsFragment.TakesSelection.NO,
+                        DetailsFragment.Context.OBSERVATION_WITH_SPECIES,
+                        null,
+                        null
+                    )
+                    findNavController().navigate(action)
+                }
+            })
+        }
     }
 
     // Listeners
 
-    private val onRefreshListener = SwipeRefreshLayout.OnRefreshListener {
-        Session.reloadData(true)
-    }
-
-    /*override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        setHasOptionsMenu(true)
-        binding = FragmentMyPageBinding.inflate(inflater, container, false)
-        return inflater.inflate(R.layout.fragment_my_page, container, false)
-    }*/
-
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        inflater.inflate(R.menu.my_page_fragment_menu, menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.menu_myPageFragment_logOut -> {
-                Session.logout()
-                return true
-            }
-            else -> return false
-        }
-    }
+    private val onRefreshListener = SwipeRefreshLayout.OnRefreshListener { Session.reloadData(true) }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupViews()
         setupViewModels()
         Session.reloadData(false)
+        requireActivity().addMenuProvider(this, viewLifecycleOwner)
+    }
+
+    override fun onCreateMenu(menu: Menu, menuInflater: MenuInflater) =
+        menuInflater.inflate(R.menu.my_page_fragment_menu, menu)
+
+    override fun onMenuItemSelected(menuItem: MenuItem): Boolean = when (menuItem.itemId) {
+        R.id.menu_myPageFragment_logOut -> {
+            Session.logout()
+            true
+        }
+
+        else -> false
     }
 
     private fun setupViews() {

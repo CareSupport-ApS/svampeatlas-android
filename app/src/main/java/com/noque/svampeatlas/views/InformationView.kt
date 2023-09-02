@@ -13,7 +13,7 @@ import com.noque.svampeatlas.databinding.ViewInformationBinding
 
 class InformationView(context: Context?, val attrs: AttributeSet?) : LinearLayout(context, attrs) {
 
-    private val binding = ViewInformationBinding.inflate(LayoutInflater.from(context), this, false)
+    private val binding = ViewInformationBinding.inflate(LayoutInflater.from(context), this, true)
 
     fun configure(information: List<Pair<String, String>>) {
         fun addInformation(info: Pair<String, String>) {

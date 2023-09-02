@@ -12,7 +12,7 @@ import com.noque.svampeatlas.databinding.ViewSpinnerBinding
 
 class SpinnerView(context: Context, attrs: AttributeSet?) : ConstraintLayout(context, attrs) {
 
-    private val binding = ViewSpinnerBinding.inflate(LayoutInflater.from(context), this, false)
+    private val binding = ViewSpinnerBinding.inflate(LayoutInflater.from(context), this, true)
 
     init {
         val inflater = LayoutInflater.from(getContext())

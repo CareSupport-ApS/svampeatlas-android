@@ -206,10 +206,8 @@ class NearbyFragment : Fragment(), MapSettingsFragment.Listener {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         mapFragment = childFragmentManager.findFragmentById(binding.nearbyFragmentMapFragment.id) as MapFragment
-
         setupViews()
         setupViewModels()
-
         locationService = LocationService(requireContext().applicationContext).apply { setListener(locationServiceListener) }
     }
 

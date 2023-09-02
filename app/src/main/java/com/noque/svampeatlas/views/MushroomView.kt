@@ -23,13 +23,13 @@ class MushroomView(context: Context, attrs: AttributeSet?) : ConstraintLayout(co
         fun onClicked(mushroom: Mushroom)
     }
 
-
     private var mushroom: Mushroom? = null
     private var listener: Listener? = null
 
-    private val binding = ViewMushroomBinding.inflate(LayoutInflater.from(context), this, false)
+    private val binding = ViewMushroomBinding.inflate(LayoutInflater.from(context), this, true)
     private lateinit var informationLinearLayout: LinearLayout
     init {
+        initViews()
         setupView()
     }
 

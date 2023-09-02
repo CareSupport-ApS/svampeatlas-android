@@ -10,11 +10,14 @@ import android.view.ViewGroup
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.navGraphViewModels
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.noque.svampeatlas.R
 import com.noque.svampeatlas.adapters.add_observation.DetailsAdapter
 import com.noque.svampeatlas.databinding.FragmentAddObservationDetailsBinding
+import com.noque.svampeatlas.fragments.AddObservationFragmentDirections
 import com.noque.svampeatlas.utilities.autoClearedViewBinding
 import com.noque.svampeatlas.view_models.NewObservationViewModel
 import java.util.Calendar
@@ -45,7 +48,7 @@ class DetailsFragment : Fragment() {
     }
 
     // View Models
-    private val newObservationViewModel: NewObservationViewModel by viewModels({ requireParentFragment() })
+    private val newObservationViewModel: NewObservationViewModel by navGraphViewModels(R.id.add_observation_nav)
 
     // Adapters
 
@@ -176,11 +179,7 @@ class DetailsFragment : Fragment() {
     }
 
     private fun showPicker(type: DetailsPickerFragment.Type) {
-        val bundle = Bundle()
-        bundle.putSerializable(DetailsPickerFragment.TYPE_KEY, type)
-
-        val dialog = DetailsPickerFragment()
-        dialog.arguments = bundle
-        dialog.show(childFragmentManager, null)
+        val action = AddObservationFragmentDirections.actionAddObservationFragmentToDetailsPickerFragment(type)
+        findNavController().navigate(action)
     }
 }

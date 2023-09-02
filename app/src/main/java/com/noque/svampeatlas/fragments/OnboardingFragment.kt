@@ -10,23 +10,14 @@ import com.noque.svampeatlas.R
 import com.noque.svampeatlas.databinding.FragmentOnboardingBinding
 import com.noque.svampeatlas.utilities.autoClearedViewBinding
 
-class OnboardingFragment : Fragment() {
+class OnboardingFragment : Fragment(R.layout.fragment_onboarding) {
 
     private val binding by autoClearedViewBinding(FragmentOnboardingBinding::bind)
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_onboarding, container, false)
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupViews()
     }
-
 
     private fun setupViews() {
         binding.onboardingFragmentSpinnerView.startLoading()

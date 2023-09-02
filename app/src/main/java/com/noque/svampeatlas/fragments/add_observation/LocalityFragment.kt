@@ -11,6 +11,7 @@ import androidx.core.view.marginBottom
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.navigation.navGraphViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.noque.svampeatlas.R
@@ -51,7 +52,7 @@ class LocalityFragment: Fragment(), LocationSettingsModal.Listener {
     }
 
     // View models
-    private val newObservationViewModel: NewObservationViewModel by viewModels({ requireParentFragment() })
+    private val newObservationViewModel: NewObservationViewModel by navGraphViewModels(R.id.add_observation_nav)
 
     // Adapters
     private val localityAdapter by lazy {

@@ -2,7 +2,7 @@
 <navigation xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/mushroom_navigation"
+    android:id="@+id/nav_main"
     android:label="empty"
     app:startDestination="@id/mushroomFragment">
 
@@ -36,7 +36,7 @@
             app:destination="@id/imageFragment" />
         <action
             android:id="@+id/action_mushroomDetailsFragment_to_addObservationFragment"
-            app:destination="@id/addObservationFragment"
+            app:destination="@id/add_observation_nav"
             app:launchSingleTop="true"
             app:popUpTo="@id/myPageFragment"
             app:popUpToInclusive="false" />
@@ -50,7 +50,7 @@
             app:nullable="true" />
         <action
             android:id="@+id/action_mushroomDetailsFragment_to_addObservationFragment_edit"
-            app:destination="@id/addObservationFragment"
+            app:destination="@id/add_observation_nav"
             app:launchSingleTop="true"
             app:popUpTo="@id/addObservationFragment"
             app:popUpToInclusive="true" />
@@ -63,45 +63,14 @@
         tools:layout="@layout/fragment_nearby" />
 
     <fragment
-        android:id="@+id/addObservationFragment"
-        android:name="com.noque.svampeatlas.fragments.AddObservationFragment"
-        android:label="@string/navigationItem_newObservationVC"
-        tools:layout="@layout/fragment_add_observation" >
-        <action
-            android:id="@+id/action_addObservationFragment_to_cameraFragment"
-            app:destination="@id/cameraFragment" />
-        <argument
-            android:name="context"
-            app:argType="com.noque.svampeatlas.fragments.AddObservationFragment$Context"
-            android:defaultValue="New" />
-        <argument
-            android:name="id"
-            app:argType="long"
-            android:defaultValue="0L" />
-        <argument
-            android:name="mushroomId"
-            app:argType="integer"
-            android:defaultValue="0" />
-        <argument
-            android:name="imageFilePath"
-            app:argType="string"
-            app:nullable="true"
-            android:defaultValue="null" />
-        <argument
-            android:name="predictionNotes"
-            app:argType="string"
-            app:nullable="true"
-            android:defaultValue="null" />
-    </fragment>
-    <fragment
         android:id="@+id/cameraFragment"
         android:name="com.noque.svampeatlas.fragments.CameraFragment"
         android:label="fragment_camera"
         tools:layout="@layout/fragment_camera">
         <argument
             android:name="Context"
-            app:argType="com.noque.svampeatlas.fragments.CameraFragment$Context"
-            android:defaultValue="IDENTIFY" />
+            android:defaultValue="IDENTIFY"
+            app:argType="com.noque.svampeatlas.fragments.CameraFragment$Context" />
     </fragment>
 
     <fragment
@@ -143,7 +112,7 @@
     <fragment
         android:id="@+id/observationLocationFragment"
         android:name="com.noque.svampeatlas.fragments.ObservationLocationFragment"
-        android:label="ObservationLocationFragment" >
+        android:label="ObservationLocationFragment">
         <argument
             android:name="latitude"
             app:argType="float" />
@@ -154,7 +123,7 @@
     <fragment
         android:id="@+id/imageFragment"
         android:name="com.noque.svampeatlas.fragments.ImageFragment"
-        android:label="ImageFragment" >
+        android:label="ImageFragment">
         <argument
             android:name="selectedIndex"
             app:argType="integer" />
@@ -181,11 +150,79 @@
     <fragment
         android:id="@+id/notesFragment"
         android:name="com.noque.svampeatlas.fragments.NotesFragment"
-        android:label="NotesFragment" >
+        android:label="NotesFragment">
         <action
             android:id="@+id/action_notesFragment_to_addObservationFragment"
-            app:destination="@id/addObservationFragment" />
+            app:destination="@id/add_observation_nav" />
     </fragment>
+    <navigation
+        android:id="@+id/add_observation_nav"
+        app:startDestination="@id/addObservationFragment">
+        <argument
+            android:name="context"
+            android:defaultValue="New"
+            app:argType="com.noque.svampeatlas.fragments.AddObservationFragment$Context" />
+        <argument
+            android:name="id"
+            android:defaultValue="0L"
+            app:argType="long" />
+        <argument
+            android:name="mushroomId"
+            android:defaultValue="0"
+            app:argType="integer" />
+        <argument
+            android:name="imageFilePath"
+            android:defaultValue="null"
+            app:argType="string"
+            app:nullable="true" />
+        <argument
+            android:name="predictionNotes"
+            android:defaultValue="null"
+            app:argType="string"
+            app:nullable="true" />
+        <fragment
+            android:id="@+id/addObservationFragment"
+            android:name="com.noque.svampeatlas.fragments.AddObservationFragment"
+            android:label="@string/navigationItem_newObservationVC"
+            tools:layout="@layout/fragment_add_observation">
+            <action
+                android:id="@+id/action_addObservationFragment_to_cameraFragment"
+                app:destination="@id/cameraFragment" />
+            <argument
+                android:name="context"
+                android:defaultValue="New"
+                app:argType="com.noque.svampeatlas.fragments.AddObservationFragment$Context" />
+            <argument
+                android:name="id"
+                android:defaultValue="0L"
+                app:argType="long" />
+            <argument
+                android:name="mushroomId"
+                android:defaultValue="0"
+                app:argType="integer" />
+            <argument
+                android:name="imageFilePath"
+                android:defaultValue="null"
+                app:argType="string"
+                app:nullable="true" />
+            <argument
+                android:name="predictionNotes"
+                android:defaultValue="null"
+                app:argType="string"
+                app:nullable="true" />
+            <action
+                android:id="@+id/action_addObservationFragment_to_detailsPickerFragment"
+                app:destination="@id/detailsPickerFragment" />
+        </fragment>
+        <dialog
+            android:id="@+id/detailsPickerFragment"
+            android:name="com.noque.svampeatlas.fragments.add_observation.DetailsPickerFragment"
+            android:label="DetailsPickerFragment">
+            <argument
+                android:name="Type"
+                app:argType="com.noque.svampeatlas.fragments.add_observation.DetailsPickerFragment$Type" />
+        </dialog>
+    </navigation>
 
 
 </navigation>

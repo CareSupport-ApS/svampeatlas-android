@@ -14,7 +14,7 @@ import com.noque.svampeatlas.utilities.autoCleared
 import com.noque.svampeatlas.utilities.autoClearedViewBinding
 import com.noque.svampeatlas.views.MainActivity
 
-class ObservationLocationFragment : Fragment() {
+class ObservationLocationFragment : Fragment(R.layout.fragment_observation_location) {
 
     // Objects
     private val args:  ObservationLocationFragmentArgs by navArgs()
@@ -22,17 +22,9 @@ class ObservationLocationFragment : Fragment() {
     // Views
     private val binding by autoClearedViewBinding(FragmentObservationLocationBinding::bind)
 
-    private var mapFragment by autoCleared<MapFragment>() {
+    private var mapFragment by autoCleared<MapFragment> {
         it?.setListener(null)
     }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_observation_location, container, false)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         initViews()

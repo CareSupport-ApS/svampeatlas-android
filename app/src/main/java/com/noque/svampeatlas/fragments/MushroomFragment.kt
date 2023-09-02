@@ -36,28 +36,22 @@ import com.noque.svampeatlas.views.MainActivity
 import com.noque.svampeatlas.views.SearchBarListener
 
 
-class MushroomFragment : Fragment() {
-
+class MushroomFragment : Fragment(R.layout.fragment_mushroom) {
     companion object {
         const val TAG = "MushroomFragment"
     }
 
-
     // Views
-
     private val binding by autoClearedViewBinding(FragmentMushroomBinding::bind) {
         it?.mushroomFragmentRecyclerView?.adapter = null
     }
 
     // View models
-
     private val mushroomsViewModel by lazy {
         ViewModelProvider(this, MushroomsViewModelFactory(MushroomsViewModel.Category.SPECIES, requireActivity().application))[MushroomsViewModel::class.java]
     }
 
-
     // Adapters
-
     private val mushroomListAdapter: MushroomListAdapter by lazy {
         val adapter = MushroomListAdapter()
 
@@ -79,13 +73,8 @@ class MushroomFragment : Fragment() {
 
     private val searchBarListener by lazy {
         object : SearchBarListener {
-            override fun newSearch(entry: String) {
-                mushroomsViewModel.search(entry, true)
-            }
-
-            override fun clearedSearchEntry() {
-                mushroomsViewModel.reloadData()
-            }
+            override fun newSearch(entry: String) = mushroomsViewModel.search(entry, true)
+            override fun clearedSearchEntry() = mushroomsViewModel.reloadData()
         }
     }
 
@@ -263,14 +252,6 @@ class MushroomFragment : Fragment() {
 
             }
         }
-    }
-
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_mushroom, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

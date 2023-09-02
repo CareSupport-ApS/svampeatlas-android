@@ -7,9 +7,8 @@ import com.noque.svampeatlas.databinding.ItemMushroomBinding
 import com.noque.svampeatlas.models.Mushroom
 import com.noque.svampeatlas.view_holders.MushroomViewHolder
 
-class MushroomListAdapter():
+class MushroomListAdapter :
     RecyclerView.Adapter<MushroomViewHolder>() {
-
 
     private var mushrooms: List<Mushroom> = mutableListOf()
     private var onClickListener: ((mushroom: Mushroom) -> Unit)? = null

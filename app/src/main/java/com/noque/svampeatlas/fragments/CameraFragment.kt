@@ -52,7 +52,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 
-class CameraFragment : Fragment(), PromptFragment.Listener, MenuProvider {
+class CameraFragment : Fragment(R.layout.fragment_camera), PromptFragment.Listener, MenuProvider {
     enum class Context {
         NEW_OBSERVATION,
         IMAGE_CAPTURE,
@@ -310,16 +310,6 @@ class CameraFragment : Fragment(), PromptFragment.Listener, MenuProvider {
         activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
     }
 
-        @SuppressLint("SourceLockedOrientationActivity")
-        override fun onCreateView(
-            inflater: LayoutInflater, container: ViewGroup?,
-            savedInstanceState: Bundle?
-        ): View? {
-            val menuHost: MenuHost = requireActivity()
-            menuHost.addMenuProvider(this, viewLifecycleOwner, Lifecycle.State.RESUMED)
-            return inflater.inflate(R.layout.fragment_camera, container, false)
-        }
-
         override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
             super.onViewCreated(view, savedInstanceState)
             this.sensorManager = (requireContext().getSystemService(android.content.Context.SENSOR_SERVICE) as SensorManager).also {
@@ -384,6 +374,8 @@ class CameraFragment : Fragment(), PromptFragment.Listener, MenuProvider {
 
         @SuppressLint("ClickableViewAccessibility")
         private fun setupViews() {
+            requireActivity().addMenuProvider(this, viewLifecycleOwner)
+
             when (args.context) {
                 Context.IMAGE_CAPTURE -> {
                     binding.cameraFragmentToolbar.setNavigationIcon(R.drawable.glyph_cancel)

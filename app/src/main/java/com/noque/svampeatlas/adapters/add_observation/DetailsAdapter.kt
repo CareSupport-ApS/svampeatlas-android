@@ -40,12 +40,6 @@ class DetailsAdapter(private val resources: Resources, private val categories: A
     var categoryClicked: ((category: DetailsFragment.Categories) -> Unit)? = null
     var onTextInputChanged: ((category: DetailsFragment.Categories, text: String?) -> Unit)? = null
 
-    private val onClickListener = View.OnClickListener { view ->
-        (view.tag as? ViewHolder)?.adapterPosition?.let {
-            categoryClicked?.invoke(categories[it])
-        }
-    }
-
     private val onInputTypeChanged: ((view: View, text: String?) -> Unit) = { view, text ->
         (view.tag as? ViewHolder)?.adapterPosition?.let {
             when (categories[it]) {
@@ -63,8 +57,6 @@ class DetailsAdapter(private val resources: Resources, private val categories: A
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-
-        val view: View
         val viewHolder: ViewHolder
         val layoutInflater = LayoutInflater.from(parent.context)
 
@@ -75,8 +67,10 @@ class DetailsAdapter(private val resources: Resources, private val categories: A
             DetailsFragment.Categories.HOST,
             DetailsFragment.Categories.VEGETATIONTYPE -> {
                 val binding = ItemSettingBinding.inflate(layoutInflater, parent, false)
-                //TODO: view.setOnClickListener(onClickListener)
                 viewHolder = SettingsViewHolder(binding)
+                viewHolder.itemView.setOnClickListener {
+                    categoryClicked?.invoke(categories[viewType])
+                }
             }
             DetailsFragment.Categories.NOTES,
             DetailsFragment.Categories.ECOLOGYNOTES -> {
@@ -84,8 +78,6 @@ class DetailsAdapter(private val resources: Resources, private val categories: A
                 viewHolder = InputTypeViewHolder(onInputTypeChanged, binding)
             }
         }
-
-        viewHolder.itemView.tag = viewHolder
         return viewHolder
     }
 

@@ -10,7 +10,7 @@
     tools:context=".fragments.AddObservationFragment">
 
     <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/addObservationFragment_addObservationImagesRecyclerView"
+        android:id="@+id/observationImagesRecyclerView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:clipChildren="false"
@@ -54,7 +54,7 @@
         android:theme="@style/Light"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/addObservationFragment_addObservationImagesRecyclerView"
+        app:layout_constraintTop_toBottomOf="@id/observationImagesRecyclerView"
         app:tabMode="fixed"
         app:tabTextAppearance="@style/AppPrimary"/>
 

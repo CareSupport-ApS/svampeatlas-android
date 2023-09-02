@@ -51,7 +51,7 @@ class SearchBarView(context: Context, attrs: AttributeSet?) : ConstraintLayout(c
     private var rootLayout = ConstraintSet()
     private var iconifiedLayout = ConstraintSet()
 
-    private val binding = ViewSearchbarBinding.inflate(LayoutInflater.from(context), this, false)
+    private val binding = ViewSearchbarBinding.inflate(LayoutInflater.from(context), this, true)
 
     // Listeners
 

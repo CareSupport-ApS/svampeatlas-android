@@ -13,7 +13,7 @@ import com.noque.svampeatlas.models.Prediction
 
 class ResultsView(context: Context?, attrs: AttributeSet?) : LinearLayout(context, attrs) {
 
-    private val binding = ViewResultsBinding.inflate(LayoutInflater.from(context), this, false)
+    private val binding = ViewResultsBinding.inflate(LayoutInflater.from(context), this, true)
 
     private val resultsAdapter by lazy { ResultsAdapter() }
 

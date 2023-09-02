@@ -13,7 +13,7 @@ import com.noque.svampeatlas.models.RecoveryAction
 class BackgroundView(context: Context, attrs: AttributeSet?) : ConstraintLayout(context, attrs) {
 
 
-    private val binding = ViewBackgroundBinding.inflate(LayoutInflater.from(context), this, false)
+    private val binding = ViewBackgroundBinding.inflate(LayoutInflater.from(context), this, true)
 
     fun setLoading() {
         binding.backgroundViewSpinnerView.startLoading()

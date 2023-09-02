@@ -40,7 +40,7 @@ class ZoomControlsView(context: Context, attrs: AttributeSet?) : MotionLayout(co
         fun expanded()
     }
 
-    private val binding = ViewZoomControlsBinding.inflate(LayoutInflater.from(context), this, false)
+    private val binding = ViewZoomControlsBinding.inflate(LayoutInflater.from(context), this, true)
 
     private var listener: Listener? = null
     private var countDownTimer = object: CountDownTimer(1500,2000) {
