@@ -11,6 +11,7 @@ import androidx.core.view.marginBottom
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
+import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -19,6 +20,7 @@ import com.noque.svampeatlas.adapters.add_observation.LocalityAdapter
 import com.noque.svampeatlas.databinding.FragmentAddObservationLocalityBinding
 import com.noque.svampeatlas.extensions.openSettings
 import com.noque.svampeatlas.fragments.AddObservationFragment
+import com.noque.svampeatlas.fragments.AddObservationFragmentDirections
 import com.noque.svampeatlas.fragments.MapFragment
 import com.noque.svampeatlas.fragments.TermsFragment
 import com.noque.svampeatlas.fragments.modals.LocationSettingsModal
@@ -32,7 +34,7 @@ import com.noque.svampeatlas.utilities.safeAutoCleared
 import com.noque.svampeatlas.view_models.NewObservationViewModel
 import java.util.Date
 
-class LocalityFragment: Fragment(), LocationSettingsModal.Listener {
+class LocalityFragment: Fragment(R.layout.fragment_add_observation_locality) {
 
     companion object {
         const val TAG = "LocalityFragment"
@@ -56,18 +58,16 @@ class LocalityFragment: Fragment(), LocationSettingsModal.Listener {
 
     // Adapters
     private val localityAdapter by lazy {
-        val adapter = LocalityAdapter()
-
-        adapter.localitySelected = {
-            newObservationViewModel.setLocality(it)
+        LocalityAdapter().apply {
+            localitySelected = {
+                newObservationViewModel.setLocality(it)
+            }
         }
-        adapter
     }
 
     // Listeners
-
-    private val retryButtonClicked = View.OnClickListener {
-        newObservationViewModel.resetLocation()
+    private val retryButtonClicked by lazy {
+        View.OnClickListener { newObservationViewModel.resetLocation() }
     }
 
     private val mapFragmentListener by lazy {
@@ -137,24 +137,11 @@ class LocalityFragment: Fragment(), LocationSettingsModal.Listener {
         }
     }
 
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        return inflater.inflate(R.layout.fragment_add_observation_locality, container, false)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initViews()
+        mapFragment = childFragmentManager.findFragmentById(R.id.localityFragment_mapView) as MapFragment
         setupViews()
         setupViewModels()
-    }
-
-    private fun initViews() {
-        mapFragment = childFragmentManager.findFragmentById(R.id.localityFragment_mapView) as MapFragment
     }
 
     private fun setupViews() {
@@ -177,14 +164,8 @@ class LocalityFragment: Fragment(), LocationSettingsModal.Listener {
         binding.localityFragmentMarkerImageView.setOnTouchListener(markerOnTouchListener)
 
         binding.localityFragmentSettingsButton.setOnClickListener {
-           val localityLockPossible = when (newObservationViewModel.context) {
-                AddObservationFragment.Context.Note, AddObservationFragment.Context.EditNote, AddObservationFragment.Context.Edit -> false
-                else -> true
-            }
-
-            val dialog = LocationSettingsModal(lockedLocality = newObservationViewModel.locality.value?.second ?: false, lockedLocation = newObservationViewModel.coordinateState.value?.item?.second ?: false, allowLockingLocality = localityLockPossible)
-            dialog.setTargetFragment(this, 10)
-            dialog.show(parentFragmentManager, null)
+           val action = AddObservationFragmentDirections.actionAddObservationFragmentToLocationSettingsFragment()
+            findNavController().navigate(action)
         }
     }
 
@@ -209,49 +190,60 @@ class LocalityFragment: Fragment(), LocationSettingsModal.Listener {
             }
         })
 
-            newObservationViewModel.locality.observe(viewLifecycleOwner) {
+        newObservationViewModel.locality.observe(viewLifecycleOwner) {
 
-                it?.first?.let { locality ->
-                    binding.localityFragmentRecyclerView.scrollToPosition(localityAdapter.setSelected(locality, it.second))
-                    mapFragment?.setSelectedLocalityAnnotation(locality.location)
-                }
+            it?.first?.let { locality ->
+                binding.localityFragmentRecyclerView.scrollToPosition(
+                    localityAdapter.setSelected(
+                        locality,
+                        it.second
+                    )
+                )
+                mapFragment?.setSelectedLocalityAnnotation(locality.location)
             }
+        }
 
         newObservationViewModel.coordinateState.observe(viewLifecycleOwner, Observer {
-                when (it) {
-                    is State.Items -> {
-                        binding.localityFragmentLockedLocation.visibility = if (it.items.second) View.VISIBLE else View.GONE
-                        mapFragment?.addLocationMarker(it.items.first.latLng, resources.getString(R.string.locationAnnotation_title), it.items.first.accuracy.toDouble())
-                        mapFragment?.setRegion(it.items.first.latLng)
-                        binding.localityFragmentPrecisionLabel.text = resources.getString(R.string.precision, it.items.first.accuracy) + ", lat: ${String.format("%.2f", it.items.first.latLng.latitude)}, lon: ${String.format("%.2f", it.items.first.latLng.longitude)}"
-                    }
+            when (it) {
+                is State.Items -> {
+                    binding.localityFragmentLockedLocation.visibility =
+                        if (it.items.second) View.VISIBLE else View.GONE
+                    mapFragment?.addLocationMarker(
+                        it.items.first.latLng,
+                        resources.getString(R.string.locationAnnotation_title),
+                        it.items.first.accuracy.toDouble()
+                    )
+                    mapFragment?.setRegion(it.items.first.latLng)
+                    binding.localityFragmentPrecisionLabel.text = resources.getString(
+                        R.string.precision,
+                        it.items.first.accuracy
+                    ) + ", lat: ${
+                        String.format(
+                            "%.2f",
+                            it.items.first.latLng.latitude
+                        )
+                    }, lon: ${String.format("%.2f", it.items.first.latLng.longitude)}"
+                }
 
-                    is State.Loading -> {
-                        mapFragment?.setLoading()
-                        binding.localityFragmentPrecisionLabel.text = "Finder placering..."
-                    }
+                is State.Loading -> {
+                    mapFragment?.setLoading()
+                    binding.localityFragmentPrecisionLabel.text = "Finder placering..."
+                }
 
-                    is State.Empty -> {
-                        mapFragment?.removeAllMarkers()
-                    }
-                    is State.Error -> {
-                        mapFragment?.setError(it.error) {
-                            when (it) {
-                                RecoveryAction.OPENSETTINGS -> openSettings()
-                                RecoveryAction.TRYAGAIN -> newObservationViewModel.resetLocation()
-                                else -> {}
-                            }
+                is State.Empty -> {
+                    mapFragment?.removeAllMarkers()
+                }
+
+                is State.Error -> {
+                    mapFragment?.setError(it.error) {
+                        when (it) {
+                            RecoveryAction.OPENSETTINGS -> openSettings()
+                            RecoveryAction.TRYAGAIN -> newObservationViewModel.resetLocation()
+                            else -> {}
                         }
                     }
                 }
-            })
-    }
-
-    override fun lockLocalitySet(value: Boolean) {
-        newObservationViewModel.setLocalityLock(value)
-    }
-
-    override fun lockLocationSet(value: Boolean) {
-        newObservationViewModel.setLocationLock(value)
+            }
+        })
     }
 }

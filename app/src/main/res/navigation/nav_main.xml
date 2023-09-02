@@ -209,8 +209,12 @@
             <action
                 android:id="@+id/action_addObservationFragment_to_detailsPickerFragment"
                 app:destination="@id/detailsPickerFragment" />
+            <action
+                android:id="@+id/action_addObservationFragment_to_locationSettingsFragment"
+                app:destination="@id/locationSettingsModal" />
         </fragment>
         <dialog
+            tools:layout="@layout/fragment_details_picker"
             android:id="@+id/detailsPickerFragment"
             android:name="com.noque.svampeatlas.fragments.add_observation.DetailsPickerFragment"
             android:label="DetailsPickerFragment">
@@ -218,6 +222,11 @@
                 android:name="Type"
                 app:argType="com.noque.svampeatlas.fragments.add_observation.DetailsPickerFragment$Type" />
         </dialog>
+        <dialog
+            android:id="@+id/locationSettingsModal"
+            tools:layout="@layout/fragment_modal_locality_settings"
+            android:name="com.noque.svampeatlas.fragments.modals.LocationSettingsModal"
+            android:label="LocationSettingsModal" />
     </navigation>
     <navigation android:id="@+id/nearby_fragment_nav"
         app:startDestination="@id/nearbyFragment">

@@ -27,20 +27,15 @@ class ObservationLocationFragment : Fragment(R.layout.fragment_observation_locat
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        initViews()
-        setupViews()
-
-        val latLng = LatLng(args.latitude.toDouble(), args.longitude.toDouble())
-        mapFragment.addLocationMarker(latLng, getString(R.string.locationAnnotation_title))
-        mapFragment.setRegion(latLng, 8000)
-    }
-
-    private fun initViews() {
         mapFragment = childFragmentManager.findFragmentById(R.id.observationLocationFragment_mapFragment) as MapFragment
+        setupViews()
     }
 
     private fun setupViews() {
         (requireActivity() as MainActivity).setSupportActionBar(binding.observationLocationFragmentToolbar)
         mapFragment.showStyleSelector = true
+        val latLng = LatLng(args.latitude.toDouble(), args.longitude.toDouble())
+        mapFragment.addLocationMarker(latLng, getString(R.string.locationAnnotation_title))
+        mapFragment.setRegion(latLng, 8000)
     }
 }

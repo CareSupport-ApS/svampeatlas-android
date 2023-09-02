@@ -10,7 +10,7 @@ import com.noque.svampeatlas.databinding.ItemLocalityBinding
 import com.noque.svampeatlas.models.AppError2
 import com.noque.svampeatlas.view_holders.LocalityViewHolder
 
-class LocalityAdapter(): RecyclerView.Adapter<LocalityViewHolder>() {
+class LocalityAdapter : RecyclerView.Adapter<LocalityViewHolder>() {
 
     private var localities = listOf<Locality>()
     private var lockedLocality: Locality? = null

@@ -6,37 +6,23 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.DialogFragment
+import androidx.navigation.navGraphViewModels
 import com.noque.svampeatlas.R
 import com.noque.svampeatlas.databinding.FragmentModalLocalitySettingsBinding
+import com.noque.svampeatlas.fragments.AddObservationFragment
 import com.noque.svampeatlas.utilities.autoClearedViewBinding
+import com.noque.svampeatlas.view_models.NewObservationViewModel
 
 
 class LocationSettingsModal(
-    private val lockedLocality: Boolean,
-    private val lockedLocation: Boolean,
-    private val allowLockingLocality: Boolean
-) : DialogFragment() {
-
-    interface Listener {
-        fun lockLocalitySet(value: Boolean)
-        fun lockLocationSet(value: Boolean)
-    }
+) : DialogFragment(R.layout.fragment_modal_locality_settings) {
 
     private val binding by autoClearedViewBinding(FragmentModalLocalitySettingsBinding::bind)
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        return inflater.inflate(R.layout.fragment_modal_locality_settings, container, false)
-    }
-
+    private val viewModel: NewObservationViewModel by navGraphViewModels(R.id.add_observation_nav)
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         setupViews()
+        setupViewModels()
     }
-
 
     override fun onStart() {
         super.onStart()
@@ -45,25 +31,33 @@ class LocationSettingsModal(
     }
 
     private fun setupViews() {
-        binding.localitySettingsFragmentLocationSwitch.isChecked = lockedLocation
-        binding.localitySettingsFragmentLocalitySwitch.isChecked = lockedLocality
+        val localityLockPossible = when (viewModel.context) {
+            AddObservationFragment.Context.Note, AddObservationFragment.Context.EditNote, AddObservationFragment.Context.Edit -> false
+            else -> true
+        }
 
-        if (!allowLockingLocality) binding.localitySettingsFragmentLocalitySwitch.visibility = View.GONE
+        if (!localityLockPossible)  binding.localitySettingsFragmentLocalitySwitch.visibility = View.GONE
 
         binding.localitySettingsFragmentLocationSwitch.setOnCheckedChangeListener { _, newValue ->
-            if (newValue &&    binding.localitySettingsFragmentLocalitySwitch.visibility == View.VISIBLE)    binding.localitySettingsFragmentLocalitySwitch.isChecked = true
+            if (newValue && binding.localitySettingsFragmentLocalitySwitch.visibility == View.VISIBLE) binding.localitySettingsFragmentLocalitySwitch.isChecked = true
         }
 
         binding.localitySettingsFragmentSaveButton.setOnClickListener {
-            (targetFragment as? Listener)?.lockLocalitySet(   binding.localitySettingsFragmentLocalitySwitch.isChecked)
-            (targetFragment as? Listener)?.lockLocationSet( binding.localitySettingsFragmentLocationSwitch.isChecked)
+            viewModel.setLocalityLock(binding.localitySettingsFragmentLocalitySwitch.isChecked)
+            viewModel.setLocationLock(binding.localitySettingsFragmentLocationSwitch.isChecked)
             dismiss()
         }
 
-        binding.cancelButton.apply {
-            setOnClickListener {
-                dismiss()
-            }
+        binding.cancelButton.apply { setOnClickListener { dismiss() } }
+    }
+
+    private fun setupViewModels() {
+        viewModel.locality.observe(viewLifecycleOwner) {
+            binding.localitySettingsFragmentLocalitySwitch.isChecked = it?.second ?: false
+        }
+
+        viewModel.coordinateState.observe(viewLifecycleOwner) {
+            binding.localitySettingsFragmentLocationSwitch.isChecked = it.item?.second ?: false
         }
     }
 }

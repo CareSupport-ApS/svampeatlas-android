@@ -15,23 +15,10 @@ import com.noque.svampeatlas.utilities.autoClearedViewBinding
 import com.noque.svampeatlas.view_models.DownloaderViewModel
 
 
-class DownloaderFragment: DialogFragment() {
+class DownloaderFragment: DialogFragment(R.layout.fragment_modal_download) {
 
-
-    // Views
     private val binding by autoClearedViewBinding(FragmentModalDownloadBinding::bind)
-
-
     private val viewModel by viewModels<DownloaderViewModel>()
-
-
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        return inflater.inflate(R.layout.fragment_modal_download, container, false)
-    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -50,30 +37,34 @@ class DownloaderFragment: DialogFragment() {
     }
 
     private fun setupViewModels() {
-
-        viewModel.state.observe(viewLifecycleOwner, Observer {
+        viewModel.state.observe(viewLifecycleOwner) {
             isCancelable = true
             when (it) {
                 is State.Items -> {
                     SharedPreferences.databaseWasUpdated()
                     dismiss()
                 }
+
                 is State.Empty -> {}
                 is State.Loading -> {
                     isCancelable = false
                     binding.downloaderFragmentErrorView.setLoading()
                 }
+
                 is State.Error -> {
                     binding.downloaderFragmentMessageTextView.text = null
-                    binding.downloaderFragmentErrorView.setErrorWithHandler(it.error, it.error.recoveryAction) {
+                    binding.downloaderFragmentErrorView.setErrorWithHandler(
+                        it.error,
+                        it.error.recoveryAction
+                    ) {
                         viewModel.startDownload()
                     }
                 }
             }
-        })
+        }
 
-        viewModel.loadingState.observe(viewLifecycleOwner, Observer {
+        viewModel.loadingState.observe(viewLifecycleOwner) {
             binding.downloaderFragmentMessageTextView.text = getString(it.resID)
-        })
+        }
     }
 }
