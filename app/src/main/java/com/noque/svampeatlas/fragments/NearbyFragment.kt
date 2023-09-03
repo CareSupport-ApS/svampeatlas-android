@@ -25,6 +25,7 @@ import com.noque.svampeatlas.views.MainActivity
 
 class NearbyFragment : Fragment(R.layout.fragment_nearby) {
 
+    @Deprecated("Deprecated in Java")
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,

@@ -90,6 +90,7 @@ class CameraFragment : Fragment(R.layout.fragment_camera), PromptFragment.Listen
         }
     }*/
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == 0 && data != null) {
             data.data?.let {
