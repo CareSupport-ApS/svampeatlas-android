@@ -35,6 +35,10 @@ data class ObservationItem(val observation: Observation) : ClusterItem {
         return null
     }
 
+    override fun getZIndex(): Float? {
+        TODO("Not yet implemented")
+    }
+
     override fun getTitle(): String? {
         return null
     }

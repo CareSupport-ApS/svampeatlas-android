@@ -414,9 +414,11 @@ class AddObservationFragment : Fragment(), ActivityCompat.OnRequestPermissionsRe
     }
 
     private fun setupViewModels() {
-        newObservationViewModel.resetEvent.observe(viewLifecycleOwner) {
-            binding.addObservationFragmentViewPager.currentItem = 0
-        }
+//        TODO
+//
+//        newObservationViewModel.resetEvent.observe(viewLifecycleOwner) {
+//            binding.addObservationFragmentViewPager.currentItem = 0
+//        }
 
         newObservationViewModel.isLoading.observe(viewLifecycleOwner) {
             when (it) {
