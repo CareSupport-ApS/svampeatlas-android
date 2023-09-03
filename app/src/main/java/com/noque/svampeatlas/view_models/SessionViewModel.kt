@@ -1,13 +1,19 @@
 package com.noque.svampeatlas.view_models
 
-import android.app.backup.SharedPreferencesBackupHelper
 import android.content.res.Resources
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.logrocket.core.SDK
 import com.noque.svampeatlas.R
-import com.noque.svampeatlas.models.*
+import com.noque.svampeatlas.models.AppError
+import com.noque.svampeatlas.models.Comment
+import com.noque.svampeatlas.models.Notification
+import com.noque.svampeatlas.models.Observation
+import com.noque.svampeatlas.models.RecoveryAction
+import com.noque.svampeatlas.models.Result
+import com.noque.svampeatlas.models.State
+import com.noque.svampeatlas.models.User
+import com.noque.svampeatlas.models.UserObservation
 import com.noque.svampeatlas.services.DataService
 import com.noque.svampeatlas.services.RoomService
 import com.noque.svampeatlas.utilities.MyApplication
@@ -16,10 +22,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.File
 import java.sql.Date
 import java.util.concurrent.TimeUnit
-import kotlin.coroutines.suspendCoroutine
 
 object Session {
 
@@ -118,10 +122,8 @@ object Session {
         this._user.postValue(user)
 
         if (token == null || user == null) {
-            SDK.identify("Anonymous")
             if (_loggedInState.value?.item != false) _loggedInState.postValue(State.Items(false))
         } else {
-            SDK.identify(user.initials)
             if (_loggedInState.value?.item != true) _loggedInState.postValue(State.Items(true))
         }
     }
