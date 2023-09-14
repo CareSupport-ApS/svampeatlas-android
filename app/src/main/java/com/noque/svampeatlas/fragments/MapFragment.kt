@@ -36,7 +36,7 @@ data class ObservationItem(val observation: Observation) : ClusterItem {
     }
 
     override fun getZIndex(): Float? {
-        TODO("Not yet implemented")
+        return 1f
     }
 
     override fun getTitle(): String? {
@@ -95,6 +95,7 @@ class MapFragment : Fragment(R.layout.fragment_map), ViewTreeObserver.OnGlobalLa
 
     // Views
     private val binding by autoClearedViewBinding(FragmentMapBinding::bind) {
+
        it?.fragmentMapMapView?.viewTreeObserver?.removeOnGlobalLayoutListener { this }
        it?.fragmentMapMapView?.onDestroy()
     }
@@ -159,9 +160,14 @@ class MapFragment : Fragment(R.layout.fragment_map), ViewTreeObserver.OnGlobalLa
     }
 
     override fun onGlobalLayout() {
-        if (viewLifecycleOwnerLiveData.value?.lifecycle?.currentState != Lifecycle.State.DESTROYED && binding.fragmentMapMapView?.height != 0 && binding.fragmentMapMapView?.width != 0) {
-            binding.fragmentMapMapView?.viewTreeObserver?.removeOnGlobalLayoutListener(this)
-            dispatchGroup?.leave()
+        val currentState = viewLifecycleOwner.lifecycle.currentState
+        if (currentState.isAtLeast(Lifecycle.State.INITIALIZED)) {
+            val mapViewHeight = binding.fragmentMapMapView.height ?: 0
+            val mapViewWidth = binding.fragmentMapMapView.width ?: 0
+            if (mapViewHeight != 0 && mapViewWidth != 0) {
+                binding.fragmentMapMapView.viewTreeObserver?.removeOnGlobalLayoutListener(this)
+                dispatchGroup?.leave()
+            }
         }
     }
 
@@ -220,9 +226,7 @@ class MapFragment : Fragment(R.layout.fragment_map), ViewTreeObserver.OnGlobalLa
         binding.fragmentMapBackgroundView.setLoading()
         binding.fragmentMapMapView.viewTreeObserver?.addOnGlobalLayoutListener(this)
         binding.fragmentMapMapView.onCreate(null)
-        binding.fragmentMapMapView.postDelayed({
-            binding.fragmentMapMapView.getMapAsync(onMapReadyCallBack)
-        }, 10)
+        binding.fragmentMapMapView.getMapAsync(onMapReadyCallBack)
     }
 
     fun setType(category: Category) {
@@ -567,6 +571,8 @@ class MapFragment : Fragment(R.layout.fragment_map), ViewTreeObserver.OnGlobalLa
     override fun onDestroyView() {
         clusterManager?.clearItems()
         clusterManager = null
+
+        binding.fragmentMapMapView.viewTreeObserver.removeOnGlobalLayoutListener(this)
 
         listener = null
         locationMarker = null

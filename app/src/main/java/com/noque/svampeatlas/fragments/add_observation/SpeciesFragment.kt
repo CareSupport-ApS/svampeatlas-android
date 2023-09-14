@@ -31,12 +31,7 @@ import com.noque.svampeatlas.views.SearchBarListener
 
 class SpeciesFragment : Fragment() {
 
-    companion object {
-        private const val TAG = "AddObs.SpeciesFragment"
-    }
-
     // Objects
-
     private var defaultState: Boolean = true
 
     // Views
@@ -226,9 +221,12 @@ class SpeciesFragment : Fragment() {
     }
 
     private fun setupViewModels() {
-        newObservationViewModel.resetEvent.observe(viewLifecycleOwner) {
-            binding.addObservationSpecieFragmentSearchBarView.resetText()
-        }
+//        newObservationViewModel.event.observe(viewLifecycleOwner) {
+//            when (it) {
+//                is NewObservationViewModel.Event.Reset -> binding.addObservationSpecieFragmentSearchBarView.resetText()
+//                else -> {}
+//            }
+//        }
 
         newObservationViewModel.mushroom.observe(viewLifecycleOwner) {
             if (it != null) {

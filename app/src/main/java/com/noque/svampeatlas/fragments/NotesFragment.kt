@@ -23,6 +23,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.noque.svampeatlas.R
 import com.noque.svampeatlas.adapters.NotebookAdapter
+import com.noque.svampeatlas.constants.RELOAD_DATA
 import com.noque.svampeatlas.databinding.FragmentNotebookBinding
 import com.noque.svampeatlas.extensions.dpToPx
 import com.noque.svampeatlas.extensions.removeTime
@@ -38,10 +39,6 @@ import com.noque.svampeatlas.views.MainActivity
 import java.util.Date
 
 class NotesFragment: Fragment(R.layout.fragment_notebook), PromptFragment.Listener, MenuProvider {
-
-    companion object {
-        const val RELOAD_DATA_KEY = "RELOAD_DATA_KEY"
-    }
 
     // Views
     private val binding by autoClearedViewBinding(FragmentNotebookBinding::bind) {
@@ -119,11 +116,11 @@ private val deletedCallback by lazy {
         }
 
         findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<Boolean>(
-            RELOAD_DATA_KEY)?.observe(viewLifecycleOwner, Observer {
+            RELOAD_DATA)?.observe(viewLifecycleOwner, Observer {
             if (it) {
                 viewModel.getNotes()
             }
-            findNavController().currentBackStackEntry?.savedStateHandle?.remove<Boolean>(RELOAD_DATA_KEY)
+            findNavController().currentBackStackEntry?.savedStateHandle?.remove<Boolean>(RELOAD_DATA)
         })
     }
 

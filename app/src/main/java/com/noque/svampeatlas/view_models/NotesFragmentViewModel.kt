@@ -1,22 +1,17 @@
 package com.noque.svampeatlas.view_models
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hadilq.liveevent.LiveEvent
 import com.noque.svampeatlas.models.NewObservation
-import com.noque.svampeatlas.models.Result
 import com.noque.svampeatlas.models.State
 import com.noque.svampeatlas.models.UserObservation
-import com.noque.svampeatlas.services.DataService
 import com.noque.svampeatlas.services.RoomService
 import com.noque.svampeatlas.utilities.MyApplication
 import com.noque.svampeatlas.utilities.SharedPreferences
-import com.noque.svampeatlas.utilities.SingleLiveEvent
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.io.File
 
 class NotesFragmentViewModel: ViewModel() {
@@ -28,7 +23,7 @@ class NotesFragmentViewModel: ViewModel() {
     private val _notes by lazy { MutableLiveData<State<MutableList<NewObservation>>>(State.Empty()) }
     val notes: LiveData<State<MutableList<NewObservation>>> get() = _notes
 
-    val event by lazy { SingleLiveEvent<Event>() }
+    val event by lazy { LiveEvent<Event>() }
 
     init {
         getNotes()

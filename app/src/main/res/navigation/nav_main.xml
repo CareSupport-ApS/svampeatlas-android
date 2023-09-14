@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/nav_main"
     android:label="empty"
-    app:startDestination="@id/mushroomFragment">
+    app:startDestination="@id/onboardingFragment">
 
     <fragment
         android:id="@+id/mushroomFragment"
@@ -88,6 +88,11 @@
         app:destination="@id/nearby_fragment_nav"
         app:popUpTo="@id/nearbyFragment"
         app:popUpToInclusive="true" />
+
+    <action
+        android:id="@+id/action_global_spinner"
+        app:destination="@id/spinnerFragment"/>
+
     <action
         android:id="@+id/action_global_myPageFragment"
         app:destination="@id/myPageFragment"
@@ -244,4 +249,8 @@
                 app:destination="@id/mapSettingsFragment" />
         </fragment>
     </navigation>
+    <dialog
+        android:id="@+id/spinnerFragment"
+        android:name="com.noque.svampeatlas.fragments.modals.SpinnerFragment"
+        android:label="SpinnerFragment" />
 </navigation>

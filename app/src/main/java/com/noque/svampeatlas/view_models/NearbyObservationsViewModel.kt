@@ -48,7 +48,7 @@ class NearbyObservationsViewModel(application: Application) : AndroidViewModel(a
 
         val geometry = Geometry(latLng, radius.value ?: defaultRadius, Geometry.Type.CIRCLE)
 
-        DataService.getInstance(getApplication()).getObservationsWithin(TAG, geometry, null, ageInYears.value ?: defaultAgeInYears) {
+        DataService.getObservationsWithin(TAG, geometry, null, ageInYears.value ?: defaultAgeInYears) {
             it.onSuccess {
                 observations.addAll(it)
                 geometries.add(geometry)

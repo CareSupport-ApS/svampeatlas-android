@@ -1,8 +1,12 @@
 package com.noque.svampeatlas.repositories
 
-import android.os.Bundle
 import com.android.volley.RequestQueue
+import com.android.volley.Response
+import com.google.gson.reflect.TypeToken
 import com.noque.svampeatlas.extensions.toAppError
+import com.noque.svampeatlas.extensions.toAppError2
+import com.noque.svampeatlas.models.AppError2
+import com.noque.svampeatlas.models.Observation
 import com.noque.svampeatlas.models.Result
 import com.noque.svampeatlas.services.DataService
 import com.noque.svampeatlas.services.ImageService
@@ -10,6 +14,7 @@ import com.noque.svampeatlas.utilities.api.API
 import com.noque.svampeatlas.utilities.api.APIType
 import com.noque.svampeatlas.utilities.volleyRequests.AppEmptyRequest
 import com.noque.svampeatlas.utilities.volleyRequests.AppJSONObjectRequest
+import com.noque.svampeatlas.utilities.volleyRequests.AppRequest
 import org.json.JSONObject
 import java.io.File
 import kotlin.coroutines.resume
@@ -17,14 +22,14 @@ import kotlin.coroutines.suspendCoroutine
 
 class ObservationsRepository(private val requestQueue: RequestQueue) {
 
-    suspend fun editObservation(id: Int, token: String, jsonObject: JSONObject, imageFiles: List<File>?): Result<Pair<Int, Int>, DataService.Error> {
+    suspend fun editObservation(id: Int, token: String, jsonObject: JSONObject, imageFiles: List<File>?): Result<Pair<Int, Int>, AppError2> {
         return when (val result = put(id, jsonObject, token)) {
             is Result.Success -> Result.Success(Pair(id, postImagesToObservation(id, imageFiles, token)))
             is Result.Error -> Result.Error(result.error)
         }
     }
 
-    suspend fun uploadObservation(tag: String, token: String, jsonObject: JSONObject, imageFiles: List<File>?): Result<Pair<Int, Int>, DataService.Error> {
+    suspend fun uploadObservation(tag: String, token: String, jsonObject: JSONObject, imageFiles: List<File>?): Result<Pair<Int, Int>, AppError2> {
         return when (val result = post(jsonObject, token)) {
            is Result.Success -> Result.Success(Pair(result.value,postImagesToObservation(result.value, imageFiles, token)))
            is Result.Error -> {
@@ -33,11 +38,32 @@ class ObservationsRepository(private val requestQueue: RequestQueue) {
        }
     }
 
-    suspend fun deleteObservation(id: Int, token: String): Result<Void?, DataService.Error> {
+    suspend fun deleteObservation(id: Int, token: String): Result<Void?, AppError2> {
         return delete(id, token)
     }
 
-    private suspend fun post(json: JSONObject, token: String): Result<Int, DataService.Error> = suspendCoroutine { cont ->
+    suspend fun getObservation(id: Int): Result<Observation, AppError2> {
+    return get(id)
+    }
+
+    private suspend fun get(id: Int): Result<Observation, AppError2> = suspendCoroutine { cont ->
+        val request = AppRequest<Observation>(
+            object : TypeToken<Observation>() {}.type,
+            API(APIType.Request.SingleObservation(id)),
+            null,
+            null,
+            Response.Listener {
+                cont.resume(Result.Success(it))
+            },
+
+            Response.ErrorListener {
+                cont.resume(Result.Error(it.toAppError2()))
+            }
+        )
+        requestQueue.add(request)
+    }
+
+    private suspend fun post(json: JSONObject, token: String): Result<Int, AppError2> = suspendCoroutine { cont ->
         val request = AppJSONObjectRequest(
             API(APIType.Post.Observation),
             token,
@@ -47,14 +73,14 @@ class ObservationsRepository(private val requestQueue: RequestQueue) {
                 cont.resume(Result.Success(id))
             },
             {
-                cont.resume(Result.Error(it.toAppError()))
+                cont.resume(Result.Error(it.toAppError2()))
             })
 
         requestQueue.add(request)
     }
 
 
-    private suspend fun put(id: Int, json: JSONObject, token: String): Result<Void?, DataService.Error> = suspendCoroutine { cont ->
+    private suspend fun put(id: Int, json: JSONObject, token: String): Result<Void?, AppError2> = suspendCoroutine { cont ->
         val request = AppJSONObjectRequest(
             API(APIType.Put.Observation(id)),
             token,
@@ -63,13 +89,13 @@ class ObservationsRepository(private val requestQueue: RequestQueue) {
                 cont.resume(Result.Success(null))
             },
             {
-                cont.resume(Result.Error(it.toAppError()))
+                cont.resume(Result.Error(it.toAppError2()))
             })
 
         requestQueue.add(request)
     }
 
-    private suspend fun delete(id: Int, token: String): Result<Void?, DataService.Error> = suspendCoroutine { cont ->
+    private suspend fun delete(id: Int, token: String): Result<Void?, AppError2> = suspendCoroutine { cont ->
         val request = AppEmptyRequest(
             API(APIType.Delete.Observation(id)),
             token,
@@ -77,7 +103,7 @@ class ObservationsRepository(private val requestQueue: RequestQueue) {
                 cont.resume(Result.Success(null))
             },
             {
-                cont.resume(Result.Error(it.toAppError()))
+                cont.resume(Result.Error(it.toAppError2()))
             })
 
         requestQueue.add(request)

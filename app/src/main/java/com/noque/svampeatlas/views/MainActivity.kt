@@ -17,14 +17,17 @@ import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.navigateUp
+import com.appupgrade.app_upgrade_android_sdk.AppUpgrade
 import com.google.android.material.navigation.NavigationView
 import com.noque.svampeatlas.R
 import com.noque.svampeatlas.databinding.ActivityMainBinding
 import com.noque.svampeatlas.fragments.TermsFragment
 import com.noque.svampeatlas.models.State
 import com.noque.svampeatlas.services.FileManager
+import com.noque.svampeatlas.utilities.AndroidUpgrade
 import com.noque.svampeatlas.utilities.SharedPreferences
 import com.noque.svampeatlas.view_models.Session
+import www.sanju.motiontoast.MotionToast
 
 
 class MainActivity : AppCompatActivity() {
@@ -105,6 +108,9 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         isLoggedIn = savedInstanceState?.getBoolean(KEY_IS_LOGGED_IN)
         binding = ActivityMainBinding.inflate(layoutInflater)
+
+        AndroidUpgrade.setup(this)
+
         setContentView(binding.root)
         initViews()
         setupView()
@@ -131,7 +137,8 @@ class MainActivity : AppCompatActivity() {
 
         // Setup toast
 
-        //MotionToast.setErrorBackgroundColor()
+        MotionToast.setErrorColor(R.color.colorRed)
+        MotionToast.setSuccessColor(R.color.colorGreen)
     }
 
     private fun setupViewModels() {

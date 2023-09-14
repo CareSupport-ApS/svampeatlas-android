@@ -5,9 +5,7 @@ import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.fragment.app.Fragment
@@ -15,8 +13,10 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.noque.svampeatlas.R
 import com.noque.svampeatlas.databinding.FragmentLoginBinding
+import com.noque.svampeatlas.extensions.handleError
+import com.noque.svampeatlas.extensions.hideSpinner
+import com.noque.svampeatlas.extensions.showSpinner
 import com.noque.svampeatlas.models.State
-import com.noque.svampeatlas.utilities.ToastHelper.handleError
 import com.noque.svampeatlas.utilities.autoClearedViewBinding
 import com.noque.svampeatlas.view_models.Session
 import com.noque.svampeatlas.views.MainActivity
@@ -73,12 +73,10 @@ class LoginFragment : Fragment(R.layout.fragment_login) {
 
     private fun setupViewModels() {
         Session.loggedInState.observe(viewLifecycleOwner) {
-            binding.loginFragmentBackgroundView.reset()
-
             when (it) {
                 is State.Error -> handleError(it.error)
-                is State.Loading -> binding.loginFragmentBackgroundView.setLoading()
-                else -> {}
+                is State.Loading -> showSpinner()
+                else -> hideSpinner()
             }
         }
     }

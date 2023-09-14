@@ -20,7 +20,7 @@ class AutoClearedViewBinding<T : ViewBinding>( val fragment: Fragment,
     init {
         fragment.lifecycle.addObserver(object : DefaultLifecycleObserver {
             val viewLifecycleOwnerObserver = Observer<LifecycleOwner?> { owner ->
-                if (owner == null) {
+                if (owner == null && binding != null) {
                     onDestroyView?.invoke(binding)
                     binding = null
                 }

@@ -14,6 +14,12 @@
         <item name="windowNoTitle">true</item>
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorSecondary</item>
+
+        <item name="cookiePadding">@dimen/default_padding</item>
+        <item name="cookieTitleSize">18sp</item>
+        <item name="cookieMessageSize">14sp</item>
+
+
         <item name="colorAccent">@color/colorThird</item>
     <item name="colorControlNormal">@color/colorWhite</item>
         <!--<item name="AppPrimary.Light">@style/AppPrimary</item>-->

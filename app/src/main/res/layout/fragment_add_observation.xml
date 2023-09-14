@@ -58,10 +58,4 @@
         app:tabMode="fixed"
         app:tabTextAppearance="@style/AppPrimary"/>
 
-
-    <com.noque.svampeatlas.views.SpinnerView
-        android:id="@+id/addObservationFragment_spinner"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent" />
-
 </androidx.constraintlayout.widget.ConstraintLayout>

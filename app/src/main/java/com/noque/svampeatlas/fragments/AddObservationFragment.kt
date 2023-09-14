@@ -8,17 +8,12 @@ import android.location.Location
 import android.os.Bundle
 import android.view.*
 import android.widget.Button
-import android.widget.LinearLayout
-import android.widget.Toast
 import androidx.annotation.StringRes
 import androidx.core.app.ActivityCompat
 import androidx.core.content.res.ResourcesCompat
-import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentPagerAdapter
-import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
@@ -30,20 +25,25 @@ import com.google.android.gms.maps.model.LatLng
 import com.noque.svampeatlas.R
 import com.noque.svampeatlas.adapters.add_observation.AddImagesAdapter
 import com.noque.svampeatlas.adapters.add_observation.InformationAdapter
+import com.noque.svampeatlas.constants.RELOAD_DATA
 import com.noque.svampeatlas.databinding.FragmentAddObservationBinding
+import com.noque.svampeatlas.extensions.handleError
+import com.noque.svampeatlas.extensions.handleInfo
+import com.noque.svampeatlas.extensions.handleSuccess
+import com.noque.svampeatlas.extensions.hideSpinner
+import com.noque.svampeatlas.extensions.showSpinner
 import com.noque.svampeatlas.extensions.toReadableDate
 import com.noque.svampeatlas.models.State
 import com.noque.svampeatlas.models.UserObservation
 import com.noque.svampeatlas.services.LocationService
 import com.noque.svampeatlas.utilities.SharedPreferences
-import com.noque.svampeatlas.utilities.ToastHelper.handleError
-import com.noque.svampeatlas.utilities.ToastHelper.handleSuccess
 import com.noque.svampeatlas.utilities.autoClearedViewBinding
 import com.noque.svampeatlas.view_holders.AddImageViewHolder
 import com.noque.svampeatlas.view_holders.AddedImageViewHolder
 import com.noque.svampeatlas.view_models.NewObservationViewModel
 import com.noque.svampeatlas.view_models.factories.NewObservationViewModelFactory
 import com.noque.svampeatlas.views.MainActivity
+import www.sanju.motiontoast.MotionToastStyle
 import java.io.File
 import java.util.*
 
@@ -101,7 +101,7 @@ class AddObservationFragment : Fragment(), ActivityCompat.OnRequestPermissionsRe
     }
 
     // View models
-    private val newObservationViewModel: NewObservationViewModel by navGraphViewModels(R.id.add_observation_nav) { NewObservationViewModelFactory(args.context, args.id, args.mushroomId, args.imageFilePath,  requireActivity().application) }
+    private val newObservationViewModel: NewObservationViewModel by navGraphViewModels(R.id.add_observation_nav) { NewObservationViewModelFactory(args.context, args.id, args.mushroomId, args.imageFilePath) }
 
     // Adapters
     private val addImagesAdapter by lazy {
@@ -166,8 +166,8 @@ class AddObservationFragment : Fragment(), ActivityCompat.OnRequestPermissionsRe
                 }
                 Category.SPECIES -> {
                     binding.observationImagesRecyclerView.apply {
-                        foreground = ColorDrawable(resources.getColor(R.color.colorPrimary))
-                        isEnabled = true
+                        foreground = ColorDrawable(resources.getColor(R.color.colorPrimary_dimmed, null))
+                        isEnabled = false
                     }
                     newObservationViewModel.getPredictions()
                 }
@@ -368,7 +368,6 @@ class AddObservationFragment : Fragment(), ActivityCompat.OnRequestPermissionsRe
         when (args.context) {
             Context.Edit -> setToolbar(R.string.action_editObservation, "ID: ${args.id}")
             Context.Note -> setToolbar(R.string.action_newNote, null)
-
             Context.EditNote -> setToolbar(R.string.action_editNote, Date(args.id).toReadableDate(false, ignoreTime = false))
             Context.UploadNote -> setToolbar(R.string.action_upload_note, Date(args.id).toReadableDate(false, ignoreTime = false))
             else -> setToolbar(R.string.addObservationVC_title, null, R.drawable.icon_menu_button)
@@ -414,21 +413,17 @@ class AddObservationFragment : Fragment(), ActivityCompat.OnRequestPermissionsRe
     }
 
     private fun setupViewModels() {
-//        TODO
-//
-//        newObservationViewModel.resetEvent.observe(viewLifecycleOwner) {
-//            binding.addObservationFragmentViewPager.currentItem = 0
-//        }
-
         newObservationViewModel.isLoading.observe(viewLifecycleOwner) {
             when (it) {
-                true -> binding.addObservationFragmentSpinner.startLoading()
-                false -> binding.addObservationFragmentSpinner.stopLoading()
+                true -> showSpinner()
+                false -> hideSpinner()
             }
         }
 
         newObservationViewModel.images.observe(viewLifecycleOwner) {
-            addImagesAdapter.configure(it ?: listOf())
+            addImagesAdapter.configure(
+                it ?: listOf()
+            )
         }
 
         newObservationViewModel.coordinateState.observe(viewLifecycleOwner) {
@@ -456,88 +451,55 @@ class AddObservationFragment : Fragment(), ActivityCompat.OnRequestPermissionsRe
             }
         }
 
-        newObservationViewModel.showNotification.observe(viewLifecycleOwner) {
+        newObservationViewModel.prompt.observe(viewLifecycleOwner) {
+            PromptFragment().apply {
+                setTargetFragment(this@AddObservationFragment, 10)
+                                arguments = Bundle().apply {
+                                    putString(PromptFragment.KEY_TITLE, getString(it.title))
+                                    putString(PromptFragment.KEY_MESSAGE, getString(it.message))
+                                    putString(PromptFragment.KEY_POSITIVE, getString(it.action.first))
+                                    putString(PromptFragment.KEY_NEGATIVE, getString(it.action.second))
+                                }
+                                show(this@AddObservationFragment.parentFragmentManager, null)
+                            }
+        }
+
+        newObservationViewModel.event.observe(viewLifecycleOwner) {
             when (it) {
-                is NewObservationViewModel.Notification.LocalityInaccessible, is NewObservationViewModel.Notification.LocationInaccessible -> handleError(it.title, it.message)
-                is NewObservationViewModel.Notification.ObservationUploaded -> {
-                    // When a user has uploaded an observation, we always want to just reset, so they can prepare a new one
-                    handleSuccess(it.title, it.message)
-                    newObservationViewModel.delete()
+                is NewObservationViewModel.Event.Reset -> binding.addObservationFragmentViewPager.currentItem = 0
+                is NewObservationViewModel.Event.GoBack -> {
+                    if (it.reload) findNavController().previousBackStackEntry?.savedStateHandle?.set(RELOAD_DATA, true)
+                    findNavController().navigateUp()
+                }
 
+                is NewObservationViewModel.Event.GoBackToRoot -> {
+                    findNavController().popBackStack()
                 }
-                is NewObservationViewModel.Notification.ObservationUpdated -> {
-                    // When a user has updated an uploaded observation, we always want to take them back to the previous page.
-                    val action = AddObservationFragmentDirections.actionGlobalMyPageFragment()
-                    findNavController().navigate(action)
-                }
-                is NewObservationViewModel.Notification.NoteSaved -> {
-                    // When a user has saved a note, we need to check which state the app is in, to determine if they should be taken back or stay, to create a new one.
-                    when (args.context) {
-                        Context.New, Context.FromRecognition -> {
-                            binding.addObservationFragmentViewPager.currentItem = Category.SPECIES.ordinal
-                            handleSuccess(it.title, it.message)
-                            newObservationViewModel.delete()
-                            findNavController().previousBackStackEntry?.savedStateHandle?.set(
-                                NotesFragment.RELOAD_DATA_KEY,
-                                true
-                            )
-                        }
-                        Context.Note, Context.EditNote, Context.UploadNote -> {
-                            findNavController().previousBackStackEntry?.savedStateHandle?.set(
-                                NotesFragment.RELOAD_DATA_KEY,
-                                true
-                            )
-                            findNavController().navigateUp()
-                        }
-                        else -> {}
-                    }
-                }
-                is NewObservationViewModel.Notification.Deleted -> {
-                    when (args.context) {
-                        Context.New, Context.Note, Context.FromRecognition -> {
-                            binding.addObservationFragmentViewPager.currentItem = Category.SPECIES.ordinal
-                        }
-                        Context.Edit -> {
-                            val action =
-                                AddObservationFragmentDirections.actionGlobalMyPageFragment()
-                            findNavController().navigate(action)
-                        }
+            }
+        }
 
-                        Context.EditNote, Context.UploadNote -> {
-                            findNavController().previousBackStackEntry?.savedStateHandle?.set(
-                                NotesFragment.RELOAD_DATA_KEY,
-                                true
-                            )
-                            findNavController().navigateUp()
-                        }
-                    }
-                }
+        newObservationViewModel.notification.observe(viewLifecycleOwner) {
+            when (it.type) {
+                MotionToastStyle.SUCCESS -> handleSuccess(getString(it.title), if (it.args != null) getString(it.message, it.message, *it.args) else getString(it.message, it.message))
+                MotionToastStyle.ERROR -> handleError(getString(it.title), getString(it.message))
+                MotionToastStyle.WARNING,
+                MotionToastStyle.INFO -> handleInfo(getString(it.title), getString(it.message))
+                MotionToastStyle.DELETE -> TODO()
+                MotionToastStyle.NO_INTERNET -> TODO()
+            }
+
+            when (it) {
                 is NewObservationViewModel.Notification.NewObservationError -> {
                     when (it.error) {
-                        UserObservation.Error.NoMushroomError -> binding.addObservationFragmentViewPager.currentItem =
-                            Category.SPECIES.ordinal
-                        UserObservation.Error.NoSubstrateError, UserObservation.Error.NoVegetationTypeError -> binding.addObservationFragmentViewPager.currentItem =
-                            Category.DETAILS.ordinal
-                        UserObservation.Error.NoLocationDataError, UserObservation.Error.NoLocalityDataError, UserObservation.Error.LowAccuracy -> binding.addObservationFragmentViewPager.currentItem =
-                            Category.LOCALITY.ordinal
-                    }
-                    handleError(it.title, it.message)
+                                UserObservation.Error.NoMushroomError -> binding.addObservationFragmentViewPager.currentItem =
+                                    Category.SPECIES.ordinal
+                                UserObservation.Error.NoSubstrateError, UserObservation.Error.NoVegetationTypeError -> binding.addObservationFragmentViewPager.currentItem =
+                                    Category.DETAILS.ordinal
+                                UserObservation.Error.NoLocationDataError, UserObservation.Error.NoLocalityDataError, UserObservation.Error.LowAccuracy -> binding.addObservationFragmentViewPager.currentItem =
+                                    Category.LOCALITY.ordinal
+                            }
                 }
-                is NewObservationViewModel.Notification.Error -> {
-                    handleError(it.title, it.message)
-                }
-                is NewObservationViewModel.Notification.UseImageMetadata -> {
-                    PromptFragment().apply {
-                        setTargetFragment(this@AddObservationFragment, 10)
-                        arguments = Bundle().apply {
-                            putString(PromptFragment.KEY_TITLE, it.title)
-                            putString(PromptFragment.KEY_MESSAGE, it.message)
-                            putString(PromptFragment.KEY_POSITIVE, it.action?.first ?: "")
-                            putString(PromptFragment.KEY_NEGATIVE, it.action?.second ?: "")
-                        }
-                        show(this@AddObservationFragment.parentFragmentManager, null)
-                    }
-                }
+                else -> {}
             }
         }
     }

@@ -1,11 +1,14 @@
 package com.noque.svampeatlas.view_models
 
 import android.content.res.Resources
+import android.provider.ContactsContract.Data
 import android.util.Log
+import androidx.annotation.StringRes
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.noque.svampeatlas.R
 import com.noque.svampeatlas.models.AppError
+import com.noque.svampeatlas.models.AppError2
 import com.noque.svampeatlas.models.Comment
 import com.noque.svampeatlas.models.Notification
 import com.noque.svampeatlas.models.Observation
@@ -15,11 +18,22 @@ import com.noque.svampeatlas.models.State
 import com.noque.svampeatlas.models.User
 import com.noque.svampeatlas.models.UserObservation
 import com.noque.svampeatlas.services.DataService
+import com.noque.svampeatlas.services.KtorService
 import com.noque.svampeatlas.services.RoomService
 import com.noque.svampeatlas.utilities.MyApplication
 import com.noque.svampeatlas.utilities.SharedPreferences
+import com.noque.svampeatlas.utilities.api.API
+import com.noque.svampeatlas.utilities.api.APIType
+import io.ktor.client.features.ClientRequestException
+import io.ktor.client.features.HttpRequestTimeoutException
+import io.ktor.client.features.ResponseException
+import io.ktor.client.request.put
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlinx.serialization.Serializable
 import org.json.JSONArray
 import org.json.JSONObject
 import java.sql.Date
@@ -31,6 +45,11 @@ object Session {
         AppError(title, message, recoveryAction) {
         class NewObservationError(resources: Resources, message: String): Error(resources.getString(R.string.newObservationError_missingInformation), message, null)
         class IsNotLoggedinError(resources: Resources): Error(resources.getString(R.string.dataServiceError_loginError_title), resources.getString(R.string.dataServiceError_loginError_message), null)
+    }
+
+    sealed class NewError(@StringRes title: Int, @StringRes message: Int, recoveryAction: RecoveryAction?): AppError2(title, message, recoveryAction) {
+        class UnknownError: NewError(R.string.dataServiceError_unknown_title, R.string.dataServiceError_unknown_message, null)
+        class IsNotLoggedIn: NewError(R.string.dataServiceError_loginError_title, R.string.dataServiceError_loginError_message, null)
     }
 
     const val TAG = "SessionViewModel"
@@ -65,6 +84,7 @@ object Session {
 
     init {
         this.token = SharedPreferences.token
+        KtorService.setBearerToken(this.token)
         evaluateLoginState(this.token)
     }
 
@@ -81,7 +101,7 @@ object Session {
             val result = RoomService.users.getUser()
 
             result.onError {
-                    DataService.getInstance(MyApplication.applicationContext).getUser(TAG, token) {
+                    DataService.getUser(TAG, token) {
                         it.onSuccess {
                             GlobalScope.launch {
                                 RoomService.users.saveUser(it)
@@ -106,7 +126,7 @@ object Session {
     }
 
     fun downloadUser(token: String) {
-        DataService.getInstance(MyApplication.applicationContext).getUser(TAG, token) {
+        DataService.getUser(TAG, token) {
             it.onSuccess {
                 GlobalScope.launch {
                     RoomService.users.saveUser(it)
@@ -131,11 +151,11 @@ object Session {
     private fun getNotifications(token: String) {
         _notificationsState.postValue(State.Loading())
 
-        DataService.getInstance(MyApplication.applicationContext).getUserNotificationCount(TAG, token) {
+        DataService.getUserNotificationCount(TAG, token) {
             it.onSuccess {
                 notificationsCount = it
                 lastUpdated = Date(System.currentTimeMillis())
-                DataService.getInstance(MyApplication.applicationContext)
+                DataService
                     .getNotifications(TAG, token, if (it >= 8) 8 else it, 0) {
                         it.onSuccess {
                             _notificationsState.postValue(State.Items(Pair(it, notificationsCount)))
@@ -156,11 +176,11 @@ object Session {
     private fun getObservations(user: User) {
         _observationsState.postValue(State.Loading())
 
-        DataService.getInstance(MyApplication.applicationContext).getObservationCountForUser(TAG, user.id) {
+        DataService.getObservationCountForUser(TAG, user.id) {
             it.onSuccess {
                 lastUpdated = Date(System.currentTimeMillis())
                 observationsCount = it
-                DataService.getInstance(MyApplication.applicationContext)
+                DataService
                     .getObservationsForUser(TAG, user.id, 0, 16) {
                         it.onSuccess {
                             _observationsState.postValue(State.Items(Pair(it, observationsCount)))
@@ -179,7 +199,8 @@ object Session {
     }
 
     fun login(initials: String, password: String) {
-        DataService.getInstance(MyApplication.applicationContext).login(initials, password) {
+        _loggedInState.value = State.Loading()
+        DataService.login(initials, password) {
             it.onError {
                 _loggedInState.value = State.Error(it)
             }
@@ -192,12 +213,47 @@ object Session {
         }
     }
 
+    @Serializable
+    data class ChangeEmailRequest(
+        val email: String
+    )
+
+    @Serializable
+    data class ChangeNameRequest(val name: String)
+
+    @Serializable
+    data class ChangePasswordRequest(val oldPassword: String, val newPassword: String)
+    suspend fun deleteUser(password: String) {
+        withContext(Dispatchers.IO) {
+            try {
+                KtorService.put<String>(API(APIType.Put.ChangeEmail()), ChangeEmailRequest("bruger-slettet@svampe.dk"))
+                KtorService.put<String>(API(APIType.Put.ChangeName()), ChangeNameRequest("Anonym bruger"))
+                KtorService.put<String>(API(APIType.Put.ChangePassword(user.value?.id ?: 0)), ChangePasswordRequest(password, "askdaslækdj12311!#!"))
+                logout()
+            } catch (e: ClientRequestException) {
+                // Handle cases when the server responds with a 4xx status code
+                // e.response can provide more details
+                println("Client request error: ${e.response.status}")
+            } catch (e: ResponseException) {
+                // Handle cases when server responds, but with a non-2xx status code
+                println("Response error: ${e.response.status}")
+            } catch (e: HttpRequestTimeoutException) {
+                // Handle timeout exceptions
+                println("Request timed out")
+            } catch (e: Throwable) {
+                // Handle general exceptions
+                println("An error occurred: ${e.localizedMessage}")
+            }
+
+        }
+    }
+
 
     fun getAdditionalNotifications(offset: Int) {
         token?.let {
             _notificationsState.value = State.Loading()
 
-            DataService.getInstance(MyApplication.applicationContext).getNotifications(
+            DataService.getNotifications(
                 TAG,
                 it,
                 if (offset + 8 <= notificationsCount) offset + 8 else notificationsCount,
@@ -219,7 +275,7 @@ object Session {
         user.value?.let {
             _observationsState.value = State.Loading()
 
-            DataService.getInstance(MyApplication.applicationContext)
+            DataService
                 .getObservationsForUser(TAG, it.id, 0, offset + 16) {
                     it.onSuccess {
                         _observationsState.value = State.Items(Pair(it, observationsCount))
@@ -234,7 +290,7 @@ object Session {
 
     fun reloadData(isNeededNow: Boolean) {
         if (isNeededNow) {
-            DataService.getInstance(MyApplication.applicationContext).clearRequestsWithTag(TAG)
+            DataService.clearRequestsWithTag(TAG)
 
             token?.let { getNotifications(it) }
             user.value?.let { getObservations(it) }
@@ -244,7 +300,7 @@ object Session {
             Log.d(TAG, "Data is $hours old")
 
             if (hours > 0) {
-                DataService.getInstance(MyApplication.applicationContext).clearRequestsWithTag(TAG)
+                DataService.clearRequestsWithTag(TAG)
 
                 token?.let { getNotifications(it) }
                 user.value?.let { getObservations(it) }
@@ -256,7 +312,7 @@ object Session {
         token?.let {
             _commentUploadState.value = State.Loading()
 
-            DataService.getInstance(MyApplication.applicationContext).postComment(observationID, comment, it) {
+            DataService.postComment(observationID, comment, it) {
                 it.onError {
                     _commentUploadState.value = State.Error(it)
                 }
@@ -276,7 +332,7 @@ object Session {
         ) {
         token?.let {
             GlobalScope.launch {
-                DataService.getInstance(MyApplication.applicationContext).deleteImage(
+                DataService.deleteImage(
                     TAG,
                     id,
                     it,
@@ -286,17 +342,17 @@ object Session {
         }
     }
 
-    suspend fun deleteObservation(id: Int): Result<Void?, AppError> {
+    suspend fun deleteObservation(id: Int): Result<Void?, AppError2> {
         val token = token
         val user = user.value
-        if (token == null || user == null) return Result.Error(Error.IsNotLoggedinError(MyApplication.resources))
-        return DataService.getInstance(MyApplication.applicationContext).observationsRepository.deleteObservation(id, token)
+        if (token == null || user == null) return Result.Error(NewError.IsNotLoggedIn())
+        return DataService.observationsRepository.deleteObservation(id, token)
     }
 
     fun deleteObservation(id: Int, completion: (Result<Void?, DataService.Error>) -> Unit) {
         token?.let {
             GlobalScope.launch {
-                DataService.getInstance(MyApplication.applicationContext).deleteObservation(
+                DataService.deleteObservation(
                     TAG,
                     id,
                     it,
@@ -309,7 +365,7 @@ object Session {
     fun markNotificationAsRead(notification: Notification) {
         token?.let {
             GlobalScope.launch {
-                DataService.getInstance(MyApplication.applicationContext)
+                DataService
                     .markNotificationAsRead(TAG, notification.observationID, it)
                 notificationsState.value?.let {
                     (it as? State.Items)?.items?.let {
@@ -323,25 +379,25 @@ object Session {
         }
     }
 
-    suspend fun editObservation(id: Int, userObservation: UserObservation): Result<Pair<Int, Int>, AppError> {
+    suspend fun editObservation(id: Int, userObservation: UserObservation): Result<Pair<Int, Int>, AppError2> {
         val token = token
         val user = user.value
         val imageFiles = userObservation.getImagesForUpload()
-        if (token == null || user == null) return Result.Error(Error.IsNotLoggedinError(MyApplication.resources))
+        if (token == null || user == null) return Result.Error(NewError.IsNotLoggedIn())
         val json = userObservation.asJSON(false)
-            ?: return Result.Error(Error.NewObservationError(MyApplication.resources, "JSON was empty"))
-        return DataService.getInstance(MyApplication.applicationContext).observationsRepository.editObservation(id, token, json, imageFiles).also {
+            ?: return Result.Error(NewError.UnknownError())
+        return DataService.observationsRepository.editObservation(id, token, json, imageFiles).also {
             lastUpdated = Date(0)
             userObservation.deleteAllImages()
         }
     }
 
-    suspend fun uploadObservation(userObservation: UserObservation): Result<Pair<Int, Int>, AppError> {
+    suspend fun uploadObservation(userObservation: UserObservation): Result<Pair<Int, Int>, AppError2> {
         val token = token
         val user = user.value
-        if (token == null || user == null) return Result.Error(Error.IsNotLoggedinError(MyApplication.resources))
+        if (token == null || user == null) return Result.Error(NewError.IsNotLoggedIn())
         val json = userObservation.asJSON(true)
-            ?: return Result.Error(Error.NewObservationError(MyApplication.resources, "JSON object was nil"))
+            ?: return Result.Error(NewError.UnknownError())
         val imageFiles = userObservation.getImagesForUpload()
         json.optJSONObject("determination")?.put("user_id", user.id)
         json.put("users", JSONArray().also { usersArray ->
@@ -357,9 +413,9 @@ object Session {
             }
         })
 
-        if (json.optJSONArray("users")?.length() == 0) return Result.Error(Error.NewObservationError(MyApplication.resources, "Users array was empty, please contact app@noque.dk"))
+        if (json.optJSONArray("users")?.length() == 0) return Result.Error(NewError.UnknownError())
 
-        return DataService.getInstance(MyApplication.applicationContext).observationsRepository.uploadObservation(
+        return DataService.observationsRepository.uploadObservation(
             TAG,
             token,
             json,
@@ -374,7 +430,7 @@ object Session {
         val json = JSONObject()
         json.put("message", comment ?: "")
         token?.let {
-            DataService.getInstance(MyApplication.applicationContext).postOffensiveComment(TAG, observationID, json, it)
+            DataService.postOffensiveComment(TAG, observationID, json, it)
         }
     }
 

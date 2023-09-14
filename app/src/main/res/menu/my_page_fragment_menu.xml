@@ -14,6 +14,13 @@
                 android:icon="@drawable/icon_log_out"
                 android:title="@string/myPageScrollView_logout"
                 app:showAsAction="ifRoom" />
+            <item
+                android:id="@+id/menu_myPageFragment_delete"
+                android:icon="@drawable/ic_delete_black_24dp"
+                android:iconTint="@color/colorRed"
+                android:iconTintMode="src_in"
+                android:title="@string/myPage_deleteProfile"
+                app:showAsAction="ifRoom" />
         </menu>
 
     </item>

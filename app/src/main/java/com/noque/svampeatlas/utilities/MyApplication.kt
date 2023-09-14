@@ -1,10 +1,12 @@
 package com.noque.svampeatlas.utilities
 
+import android.app.Activity
 import android.app.Application
 import android.content.Context
 import android.content.res.Resources
 import com.downloader.PRDownloader
 import com.noque.svampeatlas.services.FileManager
+import org.aviran.cookiebar2.CookieBar
 
 
 class MyApplication: Application() {

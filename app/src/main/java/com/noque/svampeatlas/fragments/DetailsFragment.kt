@@ -1,7 +1,6 @@
 package com.noque.svampeatlas.fragments
 
 
-import android.animation.TimeInterpolator
 import android.graphics.Color
 import android.location.Location
 import android.os.Bundle
@@ -13,7 +12,6 @@ import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -25,13 +23,13 @@ import com.noque.svampeatlas.R
 import com.noque.svampeatlas.adapters.CommentsAdapter
 import com.noque.svampeatlas.adapters.ObservationsAdapter
 import com.noque.svampeatlas.databinding.FragmentDetailsBinding
+import com.noque.svampeatlas.extensions.handleError
 import com.noque.svampeatlas.extensions.italized
 import com.noque.svampeatlas.extensions.openSettings
 import com.noque.svampeatlas.extensions.toReadableDate
 import com.noque.svampeatlas.extensions.upperCased
 import com.noque.svampeatlas.models.*
 import com.noque.svampeatlas.services.LocationService
-import com.noque.svampeatlas.utilities.ToastHelper.handleError
 import com.noque.svampeatlas.utilities.api.Geometry
 import com.noque.svampeatlas.utilities.autoCleared
 import com.noque.svampeatlas.utilities.autoClearedViewBinding

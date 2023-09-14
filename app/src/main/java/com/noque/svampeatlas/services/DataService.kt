@@ -30,19 +30,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
-class DataService private constructor(context: Context) {
+object DataService {
+    const val TAG = "DATASERVICE"
 
-    companion object {
-        @Volatile
-        private var INSTANCE: DataService? = null
-        val TAG = "DataService"
-
-        fun getInstance(context: Context): DataService {
-            return INSTANCE ?: synchronized(this) {
-                return DataService(context.applicationContext).also { INSTANCE = it }
-            }
-        }
-    }
 
     sealed class Error(title: String, message: String) : AppError(title, message, null) {
         class VolleyError(title: String, message: String) : Error(title, message)
@@ -70,7 +60,7 @@ class DataService private constructor(context: Context) {
     }
 
     private val requestQueue: RequestQueue by lazy {
-        Volley.newRequestQueue(context.applicationContext)
+        Volley.newRequestQueue(MyApplication.applicationContext)
     }
 
     val mushroomsRepository by lazy {MushroomRepository(requestQueue)}
@@ -83,8 +73,7 @@ class DataService private constructor(context: Context) {
     }
 
 
-    private val applicationContext = context.applicationContext
-
+    private val applicationContext = MyApplication.applicationContext
 
     fun getMushrooms(
         tag: String,
@@ -207,7 +196,6 @@ class DataService private constructor(context: Context) {
 
         if (radius == API.Radius.COUNTRY) {
             val api = API(APIType.Request.GeomNames(coordinate))
-
             val request = AppRequest<GeoNames>(
                 object : TypeToken<GeoNames>() {}.type,
                 api,

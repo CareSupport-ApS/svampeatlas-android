@@ -33,7 +33,7 @@ class ObservationViewModel(val id: Int, val getSpecies: Boolean,  application: A
         _observationState.value = State.Loading()
 
         viewModelScope.launch {
-            DataService.getInstance(getApplication()).getObservation(TAG, id) {
+            DataService.getObservation(TAG, id) {
                 it.onSuccess {
                     _observationState.value = State.Items(it)
 
@@ -53,7 +53,7 @@ class ObservationViewModel(val id: Int, val getSpecies: Boolean,  application: A
         _mushroomState.value = State.Loading()
 
         viewModelScope.launch {
-            DataService.getInstance(getApplication()).mushroomsRepository.getMushroom(id).apply {
+            DataService.mushroomsRepository.getMushroom(id).apply {
                 onError {
                     _mushroomState.value = State.Error(it)
                 }
@@ -72,6 +72,6 @@ class ObservationViewModel(val id: Int, val getSpecies: Boolean,  application: A
     override fun onCleared() {
         super.onCleared()
         Log.d(TAG, "On cleared")
-        DataService.getInstance(getApplication()).clearRequestsWithTag(TAG)
+        DataService.clearRequestsWithTag(TAG)
     }
 }

@@ -1,10 +1,13 @@
 package com.noque.svampeatlas.view_models
 
-import android.app.Application
-import android.content.res.Resources
-import androidx.lifecycle.*
+import androidx.annotation.StringRes
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.Observer
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.google.maps.android.SphericalUtil
+import com.hadilq.liveevent.LiveEvent
 import com.noque.svampeatlas.R
 import com.noque.svampeatlas.extensions.getExifLocation
 import com.noque.svampeatlas.fragments.AddObservationFragment
@@ -14,13 +17,12 @@ import com.noque.svampeatlas.services.RecognitionService
 import com.noque.svampeatlas.services.RoomService
 import com.noque.svampeatlas.utilities.MyApplication
 import com.noque.svampeatlas.utilities.SharedPreferences
-import com.noque.svampeatlas.utilities.SingleLiveEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
+import www.sanju.motiontoast.MotionToastStyle
 import java.io.File
-import java.lang.Exception
-import java.util.*
+import java.util.Date
 
 fun <T> initialObserveMutableLiveData(observer: Observer<T>): MutableLiveData<T> {
     val liveData = MutableLiveData<T>()
@@ -28,23 +30,28 @@ fun <T> initialObserveMutableLiveData(observer: Observer<T>): MutableLiveData<T>
     return liveData
 }
 
-class NewObservationViewModel(application: Application, val context: AddObservationFragment.Context, val id: Long, mushroomId: Int, imageFilePath: String?) : AndroidViewModel(application) {
+class NewObservationViewModel(val context: AddObservationFragment.Context, val id: Long, mushroomId: Int, imageFilePath: String?) : ViewModel() {
+    companion object { private const val TAG = "NewObservationViewModel" }
 
-    companion object {
-        private const val TAG = "NewObservationViewModel"
+    sealed class Prompt(@StringRes val title: Int, @StringRes val message: Int, vararg formatArgs: Any?, val action: Pair<Int, Int>) {
+        class UseImageMetadata(val imageLocation: Location, val userLocation: Location?): Prompt(R.string.addObservationVC_useImageMetadata_title, R.string.addObservationVC_useImageMetadata_message, imageLocation.accuracy.toString(), action = Pair(R.string.addObservationVC_useImageMetadata_positive, R.string.addObservationVC_useImageMetadata_negative))
     }
 
-    sealed class Notification(val title: String, val message: String, val action: Pair<String, String>? = null) {
-        class LocationInaccessible(resources: Resources, error: AppError): Notification(resources.getString(R.string.newObservationError_noCoordinates_title), error.message)
-        class LocalityInaccessible(resources: Resources): Notification(resources.getString(R.string.newObservationError_noLocality_title), resources.getString(R.string.newObservationError_noLocality_message))
-        class ObservationUploaded(resources: Resources, id: Int): Notification(resources.getString(R.string.addObservationVC_successfullUpload_title),
-            "ID: $id")
-        class ObservationUpdated(resources: Resources): Notification("", "")
-        class NoteSaved(resources: Resources): Notification(resources.getString(R.string.message_noteSaved),resources.getString(R.string.message_noteSaved_message))
-        class Deleted(resource: Resources): Notification("", "")
-        class NewObservationError(val error: UserObservation.Error, resources: Resources): Notification(resources.getString(error.title), resources.getString(error.message))
-        class Error(error: AppError): Notification(error.title, error.message)
-        class UseImageMetadata(resources: Resources, val imageLocation: Location, val userLocation: Location?): Notification(resources.getString(R.string.addObservationVC_useImageMetadata_title), resources. getString(R.string.addObservationVC_useImageMetadata_message, imageLocation.accuracy.toString()), Pair(resources.getString(R.string.addObservationVC_useImageMetadata_positive), resources.getString(R.string.addObservationVC_useImageMetadata_negative)))
+    sealed class Notification(val type: MotionToastStyle, @StringRes val title: Int, @StringRes val message: Int,  val args: Array<out Any?>? = null) {
+        class LocationInaccessible: Notification(MotionToastStyle.ERROR, R.string.newObservationError_noCoordinates_title, R.string.newObservationError_noCoordinates_message)
+        class LocalityInaccessible : Notification(MotionToastStyle.ERROR, R.string.newObservationError_noLocality_title, R.string.newObservationError_noLocality_message)
+        class ObservationUploaded(id: Int): Notification(MotionToastStyle.SUCCESS, R.string.addObservationVC_successfullUpload_title, R.string.observation_id, arrayOf(id))
+        class ObservationUpdated : Notification(MotionToastStyle.SUCCESS, R.string.common_success, R.string.message_observationUpdated)
+        class NoteSaved : Notification(MotionToastStyle.SUCCESS, R.string.message_noteSaved, R.string.message_noteSaved_message)
+        class Deleted: Notification(MotionToastStyle.INFO, R.string.common_success, R.string.common_success)
+        class NewObservationError(val error: UserObservation.Error): Notification(MotionToastStyle.ERROR, error.title, error.message)
+        class Error(error: AppError2): Notification(MotionToastStyle.ERROR, error.title, error.message)
+    }
+
+    sealed class Event {
+        object Reset: Event()
+        class GoBack(val reload: Boolean): Event()
+        class GoBackToRoot(val reload: Boolean): Event()
     }
 
     // If null during session - then we do not want to find predictions
@@ -72,7 +79,7 @@ class NewObservationViewModel(application: Application, val context: AddObservat
     private val _predictionResultsState by lazy { MutableLiveData<State<List<Prediction>>>(State.Empty()) }
 
     private val userObservation = ListenableUserObservation {
-        resetEvent.call()
+        event.postValue(Event.Reset)
 
             if (it.location != null) {
                 it.location?.let { locationPair -> _coordinateState.value = State.Items(locationPair)}
@@ -106,8 +113,10 @@ class NewObservationViewModel(application: Application, val context: AddObservat
     val predictionResultsState: LiveData<State<List<Prediction>>> get() = _predictionResultsState
     val user: LiveData<User> get() = _user
 
-    val showNotification by lazy { SingleLiveEvent<Notification>() }
-    val resetEvent by lazy { SingleLiveEvent<Void>() }
+    val notification by lazy { LiveEvent<Notification>() }
+    val prompt by lazy { LiveEvent<Prompt>() }
+    val event by lazy { LiveEvent<Event>() }
+
 
     init {
         viewModelScope.launch {
@@ -147,18 +156,20 @@ class NewObservationViewModel(application: Application, val context: AddObservat
     private fun editObservation(id: Long) {
         _isLoading.value = true
         if (id != 0L) {
-            DataService.getInstance(getApplication()).getObservation(TAG, id.toInt()) {
-                it.onSuccess { observation ->
-                    userObservation.set(UserObservation(observation))
-                    _isLoading.postValue(false)
+            viewModelScope.launch {
+                DataService.observationsRepository.getObservation(id.toInt()).apply {
+                    onSuccess { observation ->
+                        userObservation.set(UserObservation(observation))
+                        _isLoading.postValue(false)
+                    }
+                    onError {
+                        notification.postValue(Notification.Error(it))
+                        _isLoading.postValue(false)
+                    }
                 }
-                it.onError {
-                    showNotification.postValue(Notification.Error(it))
-                    _isLoading.postValue(false)
                 }
             }
         }
-    }
 
     private fun editNote(id: Long) {
         _isLoading.value = true
@@ -183,7 +194,7 @@ class NewObservationViewModel(application: Application, val context: AddObservat
             }
 
             viewModelScope.launch(Dispatchers.IO) {
-                DataService.getInstance(getApplication()).mushroomsRepository.getMushroom(taxonID).apply {
+                DataService.mushroomsRepository.getMushroom(taxonID).apply {
                     onSuccess {
                         userObservation.mushroom.postValue(Pair(it, DeterminationConfidence.CONFIDENT))
                     }
@@ -240,7 +251,7 @@ class NewObservationViewModel(application: Application, val context: AddObservat
                     _isLoading.postValue(false)
                 }
                 _coordinateState.postValue(State.Empty())
-                showNotification.postValue(Notification.LocationInaccessible(getApplication<MyApplication>().resources, state.error))
+                notification.postValue(Notification.LocationInaccessible())
             }
             is State.Loading -> _coordinateState.postValue(State.Loading())
             is State.Items -> {
@@ -248,7 +259,7 @@ class NewObservationViewModel(application: Application, val context: AddObservat
                     is UserObservation.Image.New -> {
                         val imageLocation = image.file.getExifLocation()
                         if (imageLocation != null && SphericalUtil.computeDistanceBetween(imageLocation.latLng, state.items.latLng) > imageLocation.accuracy) {
-                            showNotification.postValue(Notification.UseImageMetadata(getApplication<MyApplication>().resources, imageLocation, state.items))
+                            prompt.postValue(Prompt.UseImageMetadata(imageLocation, state.items))
                         } else {
                             setLocation(state.items)
                             if (state.item != null) userObservation.observationDate.value = state.item.date
@@ -265,9 +276,7 @@ class NewObservationViewModel(application: Application, val context: AddObservat
         userObservation.substrate.value = Pair(substrate, isLocked)
         SharedPreferences.saveSubstrateID(if (isLocked) substrate.id else null)
         if (isLocked) {
-            viewModelScope.launch {
-                RoomService.substrates.saveSubstrate(substrate)
-            }
+            viewModelScope.launch { RoomService.substrates.saveSubstrate(substrate) }
         }
     }
 
@@ -320,7 +329,7 @@ class NewObservationViewModel(application: Application, val context: AddObservat
         imageFile.getExifLocation()?.let { imageLocation ->
             _coordinateState.value?.item?.first?.let { coordinateLocation ->
                 if (SphericalUtil.computeDistanceBetween(imageLocation.latLng, coordinateLocation.latLng) > imageLocation.accuracy) {
-                   showNotification.postValue(Notification.UseImageMetadata(getApplication<MyApplication>().resources, imageLocation, null))
+                   prompt.postValue(Prompt.UseImageMetadata(imageLocation, null))
                 }
             }
         }
@@ -374,8 +383,8 @@ class NewObservationViewModel(application: Application, val context: AddObservat
     }
 
     fun promptPositive() {
-        when (val prompt = showNotification.value) {
-            is Notification.UseImageMetadata -> {
+        when (val prompt = prompt.value) {
+            is Prompt.UseImageMetadata -> {
                 userObservation.observationDate.value = prompt.imageLocation.date
                 _coordinateState.value = State.Items(Pair(prompt.imageLocation, false))
                 getLocalities(prompt.imageLocation)
@@ -385,8 +394,8 @@ class NewObservationViewModel(application: Application, val context: AddObservat
     }
 
     fun promptNegative() {
-        when (val prompt = showNotification.value) {
-            is Notification.UseImageMetadata -> {
+        when (val prompt = prompt.value) {
+            is Prompt.UseImageMetadata -> {
                 prompt.userLocation?.let {
                     _coordinateState.value = State.Items(Pair(prompt.userLocation, false))
                 }
@@ -419,7 +428,7 @@ class NewObservationViewModel(application: Application, val context: AddObservat
         }
         _localitiesState.value = State.Loading()
         viewModelScope.launch {
-            DataService.getInstance(getApplication())
+            DataService
                 .getLocalities(TAG, location.latLng) { result ->
                     result.onSuccess {
                         _localitiesState.postValue(State.Items(it))
@@ -435,7 +444,7 @@ class NewObservationViewModel(application: Application, val context: AddObservat
                     result.onError {
                         _localitiesState.value = State.Error(it)
                         if (context != AddObservationFragment.Context.Note)
-                        showNotification.postValue(Notification.LocalityInaccessible(MyApplication.applicationContext.resources))
+                        notification.postValue(Notification.LocalityInaccessible())
                     }
                 }
         }
@@ -465,7 +474,7 @@ class NewObservationViewModel(application: Application, val context: AddObservat
                     )
                     is Result.Success -> {
                         val predictions =
-                            DataService.getInstance(MyApplication.applicationContext).mushroomsRepository.fetchMushrooms(
+                            DataService.mushroomsRepository.fetchMushrooms(
                                 result.value
                             )
                         _predictionResultsState.postValue(
@@ -484,10 +493,9 @@ class NewObservationViewModel(application: Application, val context: AddObservat
     fun uploadNew(): Boolean {
         val error = userObservation.userObservation.isValid()
         if (error != null) {
-            showNotification.postValue(
+            notification.postValue(
                 Notification.NewObservationError(
-                    error,
-                    MyApplication.resources
+                    error
                 )
             )
             return false
@@ -495,10 +503,24 @@ class NewObservationViewModel(application: Application, val context: AddObservat
             viewModelScope.launch {
                 _isLoading.value = true
                 Session.uploadObservation(userObservation.userObservation).apply {
-                    onError {
-                        showNotification.postValue(Notification.Error(it)) }
+                    onError { notification.postValue(Notification.Error(it)) }
                     onSuccess {
-                        showNotification.postValue(Notification.ObservationUploaded(MyApplication.resources, it.first))
+                        when (context) {
+                            AddObservationFragment.Context.New,
+                            AddObservationFragment.Context.FromRecognition -> {
+                                notification.postValue(Notification.ObservationUploaded(it.first))
+                                event.postValue(Event.Reset)
+                            }
+                            AddObservationFragment.Context.Edit,
+                            AddObservationFragment.Context.Note,
+                            AddObservationFragment.Context.EditNote,
+                            AddObservationFragment.Context.UploadNote -> {
+                                notification.postValue(Notification.ObservationUploaded(it.first))
+                                RoomService.notesDao.delete(NewObservation(Date(id), Date(), null, null, null, null, null, null, null, null, null, listOf(), listOf()))
+                                event.postValue(Event.GoBack(true))
+                            }
+                        }
+
                     }
                     _isLoading.postValue(false)
                 }
@@ -512,9 +534,10 @@ class NewObservationViewModel(application: Application, val context: AddObservat
         viewModelScope.launch {
             Session.editObservation(id.toInt(), userObservation.userObservation).apply {
                 onError {
-                    showNotification.postValue(Notification.Error(it)); _isLoading.postValue(false) }
+                    notification.postValue(Notification.Error(it)); _isLoading.postValue(false) }
                 onSuccess {
-                    showNotification.postValue(Notification.ObservationUpdated(MyApplication.resources))
+                    notification.postValue(Notification.ObservationUpdated())
+                    event.postValue(Event.GoBack(true))
                     _isLoading.postValue(false)
                 }
             }
@@ -523,65 +546,60 @@ class NewObservationViewModel(application: Application, val context: AddObservat
 
 
     fun saveAsNote() {
-        _isLoading.value = true
-        /*if (coordinateState.value !is State.Items) {
-            isAwaitingCoordinatedBeforeSave = true
-            return
-        } else {
-            isAwaitingCoordinatedBeforeSave = false
-        }*/
-
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch {
             RoomService.notesDao.save(userObservation.userObservation.asNewObservation()).apply {
-                onError {
-                    showNotification.postValue(Notification.Error(it.toAppError(MyApplication.resources)))
-                }
-
+                onError { notification.postValue(Notification.Error(it)) }
                 onSuccess {
-                    showNotification.postValue(Notification.NoteSaved(MyApplication.resources))
+                    notification.postValue(Notification.NoteSaved())
+                    when (context) {
+                        AddObservationFragment.Context.New,
+                        AddObservationFragment.Context.FromRecognition,
+                        AddObservationFragment.Context.Note -> {
+                            userObservation.set(UserObservation())
+                        }
+                        AddObservationFragment.Context.UploadNote,
+                        AddObservationFragment.Context.EditNote -> {
+                            event.postValue(Event.GoBack(true))
+                        }
+                        else -> {}
+                    }
                 }
-
-                _isLoading.postValue(false)
             }
         }
     }
 
     override fun onCleared() {
         userObservation.userObservation.deleteTempimages()
-        DataService.getInstance(getApplication()).clearRequestsWithTag(TAG)
+        DataService.clearRequestsWithTag(TAG)
         super.onCleared()
     }
 
     fun delete() {
+        viewModelScope.launch {
         when (context) {
             AddObservationFragment.Context.New, AddObservationFragment.Context.FromRecognition -> userObservation.set(UserObservation())
             AddObservationFragment.Context.Edit -> {
-                viewModelScope.launch {
-                    Session.deleteObservation(id.toInt()).apply {
-                        onError {
-                            showNotification.postValue(Notification.Error(it))
-                        }
-                        onSuccess {
-                            showNotification.postValue(Notification.Deleted(MyApplication.resources))
-                        }
+                Session.deleteObservation(id.toInt()).apply {
+                    onError { notification.postValue(Notification.Error(it)) }
+                    onSuccess {
+                        notification.postValue(Notification.Deleted())
+                        event.postValue(Event.GoBackToRoot(true))
                     }
                 }
             }
             AddObservationFragment.Context.Note -> userObservation.set(UserObservation())
             AddObservationFragment.Context.EditNote, AddObservationFragment.Context.UploadNote -> {
-                viewModelScope.launch {
-                    RoomService.notesDao.delete(NewObservation(Date(id), Date(), null, null, null, null, null, null, null, null, null, listOf(), listOf()))
-                        .apply {
-                        onError {
-                            showNotification.postValue(Notification.Error(it.toAppError(MyApplication.resources)))
-                        }
+                RoomService.notesDao.delete(NewObservation(Date(id), Date(), null, null, null, null, null, null, null, null, null, listOf(), listOf())).apply {
+                        onError { notification.postValue(Notification.Error(it)) }
                         onSuccess {
+                            notification.postValue(Notification.Deleted())
                             userObservation.userObservation.deleteAllImages()
-                            showNotification.postValue(Notification.Deleted(MyApplication.resources))
+                            event.postValue(Event.GoBack(true))
                         }
+
                     }
-                }
             }
+        }
         }
     }
 }

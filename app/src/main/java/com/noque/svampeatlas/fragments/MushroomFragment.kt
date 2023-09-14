@@ -7,9 +7,7 @@ import android.graphics.Rect
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.view.animation.AnimationUtils
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
@@ -26,9 +24,12 @@ import com.noque.svampeatlas.adapters.MushroomListAdapter
 import com.noque.svampeatlas.databinding.FragmentMushroomBinding
 import com.noque.svampeatlas.extensions.changeColor
 import com.noque.svampeatlas.extensions.dpToPx
+import com.noque.svampeatlas.extensions.handleError
+import com.noque.svampeatlas.extensions.handleSuccess
+import com.noque.svampeatlas.extensions.hideSpinner
 import com.noque.svampeatlas.extensions.italized
+import com.noque.svampeatlas.extensions.showSpinner
 import com.noque.svampeatlas.models.State
-import com.noque.svampeatlas.utilities.ToastHelper.handleSuccess
 import com.noque.svampeatlas.utilities.autoClearedViewBinding
 import com.noque.svampeatlas.view_models.MushroomsViewModel
 import com.noque.svampeatlas.view_models.factories.MushroomsViewModelFactory
@@ -313,38 +314,36 @@ class MushroomFragment : Fragment(R.layout.fragment_mushroom) {
             binding.mushroomFragmentTabLayout.getTabAt(it.ordinal)?.select()
         })
 
-        mushroomsViewModel.mushroomsState.observe(viewLifecycleOwner, Observer {
-           binding.mushroomFragmentBackgroundView.reset()
-
+        mushroomsViewModel.mushroomsState.observe(viewLifecycleOwner) {
             when (it) {
                 is State.Loading -> {
                     mushroomListAdapter.updateData(listOf())
-                    binding.mushroomFragmentBackgroundView.setLoading()
+                    showSpinner()
                 }
+
                 is State.Items -> {
                     runLayoutAnimation()
                     mushroomListAdapter.updateData(it.items)
-
+                    hideSpinner()
                 }
 
                 is State.Error -> {
-                    binding.mushroomFragmentBackgroundView.setError(it.error)
+                    handleError(it.error)
                 }
+
                 else -> {}
             }
-        })
+        }
 
         mushroomsViewModel.favoringState.observe(viewLifecycleOwner, Observer {
             when (it) {
                 is State.Error -> {
                     mushroomsViewModel.resetFavoritizingState()
-                    BitmapFactory.decodeResource(resources, R.drawable.icon_elmessageview_failure).changeColor(ResourcesCompat.getColor(resources, R.color.colorRed, null))
                     handleSuccess(it.error.title, it.error.message)
                 }
 
                 is State.Items -> {
                     mushroomsViewModel.resetFavoritizingState()
-                    BitmapFactory.decodeResource(resources, R.drawable.icon_elmessageview_failure).changeColor(ResourcesCompat.getColor(resources, R.color.colorGreen, null))
                     handleSuccess(getString(R.string.mushroomVC_favoriteSucces_title, it.items.localizedName ?: it.items.fullName.italized()), getString(R.string.mushroomVC_favoriteSucces_message))
                 }
                 else -> {}

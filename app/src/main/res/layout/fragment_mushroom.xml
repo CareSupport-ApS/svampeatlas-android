@@ -76,20 +76,8 @@ android:orientation="vertical"
                 android:layout_marginEnd="0dp"
                 app:layout_constraintStart_toStartOf="parent"
                 android:layout_marginStart="8dp">
-
             </com.noque.svampeatlas.views.SearchBarView>
-
-            <com.noque.svampeatlas.views.BackgroundView
-                android:id="@+id/mushroomFragment_backgroundView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@drawable/gradient_background"/>
-
-
         </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
 

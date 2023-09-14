@@ -61,7 +61,7 @@ class MushroomsViewModel(category: Category?, application: Application) :
         _mushroomsState.value = State.Loading()
 
         viewModelScope.launch {
-            DataService.getInstance(getApplication()).getMushrooms(
+            DataService.getMushrooms(
                 TAG,
                 null,
                 listOf(
@@ -120,7 +120,7 @@ class MushroomsViewModel(category: Category?, application: Application) :
         if (detailed) queries.add(SpeciesQueries.Statistics)
 
         viewModelScope.launch {
-            DataService.getInstance(getApplication()).getMushrooms(TAG, entry, queries) {
+            DataService.getMushrooms(TAG, entry, queries) {
                 it.onSuccess {
                     if (!allowGenus) {
                         _mushroomsState.value = State.Items(it.filterNot { it.isGenus })
@@ -140,7 +140,7 @@ class MushroomsViewModel(category: Category?, application: Application) :
         (mushroomsState.value as? State.Items)?.items?.getOrNull(index)?.let {
             _favoringState.value = State.Loading()
             viewModelScope.launch {
-                DataService.getInstance(getApplication()).mushroomsRepository.getMushroom(it.id).apply {
+                DataService.mushroomsRepository.getMushroom(it.id).apply {
                     onSuccess {
                         viewModelScope.launch {
                             it.isUserFavorite = true
@@ -189,6 +189,6 @@ class MushroomsViewModel(category: Category?, application: Application) :
     override fun onCleared() {
         Log.d(TAG, "Cleared")
         super.onCleared()
-        DataService.getInstance(getApplication()).clearRequestsWithTag(TAG)
+        DataService.clearRequestsWithTag(TAG)
     }
 }

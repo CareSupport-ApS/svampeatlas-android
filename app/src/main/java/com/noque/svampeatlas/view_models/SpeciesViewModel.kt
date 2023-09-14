@@ -50,7 +50,7 @@ class SpeciesViewModel(val id: Int, application: Application) : AndroidViewModel
         _mushroomState.value = State.Loading()
 
         viewModelScope.launch {
-            DataService.getInstance(getApplication()).mushroomsRepository.getMushroom(id).apply {
+            DataService.mushroomsRepository.getMushroom(id).apply {
                 onError {
                     _mushroomState.value = State.Error(it)
                 }
@@ -66,7 +66,7 @@ class SpeciesViewModel(val id: Int, application: Application) : AndroidViewModel
         _recentObservationsState.value = State.Loading()
 
         viewModelScope.launch {
-            DataService.getInstance(getApplication()).getRecentObservations(TAG, 0, taxonID) { result ->
+            DataService.getRecentObservations(TAG, 0, taxonID) { result ->
                 result.onSuccess {
                     if (it.count() == 0) {
                         _recentObservationsState.value = State.Error(Error.NoObservations(getApplication()))
@@ -86,7 +86,7 @@ class SpeciesViewModel(val id: Int, application: Application) : AndroidViewModel
         _heatMapObservationCoordinates.value = State.Loading()
 
         viewModelScope.launch {
-            DataService.getInstance(getApplication()).getObservationsWithin(TAG,
+            DataService.getObservationsWithin(TAG,
                 geometry,
                 id,
                 null
@@ -110,6 +110,6 @@ class SpeciesViewModel(val id: Int, application: Application) : AndroidViewModel
     override fun onCleared() {
         super.onCleared()
         Log.d(TAG, "On Cleared")
-        DataService.getInstance(getApplication()).clearRequestsWithTag(TAG)
+        DataService.clearRequestsWithTag(TAG)
     }
 }

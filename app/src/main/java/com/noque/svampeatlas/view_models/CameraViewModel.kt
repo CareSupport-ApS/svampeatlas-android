@@ -77,7 +77,7 @@ class CameraViewModel(private val type: CameraFragment.Context, application: App
         _imageFileState.value = State.Empty()
         _predictionResultsState.value = State.Empty()
         recognitionService.reset()
-        DataService.getInstance(getApplication()).clearRequestsWithTag(TAG)
+        DataService.clearRequestsWithTag(TAG)
     }
 
     private suspend fun getPredictions(imageFile: File) = withContext(Dispatchers.Default) {
@@ -95,7 +95,7 @@ class CameraViewModel(private val type: CameraFragment.Context, application: App
                )
                is Result.Success -> {
                    val predictions =
-                       DataService.getInstance(MyApplication.applicationContext).mushroomsRepository.fetchMushrooms(
+                       DataService.mushroomsRepository.fetchMushrooms(
                            result.value
                        )
                    _predictionResultsState.postValue(

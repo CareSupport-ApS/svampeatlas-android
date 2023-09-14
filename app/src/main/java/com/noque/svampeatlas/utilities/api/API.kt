@@ -276,6 +276,22 @@ data class API(val apiType: APIType) {
                 builder.appendPath("observations")
                 builder.appendPath(request.id.toString())
             }
+
+            is APIType.Put.ChangeEmail -> {
+                builder.appendPath("users")
+                builder.appendPath("me")
+                builder.appendPath("email")
+            }
+            is APIType.Put.ChangeName -> {
+                builder.appendPath("users")
+                builder.appendPath("me")
+                builder.appendPath("name")
+            }
+            is APIType.Put.ChangePassword -> {
+                builder.appendPath("users")
+                builder.appendPath(request.userId.toString())
+                builder.appendPath("password")
+            }
         }
 
         return builder.build().toString()
@@ -506,6 +522,10 @@ sealed class APIType() {
     sealed class Put: APIType() {
         class NotificationLastRead(val notificationID: Int): Put()
         class Observation(val id: Int): Put()
+        class ChangeEmail: Put()
+        class ChangeName: Put()
+
+        class ChangePassword(val userId: Int): Put()
     }
 
     sealed class Delete: APIType() {

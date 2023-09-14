@@ -67,8 +67,8 @@ class DownloaderViewModel(application: Application) : AndroidViewModel(applicati
                 viewModelScope.launch {
                     readFile(file)
                     _loadingState.value = LoadingState.DownloadingMetadata
-                    DataService.getInstance(getApplication()).substratesRepository.getSubstrateGroups("Downloader", true)
-                    DataService.getInstance(getApplication()).vegetationTypeRepository.getVegetationTypes("Downloader", true)
+                    DataService.substratesRepository.getSubstrateGroups("Downloader", true)
+                    DataService.vegetationTypeRepository.getVegetationTypes("Downloader", true)
                     _state.postValue(State.Items(null))
                 }
             }

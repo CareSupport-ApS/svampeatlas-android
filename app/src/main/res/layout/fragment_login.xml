@@ -143,12 +143,4 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         app:layout_constraintGuide_percent="0.15" />
-
-
-    <com.noque.svampeatlas.views.BackgroundView
-        android:id="@+id/loginFragment_backgroundView"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
-
-
 </androidx.constraintlayout.widget.ConstraintLayout>

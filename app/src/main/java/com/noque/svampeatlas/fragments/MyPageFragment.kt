@@ -1,18 +1,26 @@
 package com.noque.svampeatlas.fragments
 
 
+import android.app.AlertDialog
+import android.content.DialogInterface
 import android.os.Bundle
+import android.text.InputType
+import android.text.method.PasswordTransformationMethod
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.widget.EditText
+import android.widget.FrameLayout
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.MenuProvider
+import androidx.core.view.marginLeft
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -20,6 +28,8 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.noque.svampeatlas.R
 import com.noque.svampeatlas.adapters.MyPageAdapter
 import com.noque.svampeatlas.databinding.FragmentMyPageBinding
+import com.noque.svampeatlas.extensions.hideSpinner
+import com.noque.svampeatlas.extensions.showSpinner
 import com.noque.svampeatlas.models.AppError
 import com.noque.svampeatlas.models.Notification
 import com.noque.svampeatlas.models.Observation
@@ -28,6 +38,7 @@ import com.noque.svampeatlas.services.DataService
 import com.noque.svampeatlas.utilities.autoClearedViewBinding
 import com.noque.svampeatlas.view_models.Session
 import com.noque.svampeatlas.views.MainActivity
+import kotlinx.coroutines.launch
 
 class MyPageFragment : Fragment(R.layout.fragment_my_page), MenuProvider {
     companion object {
@@ -35,7 +46,10 @@ class MyPageFragment : Fragment(R.layout.fragment_my_page), MenuProvider {
     }
 
     // Views
-    private val binding by autoClearedViewBinding(FragmentMyPageBinding::bind)
+    private val binding by autoClearedViewBinding(FragmentMyPageBinding::bind) {
+        it?.myPageFragmentRecyclerView?.adapter = null
+        it?.myPageFragmentSwipeRefreshLayout?.setOnRefreshListener(null)
+    }
 
     // Adapters
     private val adapter by lazy {
@@ -96,6 +110,11 @@ class MyPageFragment : Fragment(R.layout.fragment_my_page), MenuProvider {
     override fun onMenuItemSelected(menuItem: MenuItem): Boolean = when (menuItem.itemId) {
         R.id.menu_myPageFragment_logOut -> {
             Session.logout()
+            true
+        }
+
+        R.id.menu_myPageFragment_delete -> {
+            confirmDelete()
             true
         }
 
@@ -181,4 +200,37 @@ class MyPageFragment : Fragment(R.layout.fragment_my_page), MenuProvider {
             binding.myPageFragmentSwipeRefreshLayout.isRefreshing = false
         }
     }
+
+    private fun confirmDelete() {
+        val inputEditTextField = EditText(requireActivity()).apply {
+            inputType = InputType.TYPE_TEXT_VARIATION_PASSWORD
+            transformationMethod = PasswordTransformationMethod.getInstance()
+            hint = getString(R.string.loginVC_passwordTextField_placeholder)
+        }
+
+        val frameLayout = FrameLayout(requireActivity())
+        val params = FrameLayout.LayoutParams(
+            FrameLayout.LayoutParams.MATCH_PARENT,
+            FrameLayout.LayoutParams.WRAP_CONTENT
+        ).apply {
+            setMargins(30, 20, 30, 20)  // left, top, right, bottom
+        }
+        inputEditTextField.layoutParams = params
+        frameLayout.addView(inputEditTextField)
+
+        val alert = AlertDialog.Builder(requireActivity()).apply {
+            setTitle(R.string.myPage_confirmDeletion_title)
+            setMessage(R.string.myPage_confirmDeletion_message)
+            setView(frameLayout)
+            setPositiveButton(R.string.myPage_deleteProfile) { _, _ ->
+                lifecycleScope.launch {
+                    showSpinner()
+                    Session.deleteUser(inputEditTextField.text.toString())
+                    hideSpinner()
+                }
+            }
+        }.create()
+
+        alert.show()
+        }
 }

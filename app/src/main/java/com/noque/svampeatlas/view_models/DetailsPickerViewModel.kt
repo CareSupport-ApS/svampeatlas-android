@@ -36,7 +36,7 @@ class DetailsPickerViewModel(private val type: DetailsPickerFragment.Type, appli
     private fun getSubstrateGroups() {
         _substrateGroupsState.value = State.Loading()
         viewModelScope.launch {
-            DataService.getInstance(getApplication()).substratesRepository.getSubstrateGroups(TAG).apply {
+            DataService.substratesRepository.getSubstrateGroups(TAG).apply {
                 onSuccess {
                     _substrateGroupsState.value = State.Items(it)
                 }
@@ -52,7 +52,7 @@ class DetailsPickerViewModel(private val type: DetailsPickerFragment.Type, appli
         _vegetationTypesState.value = State.Loading()
 
         viewModelScope.launch {
-            DataService.getInstance(getApplication()).vegetationTypeRepository.getVegetationTypes(TAG).apply {
+            DataService.vegetationTypeRepository.getVegetationTypes(TAG).apply {
                 onSuccess {
                     _vegetationTypesState.value = State.Items(it)
                 }
@@ -69,7 +69,7 @@ class DetailsPickerViewModel(private val type: DetailsPickerFragment.Type, appli
 
         viewModelScope.launch {
             if (searchTerm != null) {
-                DataService.getInstance(getApplication()).getHosts(TAG, searchTerm) { result ->
+                DataService.getHosts(TAG, searchTerm) { result ->
                     result.onSuccess {
                         _hostsState.postValue(State.Items(Pair(it, false)))
                     }
@@ -82,7 +82,7 @@ class DetailsPickerViewModel(private val type: DetailsPickerFragment.Type, appli
                 RoomService.hosts.getAll().apply {
                     onSuccess { _hostsState.postValue(State.Items(Pair(it, true))) }
                     onError {
-                        DataService.getInstance(getApplication()).getHosts(TAG, null) { result ->
+                        DataService.getHosts(TAG, null) { result ->
                             result.onSuccess {
                                 _hostsState.postValue(State.Items(Pair(it, true)))
                             }
@@ -99,6 +99,6 @@ class DetailsPickerViewModel(private val type: DetailsPickerFragment.Type, appli
 
     override fun onCleared() {
         super.onCleared()
-        DataService.getInstance(getApplication()).clearRequestsWithTag(TAG)
+        DataService.clearRequestsWithTag(TAG)
     }
 }
