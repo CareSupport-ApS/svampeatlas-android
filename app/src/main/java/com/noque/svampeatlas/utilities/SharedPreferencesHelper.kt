@@ -2,16 +2,16 @@ package com.noque.svampeatlas.utilities
 
 import android.content.Context
 import android.content.SharedPreferences
-import android.util.Log
 import androidx.preference.PreferenceManager
-import com.noque.svampeatlas.extensions.Date
-import com.noque.svampeatlas.models.Locality
-import java.util.*
-import com.google.gson.Gson
 import com.noque.svampeatlas.BuildConfig
+import com.noque.svampeatlas.extensions.Date
 import com.noque.svampeatlas.extensions.difDays
 import com.noque.svampeatlas.extensions.difHours
+import com.noque.svampeatlas.models.Locality
 import com.noque.svampeatlas.models.Location
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import java.util.Date
 
 
 object SharedPreferences {
@@ -158,10 +158,10 @@ object SharedPreferences {
           return null
         }
         val json = prefs.getString(LOCALITY_LOCKED, null)
-        return if(json != null) Gson().fromJson(json, Locality::class.java) else null
+        return if(json != null) Json.decodeFromString<Locality>(json) else null
     } set(value) {
         if (value != null) {
-            prefs.edit().putString(LOCALITY_LOCKED, Gson().toJson(value)).apply()
+            prefs.edit().putString(LOCALITY_LOCKED, Json.encodeToString(Locality.serializer(), value)).apply()
             localityLockedDate = Date()
         } else {
             prefs.edit().remove(LOCALITY_LOCKED).apply()
@@ -177,10 +177,10 @@ object SharedPreferences {
         }
 
         val json = prefs.getString(LOCATION_LOCKED, null)
-        return if(json != null) Gson().fromJson(json, Location::class.java) else null
+        return if(json != null) Json.decodeFromString<Location>(json) else null
     } set(value) {
         locationLockedDate = if (value != null) {
-            prefs.edit().putString(LOCATION_LOCKED, Gson().toJson(value)).apply()
+            prefs.edit().putString(LOCATION_LOCKED, Json.encodeToString(value)).apply()
             Date()
         } else {
             prefs.edit().remove(LOCATION_LOCKED).apply()

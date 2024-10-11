@@ -29,7 +29,7 @@ import com.noque.svampeatlas.view_models.NewObservationViewModel
 import com.noque.svampeatlas.view_models.factories.MushroomsViewModelFactory
 import com.noque.svampeatlas.views.SearchBarListener
 
-class SpeciesFragment : Fragment() {
+class SpeciesFragment : Fragment(R.layout.fragment_add_observation_specie) {
 
     // Objects
     private var defaultState: Boolean = true
@@ -117,14 +117,6 @@ class SpeciesFragment : Fragment() {
                 binding.addObservationSpecieFragmentSearchBarView.collapse()
             }
         }
-    }
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        return inflater.inflate(R.layout.fragment_add_observation_specie, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -221,12 +213,12 @@ class SpeciesFragment : Fragment() {
     }
 
     private fun setupViewModels() {
-//        newObservationViewModel.event.observe(viewLifecycleOwner) {
-//            when (it) {
-//                is NewObservationViewModel.Event.Reset -> binding.addObservationSpecieFragmentSearchBarView.resetText()
-//                else -> {}
-//            }
-//        }
+        newObservationViewModel.event.observe(viewLifecycleOwner) {
+            when (it) {
+                is NewObservationViewModel.Event.Reset -> binding.addObservationSpecieFragmentSearchBarView.resetText()
+                else -> {}
+            }
+        }
 
         newObservationViewModel.mushroom.observe(viewLifecycleOwner) {
             if (it != null) {

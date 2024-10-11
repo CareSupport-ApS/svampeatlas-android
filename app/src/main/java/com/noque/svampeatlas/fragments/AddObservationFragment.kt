@@ -1,16 +1,18 @@
 package com.noque.svampeatlas.fragments
 
-import android.content.pm.ActivityInfo
-import android.graphics.Canvas
-import android.graphics.Rect
 import android.graphics.drawable.ColorDrawable
 import android.location.Location
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.MotionEvent
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import androidx.annotation.StringRes
 import androidx.core.app.ActivityCompat
-import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentPagerAdapter
@@ -18,6 +20,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import androidx.navigation.navGraphViewModels
 import androidx.recyclerview.widget.ItemTouchHelper
+import androidx.recyclerview.widget.ItemTouchHelper.UP
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.ViewPager
@@ -37,18 +40,17 @@ import com.noque.svampeatlas.models.State
 import com.noque.svampeatlas.models.UserObservation
 import com.noque.svampeatlas.services.LocationService
 import com.noque.svampeatlas.utilities.SharedPreferences
+import com.noque.svampeatlas.utilities.SwipeToDeleteCallback
 import com.noque.svampeatlas.utilities.autoClearedViewBinding
-import com.noque.svampeatlas.view_holders.AddImageViewHolder
-import com.noque.svampeatlas.view_holders.AddedImageViewHolder
 import com.noque.svampeatlas.view_models.NewObservationViewModel
 import com.noque.svampeatlas.view_models.factories.NewObservationViewModelFactory
 import com.noque.svampeatlas.views.MainActivity
 import www.sanju.motiontoast.MotionToastStyle
 import java.io.File
-import java.util.*
+import java.util.Date
 
 
-class AddObservationFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallback, PromptFragment.Listener,
+class AddObservationFragment : Fragment(), ActivityCompat.OnRequestPermissionsResultCallback,
     MenuProvider {
 
     override fun onRequestPermissionsResult(
@@ -98,6 +100,7 @@ class AddObservationFragment : Fragment(), ActivityCompat.OnRequestPermissionsRe
         it?.observationImagesRecyclerView?.adapter = null
         it?.addObservationFragmentViewPager?.adapter = null
         it?.addObservationFragmentTabLayout?.setupWithViewPager(null)
+        deletedCallback.attachToRecyclerView(null)
     }
 
     // View models
@@ -105,36 +108,31 @@ class AddObservationFragment : Fragment(), ActivityCompat.OnRequestPermissionsRe
 
     // Adapters
     private val addImagesAdapter by lazy {
-        val adapter = AddImagesAdapter()
-        adapter.addImageButtonClicked = {
-            val action =
-                AddObservationFragmentDirections.actionAddObservationFragmentToCameraFragment().setContext(CameraFragment.Context.IMAGE_CAPTURE)
-            findNavController().navigate(action)
+        AddImagesAdapter().apply {
+            addImageButtonClicked = {
+                val action =
+                    AddObservationFragmentDirections.actionAddObservationFragmentToCameraFragment().setContext(CameraFragment.Context.IMAGE_CAPTURE)
+                findNavController().navigate(action)
+            }
         }
-        adapter
     }
 
     private val informationAdapter by lazy {
-        if (args.context == Context.Edit) {
-            InformationAdapter(
-                context,
-                arrayOf(Category.DETAILS, Category.LOCALITY),
-                childFragmentManager,
-                FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT
-            )
+        val categories = if (args.context == Context.Edit) {
+            arrayOf(Category.DETAILS, Category.LOCALITY)
         } else {
-            InformationAdapter(
-                context,
-                Category.values,
-                childFragmentManager,
-                FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT
-            )
+            Category.values
         }
+        InformationAdapter(
+            context,
+            categories,
+            childFragmentManager,
+            FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT
+        )
     }
 
     // Listeners
-    override fun positiveButtonPressed() = newObservationViewModel.promptPositive()
-    override fun negativeButtonPressed() = newObservationViewModel.promptNegative()
+
 
     private val viewPagerListener = object: ViewPager.SimpleOnPageChangeListener() {
         override fun onPageSelected(position: Int) {
@@ -185,85 +183,30 @@ class AddObservationFragment : Fragment(), ActivityCompat.OnRequestPermissionsRe
                 Date(), LatLng(location.latitude, location.longitude), location.accuracy)))
     }
 
-    private val imageSwipedCallback =
-        object : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.UP) {
-            override fun getSwipeDirs(
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder
-            ): Int {
-                return when (viewHolder) {
-                    is AddImageViewHolder -> {
-                        0
+    private val deletedCallback by lazy {
+        ItemTouchHelper(
+            SwipeToDeleteCallback(UP,
+                { viewHolder ->
+                    val position = viewHolder.adapterPosition
+                    if (newObservationViewModel.images.value?.getOrNull(position) is UserObservation.Image.New) {
+                        newObservationViewModel.removeImageAt(position)
+                    } else if (!SharedPreferences.hasSeenImageDeletion) {
+                        addImagesAdapter.notifyItemChanged(viewHolder.adapterPosition)
+                        val dialog = TermsFragment()
+                        dialog.arguments = Bundle().apply { putSerializable(TermsFragment.KEY_TYPE, TermsFragment.Type.IMAGEDELETIONS) }
+                        dialog.show(childFragmentManager, null)
+                    } else {
+                        newObservationViewModel.removeImageAt(position)
                     }
-                    is AddedImageViewHolder -> {
-                        if (!viewHolder.isLocked) super.getSwipeDirs(recyclerView, viewHolder) else 0
-                    }
-                    else -> {
-                        super.getSwipeDirs(recyclerView, viewHolder)
-                    }
-                }
-            }
-
-            override fun onChildDraw(
-                c: Canvas,
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder,
-                dX: Float,
-                dY: Float,
-                actionState: Int,
-                isCurrentlyActive: Boolean
-            ) {
-
-                val trashIcon = ResourcesCompat.getDrawable(resources, R.drawable.ic_delete_black_24dp, null)?.apply {
-                    bounds = Rect(
-                        viewHolder.itemView.left + (viewHolder.itemView.width / 2) - (intrinsicWidth / 2),
-                        ((viewHolder.itemView.height) / 2) - (intrinsicHeight / 2) + recyclerView.paddingTop,
-                        viewHolder.itemView.right - (viewHolder.itemView.width / 2) + (intrinsicWidth / 2),
-                        (viewHolder.itemView.height / 2) + (intrinsicHeight / 2) + recyclerView.paddingTop
-                    )
-                }
-
-                viewHolder.itemView.alpha = 1 - (-(dY) / viewHolder.itemView.height)
-
-                trashIcon?.draw(c)
-                super.onChildDraw(
-                    c,
-                    recyclerView,
-                    viewHolder,
-                    dX,
-                    dY,
-                    actionState,
-                    isCurrentlyActive
-                )
-            }
-
-
-            override fun onMove(
-                recyclerView: RecyclerView,
-                viewHolder: RecyclerView.ViewHolder,
-                target: RecyclerView.ViewHolder
-            ): Boolean {
-                return false
-            }
-
-            override fun onSwiped(viewHolder: RecyclerView.ViewHolder, direction: Int) {
-                val position = viewHolder.adapterPosition
-                if (newObservationViewModel.images.value?.getOrNull(position) is UserObservation.Image.New) {
-                    newObservationViewModel.removeImageAt(position)
-                } else if (!SharedPreferences.hasSeenImageDeletion) {
-                    addImagesAdapter.notifyItemChanged(viewHolder.adapterPosition)
-                    val dialog = TermsFragment()
-                    dialog.arguments = Bundle().apply { putSerializable(TermsFragment.KEY_TYPE, TermsFragment.Type.IMAGEDELETIONS) }
-                    dialog.show(childFragmentManager, null)
-                } else {
-                    newObservationViewModel.removeImageAt(position)
-                }
-            }
-        }
+                },
+                requireContext(),
+                resources
+            )
+        )
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
         addImageShown = savedInstanceState?.getBoolean(KEY_ADDIMAGE_SHOWN) ?: false
         newObservationViewModel.setDeterminationNotes(args.predictionNotes)
     }
@@ -278,9 +221,7 @@ class AddObservationFragment : Fragment(), ActivityCompat.OnRequestPermissionsRe
                 AddObservationFragmentDirections.actionAddObservationFragmentToCameraFragment().setContext(CameraFragment.Context.NEW_OBSERVATION)
             findNavController().navigate(action)
             null
-        } else {
-            inflater.inflate(R.layout.fragment_add_observation, container, false)
-        }
+        } else inflater.inflate(R.layout.fragment_add_observation, container, false)
     }
 
 
@@ -375,8 +316,7 @@ class AddObservationFragment : Fragment(), ActivityCompat.OnRequestPermissionsRe
         (requireActivity() as MainActivity).setSupportActionBar(binding.addObservationFragmentToolbar)
         binding.addObservationFragmentTabLayout.setupWithViewPager(binding.addObservationFragmentViewPager)
         binding.observationImagesRecyclerView.apply {
-            val myHelper = ItemTouchHelper(imageSwipedCallback)
-            myHelper.attachToRecyclerView(this)
+            deletedCallback.attachToRecyclerView(this)
 
             val layoutManager = LinearLayoutManager(context)
             layoutManager.orientation = RecyclerView.HORIZONTAL
@@ -453,7 +393,6 @@ class AddObservationFragment : Fragment(), ActivityCompat.OnRequestPermissionsRe
 
         newObservationViewModel.prompt.observe(viewLifecycleOwner) {
             PromptFragment().apply {
-                setTargetFragment(this@AddObservationFragment, 10)
                                 arguments = Bundle().apply {
                                     putString(PromptFragment.KEY_TITLE, getString(it.title))
                                     putString(PromptFragment.KEY_MESSAGE, getString(it.message))
@@ -464,16 +403,30 @@ class AddObservationFragment : Fragment(), ActivityCompat.OnRequestPermissionsRe
                             }
         }
 
+        parentFragmentManager.setFragmentResultListener(
+            PromptFragment.REQUEST_KEY, viewLifecycleOwner
+        ) { _, bundle ->
+            val result = bundle.getString(PromptFragment.RESULT_KEY)
+            if (result == PromptFragment.KEY_POSITIVE) {
+                newObservationViewModel.promptPositive()
+            } else if (result == PromptFragment.KEY_NEGATIVE) {
+                newObservationViewModel.promptNegative()
+            }
+        }
+
         newObservationViewModel.event.observe(viewLifecycleOwner) {
             when (it) {
-                is NewObservationViewModel.Event.Reset -> binding.addObservationFragmentViewPager.currentItem = 0
+                is NewObservationViewModel.Event.Reset -> {
+                    binding.addObservationFragmentViewPager.currentItem = 0
+                    findNavController().previousBackStackEntry?.savedStateHandle?.set(RELOAD_DATA, true)
+                }
                 is NewObservationViewModel.Event.GoBack -> {
                     if (it.reload) findNavController().previousBackStackEntry?.savedStateHandle?.set(RELOAD_DATA, true)
-                    findNavController().navigateUp()
+                    findNavController().popBackStack(R.id.myPageFragment, false)
                 }
 
                 is NewObservationViewModel.Event.GoBackToRoot -> {
-                    findNavController().popBackStack()
+                    findNavController().popBackStack(R.id.myPageFragment, false)
                 }
             }
         }

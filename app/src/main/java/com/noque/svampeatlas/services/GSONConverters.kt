@@ -1,119 +1,94 @@
 package com.noque.svampeatlas.services
 
-import androidx.room.Index
 import androidx.room.TypeConverter
 import com.google.android.gms.maps.model.LatLng
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.noque.svampeatlas.models.Image
-import com.noque.svampeatlas.models.NewObservation
+import com.noque.svampeatlas.models.LatLngSerializer
 import com.noque.svampeatlas.models.RedListData
-import java.util.*
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import java.util.Date
 
 object IDsConverter {
-
-    val gson by lazy { Gson() }
 
     @TypeConverter
     @JvmStatic
     fun toData(data: String?): List<Int> {
-        if (data == null) {
-            return Collections.emptyList()
-        } else {
-            val listType = object: TypeToken<List<Int>>() {}.type
-            return gson.fromJson(data, listType)
-        }
+        return data?.let {
+            Json.decodeFromString(it)
+        } ?: emptyList()
     }
 
     @TypeConverter
     @JvmStatic
     fun toString(ids: List<Int>?): String? {
-        ids?.let {
-            return gson.toJson(it)
+        return ids?.let {
+            Json.encodeToString(it)
         }
-        return null
     }
 }
 
 object StringsConverter {
 
-    val gson by lazy { Gson() }
-
     @TypeConverter
     @JvmStatic
     fun toData(data: String?): List<String> {
-        if (data == null) {
-            return Collections.emptyList()
-        } else {
-            val listType = object: TypeToken<List<String>>() {}.type
-            return gson.fromJson(data, listType)
-        }
+        return data?.let {
+            Json.decodeFromString(it)
+        } ?: emptyList()
     }
 
     @TypeConverter
     @JvmStatic
     fun toString(paths: List<String>?): String? {
-        paths?.let {
-            return gson.toJson(it)
+        return paths?.let {
+            Json.encodeToString(it)
         }
-        return null
     }
 }
 
 object RedListDataConverter {
 
-    val gson by lazy { Gson() }
-
     @TypeConverter
     @JvmStatic
     fun toData(data: String?): List<RedListData> {
-        if (data == null) {
-            return Collections.emptyList()
-        } else {
-            val listType = object: TypeToken<List<RedListData>>() {}.type
-            return gson.fromJson(data, listType)
-        }
+        return data?.let {
+            Json.decodeFromString(it)
+        } ?: emptyList()
     }
 
     @TypeConverter
     @JvmStatic
     fun toString(redListData: List<RedListData>?): String? {
-        redListData?.let {
-            return gson.toJson(redListData)
+        return redListData?.let {
+            Json.encodeToString(it)
         }
-
-        return null
     }
 }
 
 
-object ImagesConverter {
-    data class IndexedImage(val index: Int, val image: Image)
 
-    val gson = Gson()
+object ImagesConverter {
+    @Serializable
+    data class IndexedImage(val index: Int, val image: Image)
 
     @TypeConverter
     @JvmStatic
     fun toImages(data: String?): List<Image> {
-        if (data == null) {
-            return Collections.emptyList()
-        }
-
-        val listType = object : TypeToken<List<IndexedImage>>() {
-        }.type
-        val indexImages = gson.fromJson<List<IndexedImage>>(data, listType)
-
-        return indexImages.sortedBy { it.index }.map { it.image }
+        return data?.let {
+            val indexedImages: List<IndexedImage> = Json.decodeFromString(it)
+            indexedImages.sortedBy { it.index }.map { it.image }
+        } ?: emptyList()
     }
 
     @TypeConverter
     @JvmStatic
     fun toString(images: List<Image>?): String? {
-        images?.let {
+        return images?.let {
             val indexedImages = it.mapIndexed { index, image -> IndexedImage(index, image) }
-            return gson.toJson(indexedImages)
+            Json.encodeToString(indexedImages)
         }
-        return null
     }
 }
 
@@ -132,25 +107,19 @@ object DateConverter {
 }
 
 object LatLngConverter {
-    val gson by lazy { Gson() }
-
     @TypeConverter
     @JvmStatic
     fun toData(data: String?): LatLng? {
-        if (data == null) {
-           return null
-        } else {
-            val listType = object: TypeToken<LatLng>() {}.type
-            return gson.fromJson(data, listType)
+        return data?.let {
+            Json.decodeFromString(LatLngSerializer, it)
         }
     }
 
     @TypeConverter
     @JvmStatic
     fun toString(latLng: LatLng?): String? {
-        latLng?.let {
-            return gson.toJson(it)
+        return latLng?.let {
+            Json.encodeToString(LatLngSerializer, it)
         }
-        return null
     }
 }

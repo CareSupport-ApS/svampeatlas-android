@@ -1,11 +1,10 @@
 package com.noque.svampeatlas.models
 
-import android.util.Log
-import com.google.gson.annotations.SerializedName
-import com.google.gson.Gson
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
 
-
+@Serializable
 class Prediction(val mushroom: Mushroom, val score: Double) {
     companion object {
         fun getNotes(
@@ -33,13 +32,14 @@ class Prediction(val mushroom: Mushroom, val score: Double) {
     }
 }
 
+@Serializable
 class PredictionResult(
-    @SerializedName("_id") private val id: Int,
-    @SerializedName("score") val score: Double,
-    @SerializedName("acceptedTaxon") private val acceptedTaxon: AcceptedTaxon,
-    @SerializedName("Vernacularname_DK") private val vernacularNameDK: VernacularNameDK?,
-    @SerializedName("attributes") private val attributes: Attributes?,
-    @SerializedName("Images") private val images: List<Image>?
+    @SerialName("_id") private val id: Int,
+    @SerialName("score") val score: Double,
+    @SerialName("acceptedTaxon") private val acceptedTaxon: AcceptedTaxon,
+    @SerialName("Vernacularname_DK") private val vernacularNameDK: VernacularNameDK?,
+    @SerialName("attributes") private val attributes: Attributes?,
+    @SerialName("Images") private val images: List<Image>?
 ) {
 
     companion object {

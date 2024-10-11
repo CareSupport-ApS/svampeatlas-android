@@ -6,7 +6,7 @@ import com.noque.svampeatlas.models.User
 @Dao
 interface UserDao {
     @Query("SELECT * FROM user")
-    suspend fun getUsers(): Array<User>
+    fun getUsers(): Array<User>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(user: User)

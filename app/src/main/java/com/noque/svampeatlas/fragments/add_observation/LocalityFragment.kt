@@ -1,15 +1,11 @@
 package com.noque.svampeatlas.fragments.add_observation
 
-import android.content.pm.ActivityInfo
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import androidx.core.view.marginBottom
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.navGraphViewModels
@@ -19,11 +15,9 @@ import com.noque.svampeatlas.R
 import com.noque.svampeatlas.adapters.add_observation.LocalityAdapter
 import com.noque.svampeatlas.databinding.FragmentAddObservationLocalityBinding
 import com.noque.svampeatlas.extensions.openSettings
-import com.noque.svampeatlas.fragments.AddObservationFragment
 import com.noque.svampeatlas.fragments.AddObservationFragmentDirections
 import com.noque.svampeatlas.fragments.MapFragment
 import com.noque.svampeatlas.fragments.TermsFragment
-import com.noque.svampeatlas.fragments.modals.LocationSettingsModal
 import com.noque.svampeatlas.models.Locality
 import com.noque.svampeatlas.models.Location
 import com.noque.svampeatlas.models.Observation

@@ -1,19 +1,15 @@
 package com.noque.svampeatlas.repositories
 
 import com.android.volley.RequestQueue
-import com.android.volley.Response
-import com.google.gson.reflect.TypeToken
 import com.noque.svampeatlas.extensions.toAppError
 import com.noque.svampeatlas.models.Result
-import com.noque.svampeatlas.models.SubstrateGroup
 import com.noque.svampeatlas.models.VegetationType
 import com.noque.svampeatlas.services.DataService
 import com.noque.svampeatlas.services.RoomService
 import com.noque.svampeatlas.utilities.api.API
 import com.noque.svampeatlas.utilities.api.APIType
 import com.noque.svampeatlas.utilities.volleyRequests.AppRequest
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.ListSerializer
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -32,8 +28,8 @@ class VegetationTypeRepository(private val requestQueue: RequestQueue) {
 
     private suspend fun fetchVegetationTypes(tag: String): Result<List<VegetationType>, DataService.Error> = suspendCoroutine { cont ->
         val api = API(APIType.Request.VegetationType())
-        val request = AppRequest<List<VegetationType>>(
-            object : TypeToken<List<VegetationType>>() {}.type,
+        val request = AppRequest(
+            ListSerializer(VegetationType.serializer()),
             api,
             null,
             null,

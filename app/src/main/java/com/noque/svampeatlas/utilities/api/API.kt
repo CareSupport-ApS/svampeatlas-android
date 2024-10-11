@@ -4,8 +4,14 @@ import android.net.Uri
 import android.util.Log
 import com.android.volley.Request
 import com.google.android.gms.maps.model.LatLng
-import com.noque.svampeatlas.extensions.*
-import java.util.*
+import com.noque.svampeatlas.extensions.AppLanguage
+import com.noque.svampeatlas.extensions.appLanguage
+import com.noque.svampeatlas.extensions.toBounds
+import com.noque.svampeatlas.extensions.toCircularPolygon
+import com.noque.svampeatlas.extensions.toDatabaseName
+import com.noque.svampeatlas.extensions.toRectanglePolygon
+import java.util.Calendar
+import java.util.Locale
 
 data class API(val apiType: APIType) {
 
@@ -430,7 +436,7 @@ sealed class ObservationQueries: APIType() {
                 }
             }
 
-            is Locality -> "\"{\\\"model\\\":\\\"Locality\\\",\\\"as\\\":\\\"Locality\\\",\\\"attributes\\\":[\\\"_id\\\",\\\"name\\\"]}\""
+            is Locality -> "\"{\\\"model\\\":\\\"Locality\\\",\\\"as\\\":\\\"Locality\\\",\\\"attributes\\\":[\\\"_id\\\",\\\"name\\\",\\\"decimalLongitude\\\",\\\"decimalLatitude\\\"]}\""
             is GeomNames -> "\"{\\\"model\\\":\\\"GeoNames\\\",\\\"as\\\":\\\"GeoNames\\\",\\\"where\\\":{},\\\"required\\\":false}\""
         }
     }

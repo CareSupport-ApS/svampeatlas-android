@@ -1,8 +1,11 @@
 package com.noque.svampeatlas.models
 
 import com.noque.svampeatlas.extensions.Date
+import kotlinx.serialization.Serializable
 import java.util.*
 
+
+@Serializable
 data class Comment(
     val id: Int,
     private val _date: String,

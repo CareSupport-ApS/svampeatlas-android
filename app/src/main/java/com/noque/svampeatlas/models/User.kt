@@ -4,59 +4,54 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverter
-import com.google.gson.Gson
-import com.google.gson.annotations.SerializedName
-import com.google.gson.reflect.TypeToken
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.json.Json
 import java.util.*
 
 object UserRolesTypeConverters {
 
-    val gson = Gson()
-
+    // Convert from a JSON string to a List<Role>
     @TypeConverter
     @JvmStatic
     fun toRoles(data: String?): List<Role> {
-        if (data == null) {
-            return Collections.emptyList()
-        }
-
-        val listType = object : TypeToken<List<Role>>() {
-
-        }.type
-
-        return gson.fromJson(data, listType)
+        return data?.let {
+            Json.decodeFromString(it)
+        } ?: emptyList()
     }
 
+    // Convert from a List<Role> to a JSON string
     @TypeConverter
     @JvmStatic
-    fun toString(roles: List<Role>?): String? {
-        roles?.let {
-            return gson.toJson(it)
-        }
-        return null
+    fun toString(roles: List<Role>?): String {
+        return roles?.let {
+            Json.encodeToString(ListSerializer(Role.serializer()), it)
+        } ?: "[]"
     }
 }
 
+@Serializable
 @Entity(tableName = "user")
 class User(
     @PrimaryKey
     @ColumnInfo(name = "id")
-    @SerializedName("_id") val id: Int,
+    @SerialName("_id") val id: Int,
 
     @ColumnInfo(name = "content")
-    @SerializedName("name") val name: String,
+    @SerialName("name") val name: String,
 
     @ColumnInfo(name = "initials")
-    @SerializedName("Initialer") val initials: String,
+    @SerialName("Initialer") val initials: String,
 
     @ColumnInfo(name = "email")
-    @SerializedName("email") val email: String,
+    @SerialName("email") val email: String,
 
     @ColumnInfo(name = "facebook_id")
-    @SerializedName("facebook") val facebookID: String?,
+    @SerialName("facebook") val facebookID: String? = null,
 
     @ColumnInfo(name = "roles")
-    @SerializedName("Roles") val roles: List<Role>?
+    @SerialName("Roles") val roles: List<Role>? = null
 ) {
 
     val imageURL: String? get() {
@@ -74,5 +69,6 @@ class User(
     }
 }
 
+@Serializable
 data class Role(
-    @SerializedName("name") val name: String)
+    @SerialName("name") val name: String)

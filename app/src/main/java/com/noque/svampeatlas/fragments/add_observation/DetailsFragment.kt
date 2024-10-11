@@ -22,7 +22,7 @@ import com.noque.svampeatlas.utilities.autoClearedViewBinding
 import com.noque.svampeatlas.view_models.NewObservationViewModel
 import java.util.Calendar
 
-class DetailsFragment : Fragment() {
+class DetailsFragment : Fragment(R.layout.fragment_add_observation_details) {
 
     companion object {
         const val TAG = "AddObs.DetailsFragment"
@@ -90,15 +90,6 @@ class DetailsFragment : Fragment() {
             newObservationViewModel.setObservationDate(cal.time)
         }
 
-
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View? {
-        requireActivity().requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
-        return inflater.inflate(R.layout.fragment_add_observation_details, container, false)
-    }
-
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupView()
@@ -118,27 +109,27 @@ class DetailsFragment : Fragment() {
     }
 
     private fun setupViewModels() {
-        newObservationViewModel.user.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
-            adapter.user = it
+        newObservationViewModel.users.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
+            adapter.users = it
             adapter.updateCategory(Categories.Determinators)
         })
 
             newObservationViewModel.substrate.observe(
-                viewLifecycleOwner,
-                androidx.lifecycle.Observer {
-                    adapter.substrate = it
-                    adapter.updateCategory(Categories.SUBSTRATE)
-                })
+                viewLifecycleOwner
+            ) {
+                adapter.substrate = it
+                adapter.updateCategory(Categories.SUBSTRATE)
+            }
 
-            newObservationViewModel.vegetationType.observe(
-                viewLifecycleOwner,
-                androidx.lifecycle.Observer {
-                    adapter.vegetationType = it
-                    adapter.updateCategory(Categories.VEGETATIONTYPE)
-                })
+        newObservationViewModel.vegetationType.observe(
+                viewLifecycleOwner
+        ) {
+            adapter.vegetationType = it
+            adapter.updateCategory(Categories.VEGETATIONTYPE)
+        }
 
 
-            newObservationViewModel.hosts.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
+        newObservationViewModel.hosts.observe(viewLifecycleOwner, androidx.lifecycle.Observer {
                 adapter.hosts = it
                 adapter.updateCategory(Categories.HOST)
             })

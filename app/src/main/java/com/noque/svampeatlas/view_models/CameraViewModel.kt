@@ -3,14 +3,16 @@ package com.noque.svampeatlas.view_models
 import android.app.Application
 import android.net.Uri
 import android.util.Log
-import androidx.exifinterface.media.ExifInterface
-import androidx.lifecycle.*
-import com.google.android.gms.maps.model.LatLng
+import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.viewModelScope
 import com.noque.svampeatlas.R
-import com.noque.svampeatlas.extensions.copyTo
-import com.noque.svampeatlas.extensions.getExifLocation
 import com.noque.svampeatlas.fragments.CameraFragment
-import com.noque.svampeatlas.models.*
+import com.noque.svampeatlas.models.AppError
+import com.noque.svampeatlas.models.Prediction
+import com.noque.svampeatlas.models.Result
+import com.noque.svampeatlas.models.State
 import com.noque.svampeatlas.services.DataService
 import com.noque.svampeatlas.services.RecognitionService
 import com.noque.svampeatlas.utilities.MyApplication
@@ -18,10 +20,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.*
-import java.lang.Exception
-import java.text.SimpleDateFormat
-import java.util.*
+import java.io.File
+import java.io.FileNotFoundException
+import java.io.FileOutputStream
 
 
 
@@ -51,12 +52,11 @@ class CameraViewModel(private val type: CameraFragment.Context, application: App
         _imageFileState.postValue(State.Loading())
         viewModelScope.launch(Dispatchers.IO) {
             try {
-                getApplication<Application>().contentResolver.openInputStream(imageUri)?.use {
-                    val output: OutputStream = FileOutputStream(file)
-                    it.copyTo(output)
-                    output.flush()
+                getApplication<Application>().contentResolver.openInputStream(imageUri)?.use { inputStream ->
+                    FileOutputStream(file).use { outputStream ->
+                        inputStream.copyTo(outputStream)
+                    }
                     setImageFile(file)
-                    it.close()
                 }
             } catch (exception: FileNotFoundException) {
                 val res = getApplication<Application>().resources

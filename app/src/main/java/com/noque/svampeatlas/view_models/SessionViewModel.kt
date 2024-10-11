@@ -1,7 +1,6 @@
 package com.noque.svampeatlas.view_models
 
 import android.content.res.Resources
-import android.provider.ContactsContract.Data
 import android.util.Log
 import androidx.annotation.StringRes
 import androidx.lifecycle.LiveData
@@ -18,19 +17,16 @@ import com.noque.svampeatlas.models.State
 import com.noque.svampeatlas.models.User
 import com.noque.svampeatlas.models.UserObservation
 import com.noque.svampeatlas.services.DataService
-import com.noque.svampeatlas.services.KtorService
+import com.noque.svampeatlas.services.NetworkService
 import com.noque.svampeatlas.services.RoomService
-import com.noque.svampeatlas.utilities.MyApplication
 import com.noque.svampeatlas.utilities.SharedPreferences
 import com.noque.svampeatlas.utilities.api.API
 import com.noque.svampeatlas.utilities.api.APIType
-import io.ktor.client.features.ClientRequestException
-import io.ktor.client.features.HttpRequestTimeoutException
-import io.ktor.client.features.ResponseException
-import io.ktor.client.request.put
+import io.ktor.client.plugins.ClientRequestException
+import io.ktor.client.plugins.HttpRequestTimeoutException
+import io.ktor.client.plugins.ResponseException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -84,7 +80,7 @@ object Session {
 
     init {
         this.token = SharedPreferences.token
-        KtorService.setBearerToken(this.token)
+        NetworkService.setBearerToken(this.token)
         evaluateLoginState(this.token)
     }
 
@@ -226,9 +222,9 @@ object Session {
     suspend fun deleteUser(password: String) {
         withContext(Dispatchers.IO) {
             try {
-                KtorService.put<String>(API(APIType.Put.ChangeEmail()), ChangeEmailRequest("bruger-slettet@svampe.dk"))
-                KtorService.put<String>(API(APIType.Put.ChangeName()), ChangeNameRequest("Anonym bruger"))
-                KtorService.put<String>(API(APIType.Put.ChangePassword(user.value?.id ?: 0)), ChangePasswordRequest(password, "askdaslækdj12311!#!"))
+                NetworkService.put<String>(API(APIType.Put.ChangeEmail()), ChangeEmailRequest("bruger-slettet@svampe.dk"))
+                NetworkService.put<String>(API(APIType.Put.ChangeName()), ChangeNameRequest("Anonym bruger"))
+                NetworkService.put<String>(API(APIType.Put.ChangePassword(user.value?.id ?: 0)), ChangePasswordRequest(password, "askdaslækdj12311!#!"))
                 logout()
             } catch (e: ClientRequestException) {
                 // Handle cases when the server responds with a 4xx status code
@@ -386,20 +382,15 @@ object Session {
         if (token == null || user == null) return Result.Error(NewError.IsNotLoggedIn())
         val json = userObservation.asJSON(false)
             ?: return Result.Error(NewError.UnknownError())
+        addUserToRequest(json, user)
+        if (json.optJSONArray("users")?.length() == 0) return Result.Error(NewError.UnknownError())
         return DataService.observationsRepository.editObservation(id, token, json, imageFiles).also {
             lastUpdated = Date(0)
             userObservation.deleteAllImages()
         }
     }
 
-    suspend fun uploadObservation(userObservation: UserObservation): Result<Pair<Int, Int>, AppError2> {
-        val token = token
-        val user = user.value
-        if (token == null || user == null) return Result.Error(NewError.IsNotLoggedIn())
-        val json = userObservation.asJSON(true)
-            ?: return Result.Error(NewError.UnknownError())
-        val imageFiles = userObservation.getImagesForUpload()
-        json.optJSONObject("determination")?.put("user_id", user.id)
+    private fun addUserToRequest(json: JSONObject, user: User) {
         json.put("users", JSONArray().also { usersArray ->
             listOf(user).forEach {
                 usersArray.put(
@@ -412,6 +403,17 @@ object Session {
                 )
             }
         })
+    }
+
+    suspend fun uploadObservation(userObservation: UserObservation): Result<Pair<Int, Int>, AppError2> {
+        val token = token
+        val user = user.value
+        if (token == null || user == null) return Result.Error(NewError.IsNotLoggedIn())
+        val json = userObservation.asJSON(true)
+            ?: return Result.Error(NewError.UnknownError())
+        val imageFiles = userObservation.getImagesForUpload()
+        json.optJSONObject("determination")?.put("user_id", user.id)
+        addUserToRequest(json, user)
 
         if (json.optJSONArray("users")?.length() == 0) return Result.Error(NewError.UnknownError())
 

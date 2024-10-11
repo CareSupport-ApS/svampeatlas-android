@@ -85,6 +85,7 @@ class UserObservation(private val creationDate: Date = Date()) {
     var hosts: Pair<List<Host>, Boolean>? = null
     var notes: String? = null
     var ecologyNotes: String? = null
+    var users: List<User> = listOf()
 
     // Page 3 properties
     var locality: Pair<Locality, Boolean>? = null
@@ -116,6 +117,10 @@ class UserObservation(private val creationDate: Date = Date()) {
         SharedPreferences.lockedLocation?.let {
             location = Pair(it, true)
         }
+
+        RoomService.users.getUser().onSuccess {
+            users = listOf(it)
+        }
     }
 
     constructor(observation: Observation) : this(creationDate = observation.createdAt ?: Date()) {
@@ -131,6 +136,7 @@ class UserObservation(private val creationDate: Date = Date()) {
         observation.vegetationType?.let { vegetationType = Pair(it, false) }
         hosts = Pair(observation.hosts.toMutableList(), false)
         notes = observation.note
+        users = observation.users ?: listOf()
         ecologyNotes = observation.ecologyNote
         images = observation.images.map {
             Image.Hosted(
@@ -164,10 +170,16 @@ class UserObservation(private val creationDate: Date = Date()) {
         newObservation.vegetationType?.let { vegetationType = Pair(it, false) }
         notes = newObservation.note
         ecologyNotes = newObservation.ecologyNote
+
+
         RoomService.hosts.getHostsWithIds(newObservation.hostIDs).apply {
             onSuccess {
                 hosts = Pair(it, false)
             }
+        }
+
+        RoomService.users.getUser().onSuccess {
+            users = listOf(it)
         }
 
         images = newObservation.images.map {
@@ -237,7 +249,6 @@ class UserObservation(private val creationDate: Date = Date()) {
                         .put(
                             "confidence",
                             mushroom.second.databaseName
-                                ?: DeterminationConfidence.CONFIDENT.databaseName
                         )
                         .put("taxon_id", mushroom.first.id)
                         .put("notes", determinationNotes ?: "")

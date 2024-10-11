@@ -1,44 +1,41 @@
 package com.noque.svampeatlas.models
 
 import androidx.room.*
-import com.google.gson.Gson
-import com.google.gson.annotations.SerializedName
-import com.noque.svampeatlas.extensions.Date
-import java.util.*
-import com.google.gson.reflect.TypeToken
 import com.noque.svampeatlas.extensions.AppLanguage
+import com.noque.svampeatlas.extensions.Date
 import com.noque.svampeatlas.extensions.appLanguage
 import com.noque.svampeatlas.extensions.capitalized
-import com.noque.svampeatlas.utilities.api.SpeciesQueries
-import java.util.Collections.emptyList
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import java.util.*
 
+@Serializable
 @SuppressWarnings(RoomWarnings.PRIMARY_KEY_FROM_EMBEDDED_IS_DROPPED)
 @Entity(tableName = "mushrooms")
 class Mushroom(
-
     @PrimaryKey
-    @SerializedName("_id") val id: Int,
-    @SerializedName("FullName") val fullName: String,
-    @SerializedName("TaxonName") val taxonName: String?,
-    @SerializedName("Author") val fullNameAuthor: String?,
-    @SerializedName("updatedAt") val updatedAt: String?,
-    @SerializedName("probability") val probability: Int?,
-    @SerializedName("RankName") val _rankName: String?,
+    @SerialName("_id") val id: Int,
+    @SerialName("FullName") val fullName: String,
+    @SerialName("TaxonName") val taxonName: String? = null,
+    @SerialName("Author") val fullNameAuthor: String? = null,
+    @SerialName("updatedAt") val updatedAt: String? = null,
+    @SerialName("probability") val probability: Int? = null,
+    @SerialName("RankName") val _rankName: String? = null,
 
     @Embedded(prefix = "acceptedTaxon_")
-    @SerializedName("acceptedTaxon") val acceptedTaxon: AcceptedTaxon?,
+    @SerialName("acceptedTaxon") val acceptedTaxon: AcceptedTaxon? = null,
 
     @Embedded
-    @SerializedName("Vernacularname_DK") val _vernacularNameDK: VernacularNameDK?,
+    @SerialName("Vernacularname_DK") val _vernacularNameDK: VernacularNameDK? = null,
 
     @Embedded
-    @SerializedName("attributes") val attributes: Attributes?,
+    @SerialName("attributes") val attributes: Attributes? = null,
 
     @Embedded
-    @SerializedName("Statistics") val statistics: Statistics?,
+    @SerialName("Statistics") val statistics: Statistics? = null,
 
-    @SerializedName("redlistdata") val _redListData: List<RedListData>?,
-    @SerializedName("Images") val images: List<Image>?,
+    @SerialName("redlistdata") val _redListData: List<RedListData>? = null,
+    @SerialName("Images") val images: List<Image>? = null,
     var isUserFavorite: Boolean = false
 ) {
 
@@ -66,25 +63,28 @@ class Mushroom(
     val isGenus: Boolean get() { return (_rankName == "gen.") }
 }
 
+@Serializable
 data class VernacularNameDK(
-    @SerializedName("vernacularname_dk") val _vernacularNameDK: String?,
-    @SerializedName("source") val _source: String?
+    @SerialName("vernacularname_dk") val _vernacularNameDK: String? = null,
+    @SerialName("source") val _source: String? = null
 )
 
+@Serializable
 data class RedListData(
-    @SerializedName("status") val status: String?
+    @SerialName("status") val status: String? = null
 )
 
+@Serializable
 data class Attributes(
-    @SerializedName("diagnose") val diagnosis: String?,
-    @SerializedName("bogtekst_gyldendal_en") val diagnosisEn: String?,
-    @SerializedName("spiselighedsrapport") val edibility: String?,
-    @SerializedName("forvekslingsmuligheder") val similarities: String?,
-    @SerializedName("oekologi") val ecology: String?,
-    @SerializedName("valideringsrapport") val validationTips: String?,
-    @SerializedName("vernacular_name_GB") val vernacularNameEn: String?,
-    @SerializedName("vernacular_name_CZ") val vernacularNameCz: String?,
-    @SerializedName("PresentInDK") val presentInDenmark: Boolean?
+    @SerialName("diagnose") val diagnosis: String? = null,
+    @SerialName("bogtekst_gyldendal_en") val diagnosisEn: String? = null,
+    @SerialName("spiselighedsrapport") val edibility: String? = null,
+    @SerialName("forvekslingsmuligheder") val similarities: String? = null,
+    @SerialName("oekologi") val ecology: String? = null,
+    @SerialName("valideringsrapport") val validationTips: String? = null,
+    @SerialName("vernacular_name_GB") val vernacularNameEn: String? = null,
+    @SerialName("vernacular_name_CZ") val vernacularNameCz: String? = null,
+    @SerialName("PresentInDK") val presentInDenmark: Boolean? = null
 ) {
 
     val localizedDescription: String? get() {
@@ -124,10 +124,11 @@ data class Attributes(
     }
 }
 
+@Serializable
 data class Statistics(
-    @SerializedName("accepted_count") val acceptedCount: Int?,
-    @SerializedName("last_accepted_record") val lastAcceptedRecord: String?,
-    @SerializedName("first_accepted_record") val firstAcceptedRecord: String?
+    @SerialName("accepted_count") val acceptedCount: Int? = null,
+    @SerialName("last_accepted_record") val lastAcceptedRecord: String? = null,
+    @SerialName("first_accepted_record") val firstAcceptedRecord: String? = null
 ) {
 
     val acceptedObservationsCount: Int?

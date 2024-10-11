@@ -27,6 +27,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
@@ -53,7 +54,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 
 
-class CameraFragment : Fragment(R.layout.fragment_camera), PromptFragment.Listener, MenuProvider {
+class CameraFragment : Fragment(R.layout.fragment_camera), MenuProvider {
     enum class Context {
         NEW_OBSERVATION,
         IMAGE_CAPTURE,
@@ -126,20 +127,6 @@ class CameraFragment : Fragment(R.layout.fragment_camera), PromptFragment.Listen
         args.context,
         requireActivity().application
     ) }
-
-    // Listeners
-    override fun positiveButtonPressed() {
-        SharedPreferences.setSaveImages(true)
-        photoFile?.let {
-            GlobalScope.launch {
-                FileManager.saveTempImage(it, FileManager.createFile(requireContext()), requireContext())
-            }
-        }
-    }
-
-    override fun negativeButtonPressed() {
-        SharedPreferences.setSaveImages(false)
-    }
 
     private val resultsAdapterListener by lazy {
         object : ResultsAdapter.Listener {
@@ -278,7 +265,6 @@ class CameraFragment : Fragment(R.layout.fragment_camera), PromptFragment.Listen
                     bundle.putString(PromptFragment.KEY_POSITIVE, getString(R.string.cameraVC_shouldSaveImagesPrompt_message_positive))
                     bundle.putString(PromptFragment.KEY_NEGATIVE, getString(R.string.cameraVC_shouldSaveImagesPrompt_message_negative))
                 }
-                it.setTargetFragment(this@CameraFragment, 0)
                 it.show(parentFragmentManager, null)
             }
         } else {
@@ -332,9 +318,8 @@ class CameraFragment : Fragment(R.layout.fragment_camera), PromptFragment.Listen
             setupViewModels()
         }
 
-    override fun onCreateMenu(menu: Menu, inflater: MenuInflater) {
+    override fun onCreateMenu(menu: Menu, inflater: MenuInflater) =
         inflater.inflate(R.menu.menu_camera_fragment, menu)
-    }
 
     override fun onMenuItemSelected(menuItem: MenuItem): Boolean {
         when (menuItem.itemId) {
@@ -428,6 +413,22 @@ class CameraFragment : Fragment(R.layout.fragment_camera), PromptFragment.Listen
                         binding.cameraFragmentResultsView.reset()
                         binding.cameraFragmentRoot.transitionToStart()
                     }
+                }
+            }
+
+            parentFragmentManager.setFragmentResultListener(
+                PromptFragment.REQUEST_KEY, viewLifecycleOwner
+            ) { _, bundle ->
+                val result = bundle.getString(PromptFragment.RESULT_KEY)
+                if (result == PromptFragment.KEY_POSITIVE) {
+                    SharedPreferences.setSaveImages(true)
+                    photoFile?.let {
+                        lifecycleScope.launch {
+                            FileManager.saveTempImage(it, FileManager.createFile(requireContext()), requireContext())
+                        }
+                    }
+                } else if (result == PromptFragment.KEY_NEGATIVE) {
+                    SharedPreferences.setSaveImages(false)
                 }
             }
         }

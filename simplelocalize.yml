@@ -34,12 +34,14 @@ downloadPath: ./app/src/main/res/values-{lang}/strings.xml
 
 # Download format is a format of the file(s) with translations.
 # Supported formats: https://simplelocalize.io/docs/general/file-formats/
-downloadFormat: android-xml
+downloadFormat: android-strings
 
 # Download options are options that are passed to the download command.
 # Supported options: https://simplelocalize.io/docs/general/options/
 downloadOptions:
   - 'ESCAPE_NEW_LINES' # write nested JSON
+  - 'UNESCAPE_SINGLE_QUOTES'
+  - 'ESCAPE_SINGLE_QUOTES'
 
 
 #########################################

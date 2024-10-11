@@ -1,25 +1,43 @@
 package com.noque.svampeatlas.services
 
-import android.app.DownloadManager
 import android.content.Context
-import android.content.Context.DOWNLOAD_SERVICE
-import android.net.Uri
 import android.util.Log
-import androidx.core.net.toUri
-import com.android.volley.*
-import com.android.volley.toolbox.*
-import com.google.gson.reflect.TypeToken
-import com.noque.svampeatlas.models.*
-import org.json.JSONObject
+import com.android.volley.AuthFailureError
+import com.android.volley.DefaultRetryPolicy
+import com.android.volley.Request
+import com.android.volley.RequestQueue
+import com.android.volley.Response
+import com.android.volley.toolbox.JsonArrayRequest
+import com.android.volley.toolbox.JsonObjectRequest
+import com.android.volley.toolbox.Volley
 import com.google.android.gms.maps.model.LatLng
 import com.noque.svampeatlas.R
-import com.noque.svampeatlas.extensions.*
+import com.noque.svampeatlas.extensions.getBitmap
+import com.noque.svampeatlas.extensions.rotate
+import com.noque.svampeatlas.extensions.toAppError
+import com.noque.svampeatlas.extensions.toJPEG
+import com.noque.svampeatlas.models.AppError
+import com.noque.svampeatlas.models.Comment
+import com.noque.svampeatlas.models.GeoNames
+import com.noque.svampeatlas.models.GsonNotifications
+import com.noque.svampeatlas.models.Host
+import com.noque.svampeatlas.models.Locality
+import com.noque.svampeatlas.models.Mushroom
+import com.noque.svampeatlas.models.Notification
+import com.noque.svampeatlas.models.Observation
+import com.noque.svampeatlas.models.Result
+import com.noque.svampeatlas.models.User
 import com.noque.svampeatlas.repositories.MushroomRepository
 import com.noque.svampeatlas.repositories.ObservationsRepository
 import com.noque.svampeatlas.repositories.SubstratesRepository
 import com.noque.svampeatlas.repositories.VegetationTypeRepository
-import com.noque.svampeatlas.utilities.*
-import com.noque.svampeatlas.utilities.api.*
+import com.noque.svampeatlas.utilities.MultipartFormImage
+import com.noque.svampeatlas.utilities.MyApplication
+import com.noque.svampeatlas.utilities.api.API
+import com.noque.svampeatlas.utilities.api.APIType
+import com.noque.svampeatlas.utilities.api.Geometry
+import com.noque.svampeatlas.utilities.api.ObservationQueries
+import com.noque.svampeatlas.utilities.api.SpeciesQueries
 import com.noque.svampeatlas.utilities.volleyRequests.AppEmptyRequest
 import com.noque.svampeatlas.utilities.volleyRequests.AppJSONObjectRequest
 import com.noque.svampeatlas.utilities.volleyRequests.AppMultipartPost
@@ -28,6 +46,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.builtins.ListSerializer
+import org.json.JSONObject
 import java.io.File
 
 object DataService {
@@ -83,7 +103,8 @@ object DataService {
         limit: Int = 100,
         completion: (Result<List<Mushroom>, Error>) -> Unit
     ) {
-        val request = AppRequest<List<Mushroom>>(object : TypeToken<List<Mushroom>>() {}.type,
+        val request = AppRequest(
+            ListSerializer(Mushroom.serializer()),
             API(
                 APIType.Request.Mushrooms(
                     searchString,
@@ -130,9 +151,8 @@ object DataService {
                 null
             )
         )
-
-        val request = AppRequest<List<Observation>>(
-            object : TypeToken<List<Observation>>() {}.type,
+        val request = AppRequest(
+            ListSerializer(Observation.serializer()),
             api,
             null,
             null,
@@ -169,8 +189,8 @@ object DataService {
             )
         )
 
-        val request = AppRequest<List<Observation>>(
-            object : TypeToken<List<Observation>>() {}.type,
+        val request = AppRequest(
+            ListSerializer(Observation.serializer()),
             api,
             null,
             null,
@@ -196,12 +216,12 @@ object DataService {
 
         if (radius == API.Radius.COUNTRY) {
             val api = API(APIType.Request.GeomNames(coordinate))
-            val request = AppRequest<GeoNames>(
-                object : TypeToken<GeoNames>() {}.type,
+            val request = AppRequest(
+             GeoNames.serializer(),
                 api,
                 null,
                 null,
-                Response.Listener {
+                {
                     val localities = it.geoNames.map {
                         Locality(
                             it.geonameId,
@@ -214,7 +234,7 @@ object DataService {
                     }
                     completion(Result.Success(localities))
                 },
-                Response.ErrorListener {
+                {
                     completion(Result.Error(it.toAppError()))
                 }
             )
@@ -234,8 +254,8 @@ object DataService {
             )
 
 
-            val request = AppRequest<List<Locality>>(
-                object : TypeToken<List<Locality>>() {}.type,
+            val request = AppRequest(
+               ListSerializer(Locality.serializer()),
                 api,
                 null,
                 null,
@@ -285,12 +305,12 @@ object DataService {
         completion: (Result<List<Host>, Error>) -> Unit
     ) {
         val api = API(APIType.Request.Host(searchString))
-        val request = AppRequest<List<Host>>(
-            object : TypeToken<List<Host>>() {}.type,
+        val request = AppRequest(
+            ListSerializer(Host.serializer()),
             api,
             null,
             null,
-            Response.Listener {
+            {
                 if (searchString == null) {
                     GlobalScope.launch {
                         RoomService.hosts.saveHosts(it)
@@ -301,7 +321,7 @@ object DataService {
                 }
             },
 
-            Response.ErrorListener {
+            {
                 completion(Result.Error(it.toAppError()))
             }
         )
@@ -319,10 +339,10 @@ object DataService {
         val request = AppEmptyRequest(
             api,
             token,
-            Response.Listener<Void> {
+            {
                 completion(Result.Success(null))
             },
-            Response.ErrorListener {
+            {
                 completion(Result.Error(it.toAppError()))
             }
         )
@@ -340,10 +360,10 @@ object DataService {
         val request = AppEmptyRequest(
             api,
             token,
-            Response.Listener<Void> {
+            {
                 completion(Result.Success(null))
             },
-            Response.ErrorListener {
+            {
                 completion(Result.Error(it.toAppError()))
             }
         )
@@ -367,11 +387,11 @@ object DataService {
             val request = AppMultipartPost(api,
                 token,
                 multipartFormImage,
-                Response.Listener {
+                {
                     image.delete()
                     completion(Result.Success(true))
                 },
-                Response.ErrorListener {
+                {
                     image.delete()
                     completion(Result.Error(it.toAppError()))
                 }
@@ -387,51 +407,6 @@ object DataService {
         }
     }
 
-    suspend fun getPredictions(
-        imageFile: File,
-        completion: (Result<List<PredictionResult>, AppError>) -> Unit
-    ) = withContext(Dispatchers.IO) {
-        val bitmapResult = imageFile.getBitmap()
-        bitmapResult.onError { completion(Result.Error(it)) }
-        bitmapResult.onSuccess {
-            val mutableMap: MutableMap<Any?, Any?> = mutableMapOf(
-                Pair(
-                    "instances",
-                    listOf(
-                        mapOf(
-                            Pair(
-                                "image_in",
-                                mapOf(Pair("b64", it.rotate(imageFile).toBase64()))
-                            )
-                        )
-                    )
-                )
-            )
-            val jsonObject = JSONObject(mutableMap)
-            val request = AppRequest<List<PredictionResult>>(
-                object : TypeToken<List<PredictionResult>>() {}.type,
-                API(APIType.Post.ImagePrediction),
-                null,
-                jsonObject,
-                {
-                    completion(Result.Success(it))
-                },
-
-                {
-                    completion(Result.Error(it.toAppError()))
-                })
-
-
-            request.retryPolicy =
-                DefaultRetryPolicy(
-                    20000,
-                    DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
-                    DefaultRetryPolicy.DEFAULT_BACKOFF_MULT
-                )
-            addToRequestQueue(request)
-        }
-    }
-
     fun login(initials: String, password: String, completion: (Result<String, Error>) -> Unit) {
         val api = API(APIType.Post.Login)
         val jsonObject = JSONObject()
@@ -442,12 +417,12 @@ object DataService {
             null,
             jsonObject,
 
-            Response.Listener {
+            {
                 val token = it.getString("token")
                 completion(Result.Success(token))
             },
 
-            Response.ErrorListener {
+            {
                 if (it is AuthFailureError) completion(
                     Result.Error(
                         Error.LoginError(
@@ -462,16 +437,17 @@ object DataService {
 
     fun getUser(tag: String, token: String, completion: (Result<User, Error>) -> Unit) {
         val api = API(APIType.Request.User())
-        val request = AppRequest<User>(object : TypeToken<User>() {}.type,
+        val request = AppRequest(
+           User.serializer(),
             api,
             token,
             null,
-            Response.Listener {
+            {
                 //                saveUser(it)
                 completion(Result.Success(it))
             },
 
-            Response.ErrorListener {
+            {
                 completion(Result.Error(it.toAppError()))
             })
 
@@ -498,7 +474,7 @@ object DataService {
             }) {
 
             override fun getHeaders(): MutableMap<String, String> {
-                return mutableMapOf(Pair("Authorization", "Bearer ${token}"))
+                return mutableMapOf(Pair("Authorization", "Bearer $token"))
             }
         }
 
@@ -514,8 +490,8 @@ object DataService {
         completion: (Result<List<Notification>, Error>) -> Unit
     ) {
         val api = API(APIType.Request.UserNotifications(limit, offset))
-        val request = AppRequest<GsonNotifications>(
-            object : TypeToken<GsonNotifications>() {}.type,
+        val request = AppRequest(
+            GsonNotifications.serializer(),
             api,
             token,
             null,
@@ -535,16 +511,16 @@ object DataService {
     fun getObservation(tag: String, id: Int, completion: (Result<Observation, Error>) -> Unit) {
         val api = API(APIType.Request.SingleObservation(id))
 
-        val request = AppRequest<Observation>(
-            object : TypeToken<Observation>() {}.type,
+        val request = AppRequest(
+            Observation.serializer(),
             api,
             null,
             null,
-            Response.Listener {
+            {
                 completion(Result.Success(it))
             },
 
-            Response.ErrorListener {
+            {
                 completion(Result.Error(it.toAppError()))
             }
         )
@@ -601,16 +577,16 @@ object DataService {
             )
         )
 
-        val request = AppRequest<List<Observation>>(
-            object : TypeToken<List<Observation>>() {}.type,
+        val request = AppRequest(
+            ListSerializer(Observation.serializer()),
             api,
             null,
             null,
-            Response.Listener {
+            {
                 completion(Result.Success(it))
             },
 
-            Response.ErrorListener {
+            {
                 completion(Result.Error(it.toAppError()))
             }
         )
@@ -634,7 +610,7 @@ object DataService {
             token,
             jsonObject,
 
-            Response.Listener {
+            {
                 val id = it.optInt("_id")
                 val date = it.optString("createdAt")
                 val content = it.optString("content")
@@ -643,14 +619,14 @@ object DataService {
                 val facebook = it.optString("facebook")
                 val initials = it.optString("Initialer")
 
-                if (!name.isNullOrEmpty() && !date.isNullOrEmpty() && !content.isNullOrEmpty() && !name.isNullOrEmpty()) {
+                if (!name.isNullOrEmpty() && !date.isNullOrEmpty() && !content.isNullOrEmpty() && name.isNotEmpty()) {
                     completion(Result.Success(Comment(id, date, content, name, initials, facebook)))
                 } else {
                     completion(Result.Error(Error.ExtractionError()))
                 }
             },
 
-            Response.ErrorListener {
+            {
                 completion(Result.Error(it.toAppError()))
             }
         )
@@ -664,8 +640,8 @@ object DataService {
             api,
             token,
             JSONObject(),
-            Response.Listener {},
-            Response.ErrorListener {}
+            {},
+            {}
         )
 
         request.tag = tag
@@ -682,8 +658,8 @@ object DataService {
             api,
             token,
             json,
-            Response.Listener {  },
-            Response.ErrorListener {  }
+            {  },
+            {  }
         )
 
         request.tag = tag
