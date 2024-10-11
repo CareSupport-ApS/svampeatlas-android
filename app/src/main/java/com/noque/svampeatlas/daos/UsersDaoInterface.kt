@@ -13,7 +13,7 @@ class UsersDaoInterface(private val dao: UserDao) {
         dao.clear()
     }
 
-    suspend fun getUser(): Result<User, RoomService.Error> {
+    fun getUser(): Result<User, RoomService.Error> {
         val users = dao.getUsers()
         return if (users.firstOrNull() != null) Result.Success(users.first()) else Result.Error(
             RoomService.Error.NoData(RoomService.Error.DataType.USER)

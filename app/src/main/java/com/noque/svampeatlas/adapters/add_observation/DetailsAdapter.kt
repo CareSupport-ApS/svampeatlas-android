@@ -24,7 +24,7 @@ class DetailsAdapter(private val resources: Resources, private val categories: A
     RecyclerView.Adapter<ViewHolder>() {
 
     var date: Date? = null
-    var user: User? = null
+    var users: List<User>? = null
     var substrate: Pair<Substrate, Boolean>? = null
     var vegetationType: Pair<VegetationType, Boolean>? = null
 
@@ -78,6 +78,7 @@ class DetailsAdapter(private val resources: Resources, private val categories: A
                 viewHolder = InputTypeViewHolder(onInputTypeChanged, binding)
             }
         }
+        viewHolder.itemView.tag = viewHolder
         return viewHolder
     }
 
@@ -95,7 +96,7 @@ class DetailsAdapter(private val resources: Resources, private val categories: A
             DetailsFragment.Categories.Determinators -> (holder as? SettingsViewHolder)?.configure(
                 R.drawable.icon_profile,
                 resources.getString(R.string.observationDetailsCell_collectors),
-                content = "${user?.name ?: ""} (${user?.id ?: ""})")
+                content = users?.joinToString(", ") {  "${it?.name } (${it?.id })" })
 
             DetailsFragment.Categories.SUBSTRATE -> {
                 val string = if (substrate?.second == true) "\uD83D\uDD12 " else ""

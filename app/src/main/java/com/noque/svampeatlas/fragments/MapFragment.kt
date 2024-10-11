@@ -343,7 +343,7 @@ class MapFragment : Fragment(R.layout.fragment_map), ViewTreeObserver.OnGlobalLa
                             bounds,
                             view.width,
                             view.height,
-                            80.dpToPx(context)
+                            50.dpToPx(context)
                         )
                     )
                 }

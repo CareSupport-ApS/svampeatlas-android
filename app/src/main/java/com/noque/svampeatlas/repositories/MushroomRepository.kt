@@ -2,22 +2,18 @@ package com.noque.svampeatlas.repositories
 
 import androidx.collection.LruCache
 import com.android.volley.RequestQueue
-import com.android.volley.Response
-import com.google.gson.reflect.TypeToken
 import com.noque.svampeatlas.extensions.toAppError
-import com.noque.svampeatlas.models.AppError
 import com.noque.svampeatlas.models.Mushroom
 import com.noque.svampeatlas.models.Prediction
 import com.noque.svampeatlas.models.Result
 import com.noque.svampeatlas.services.DataService
 import com.noque.svampeatlas.services.RecognitionService
 import com.noque.svampeatlas.services.RoomService
-import com.noque.svampeatlas.utilities.MyApplication
 import com.noque.svampeatlas.utilities.MyApplication.Companion.applicationContext
 import com.noque.svampeatlas.utilities.api.API
 import com.noque.svampeatlas.utilities.api.APIType
 import com.noque.svampeatlas.utilities.volleyRequests.AppRequest
-import kotlinx.coroutines.withContext
+import kotlinx.serialization.builtins.ListSerializer
 import kotlin.coroutines.resume
 import kotlin.coroutines.suspendCoroutine
 
@@ -72,7 +68,8 @@ class MushroomRepository(private val requestQueue: RequestQueue) {
     }
 
     private suspend fun fetchMushroom(id: Int): Result<Mushroom, DataService.Error> = suspendCoroutine { cont ->
-        val request = AppRequest<List<Mushroom>>(object : TypeToken<List<Mushroom>>() {}.type,
+        val request = AppRequest(
+            ListSerializer(Mushroom.serializer()),
             API(APIType.Request.Mushroom(id)),
             null,
             null,

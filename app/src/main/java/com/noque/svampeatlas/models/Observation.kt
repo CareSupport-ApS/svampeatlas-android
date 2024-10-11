@@ -2,32 +2,38 @@ package com.noque.svampeatlas.models
 
 import androidx.room.Embedded
 import com.google.android.gms.maps.model.LatLng
-import com.google.gson.annotations.SerializedName
 import com.noque.svampeatlas.extensions.*
-import com.noque.svampeatlas.extensions.Date
 import com.noque.svampeatlas.services.RoomService
-import java.util.*
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import java.time.OffsetDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Date
+import java.util.Locale
 
+
+@Serializable
 data class Observation(
-    @SerializedName("_id") private val _id: Int = 0,
-    @SerializedName("createdAt") private val _createdAt: String,
-    @SerializedName("observationDate") private val _observationDate: String?,
-    @SerializedName("ecologynote") private val _ecologyNote: String?,
-    @SerializedName("note") private val _note: String?,
-    @SerializedName("geom") private val _geom: Geom,
-    @SerializedName("DeterminationView") private val _determinationView: DeterminationView?,
-    @SerializedName("PrimaryDetermination") private val _primaryDetermination: PrimaryDeterminationView?,
-    @SerializedName("Images") private val _observationImages: List<ObservationImage>?,
-    @SerializedName("PrimaryUser") private val _primaryUser: PrimaryUser?,
-    @SerializedName("Locality") private val _locality: Locality?,
-    @SerializedName("GeoNames") private val _geoName: GeoName?,
-    @SerializedName("Forum") private val _forum: MutableList<Forum>,
-    @SerializedName("vegetationtype_id") private val vegetationTypeID: Int?,
-    @SerializedName("substrate_id") private val substrateID: Int?,
-    @SerializedName("accuracy") private val _accuracy: Int?,
-    @SerializedName("Substrate") private val _substrate: Substrate?,
-    @SerializedName("VegetationType") private val _vegetationType: VegetationType?,
-    @SerializedName("associatedTaxa") private val _associatedTaxa: List<AssociatedTaxa>?
+    @SerialName("_id") private val _id: Int = 0,
+    @SerialName("createdAt") private val _createdAt: String,
+    @SerialName("observationDate") private val _observationDate: String?,
+    @SerialName("ecologynote") private val _ecologyNote: String?,
+    @SerialName("note") private val _note: String?,
+    @SerialName("geom") private val _geom: Geom,
+    @SerialName("DeterminationView") private val _determinationView: DeterminationView?,
+    @SerialName("PrimaryDetermination") private val _primaryDetermination: PrimaryDeterminationView?,
+    @SerialName("Images") private val _observationImages: List<ObservationImage>?,
+    @SerialName("PrimaryUser") private val _primaryUser: PrimaryUser?,
+    @SerialName("Locality") private val _locality: Locality?,
+    @SerialName("GeoNames") private val _geoName: GeoName?,
+    @SerialName("Forum") private val _forum: MutableList<Forum> = mutableListOf(),
+    @SerialName("vegetationtype_id") private val vegetationTypeID: Int?,
+    @SerialName("substrate_id") private val substrateID: Int?,
+    @SerialName("accuracy") private val _accuracy: Int?,
+    @SerialName("Substrate") private val _substrate: Substrate?,
+    @SerialName("VegetationType") private val _vegetationType: VegetationType?,
+    @SerialName("associatedTaxa") private val _associatedTaxa: List<AssociatedTaxa>?,
+    @SerialName("users") private val _users: List<User>?
 
 ) {
 
@@ -43,17 +49,24 @@ data class Observation(
             return _id
         }
     val createdAt: Date? get() {
-        return Date(_createdAt)
+        val formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
+        val dateTime = OffsetDateTime.parse(_observationDate, formatter)
+        return Date.from(dateTime.toInstant())
     }
 
     val observationDate: Date? get() {
-        return Date(_observationDate)
+        val formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME
+        val dateTime = OffsetDateTime.parse(_observationDate, formatter)
+        return Date.from(dateTime.toInstant())
     }
 
     val coordinate: LatLng
         get() {
             return LatLng(_geom.coordinates.last(), _geom.coordinates.first())
         }
+
+    val users: List<User>?
+        get() {return _users}
 
     val observationBy: String?
         get() {
@@ -138,16 +151,16 @@ data class Observation(
                 )
             } ?: listOf()
         }
-    val comments: List<Comment>?
+    val comments: List<Comment>
         get() {
             return _forum.map {
                 Comment(
                     it.id,
                     it.createdAt,
                     it.content,
-                    it.user.profile.name,
-                    it.user.profile.initials,
-                    it.user.profile.facebook
+                    it.user?.profile?.name ?: "Unknown",
+                    it.user?.profile?.initials,
+                    it.user?.profile?.facebook
                 )
             }
         }
@@ -202,7 +215,7 @@ data class Observation(
     }
 
     fun addComment(comment: Comment) {
-        _forum.add(Forum(comment.id, comment.date?.toISO8601() ?: "", comment.content, PrimaryUser(Profile(comment.commenterName, comment.initials ?: "", comment.commenterProfileImageURL))))
+        _forum?.add(Forum(comment.id, comment.date?.toISO8601() ?: "", comment.content, PrimaryUser(Profile(comment.commenterName, comment.initials ?: "", comment.commenterProfileImageURL))))
     }
 
     fun isDeleteable(user: User): Boolean {
@@ -218,23 +231,26 @@ data class Observation(
 }
 
 
+@Serializable
 data class Geom(val coordinates: List<Double>)
 
+@Serializable
 data class DeterminationView(
-    @SerializedName("taxon_id") val taxonID: Int,
-    @SerializedName("taxon_FullName") val fullName: String,
-    @SerializedName("taxon_vernacularname_dk") val vernacularNameDK: String?,
-    @SerializedName("redlistStatus") val redlistStatus: String?,
-    @SerializedName("determination_validation") val determinationValidation: String?,
-    @SerializedName("determination_score") val determinationScore: Int?,
-    @SerializedName("confidence") val confidence: String?
+    @SerialName("taxon_id") val taxonID: Int,
+    @SerialName("taxon_FullName") val fullName: String,
+    @SerialName("taxon_vernacularname_dk") val vernacularNameDK: String? = null,
+    @SerialName("redlistStatus") val redlistStatus: String? = null,
+    @SerialName("determination_validation") val determinationValidation: String? = null,
+    @SerialName("determination_score") val determinationScore: Int? = null,
+    @SerialName("confidence") val confidence: String? = null
 )
 
+@Serializable
 data class PrimaryDeterminationView(
-    @SerializedName("score") val score: Int?,
-    @SerializedName("validation") val validation: String?,
-    @SerializedName("Taxon") val taxon: Taxon,
-    @SerializedName("confidence") val confidence: String?
+    @SerialName("score") val score: Int?,
+    @SerialName("validation") val validation: String?,
+    @SerialName("Taxon") val taxon: Taxon,
+    @SerialName("confidence") val confidence: String?
 )
 
 enum class DeterminationConfidence(val databaseName: String) {
@@ -256,6 +272,7 @@ enum class DeterminationConfidence(val databaseName: String) {
     }
 }
 
+@Serializable
 data class Determination(
     val id: Int,
     val fullName: String,
@@ -271,47 +288,55 @@ data class Determination(
     }
 }
 
+@Serializable
 data class Taxon(
-    @SerializedName("acceptedTaxon") val acceptedTaxon: AcceptedTaxon
+    @SerialName("acceptedTaxon") val acceptedTaxon: AcceptedTaxon
 )
 
+@Serializable
 data class AcceptedTaxon(
-    @SerializedName("_id") val id: Int,
-    @SerializedName("FullName") val fullName: String,
+    @SerialName("_id") val id: Int,
+    @SerialName("FullName") val fullName: String,
 
     @Embedded(prefix = "vernacularName_DK_")
-    @SerializedName("Vernacularname_DK") val vernacularNameDK: Vernacularname_DK?
+    @SerialName("Vernacularname_DK") val vernacularNameDK: Vernacularname_DK? = null
 )
 
+@Serializable
 data class Vernacularname_DK(
     val vernacularname_dk: String
 )
 
+@Serializable
 data class ObservationImage(
-    @SerializedName("_id") val id: Int,
-    @SerializedName("name") val name: String,
-    @SerializedName("createdAt") val createdAt: String
+    @SerialName("_id") val id: Int,
+    @SerialName("name") val name: String,
+    @SerialName("createdAt") val createdAt: String
 )
 
+@Serializable
 data class PrimaryUser(val profile: Profile)
+@Serializable
 data class Profile(
     val name: String,
-    @SerializedName("Initialer") val initials: String,
+    @SerialName("Initialer") val initials: String,
     val facebook: String?
 )
 
+@Serializable
 data class AssociatedTaxa(
-    @SerializedName("_id")  val id: Int,
-    @SerializedName("DKname")  val dkName: String?,
-    @SerializedName("LatinName")  val name: String
+    @SerialName("_id")  val id: Int,
+    @SerialName("DKname")  val dkName: String?,
+    @SerialName("LatinName")  val name: String
 )
 
 
 
 
+@Serializable
 data class Forum(
-    @SerializedName("_id") val id: Int,
-    @SerializedName("createdAt") val createdAt: String,
-    @SerializedName("content") val content: String,
-    @SerializedName("User") val user: PrimaryUser
+    @SerialName("_id") val id: Int,
+    @SerialName("createdAt") val createdAt: String,
+    @SerialName("content") val content: String,
+    @SerialName("User") val user: PrimaryUser? = null
 )

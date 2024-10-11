@@ -12,10 +12,11 @@ import com.noque.svampeatlas.R
 import com.noque.svampeatlas.extensions.dpToPx
 
 class SwipeToDeleteCallback(
+    private val swipeDirs: Int,
     private val onDelete: (RecyclerView.ViewHolder) -> Unit,
     private val context: Context,
     private val resources: Resources
-) : ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.LEFT) {
+) : ItemTouchHelper.SimpleCallback(0, swipeDirs) {
 
     override fun onChildDrawOver(
         c: Canvas,
@@ -37,6 +38,10 @@ class SwipeToDeleteCallback(
         )
     }
 
+
+
+
+
     override fun onChildDraw(
         c: Canvas,
         recyclerView: RecyclerView,
@@ -46,18 +51,32 @@ class SwipeToDeleteCallback(
         actionState: Int,
         isCurrentlyActive: Boolean
     ) {
+
+
+
         val rightMargin = 32.dpToPx(context)
         val iconSize = 16.dpToPx(context)
         val icon = ResourcesCompat.getDrawable(resources, R.drawable.ic_delete_black_24dp, null)
         val background = ColorDrawable(ResourcesCompat.getColor(resources, R.color.colorRed, null))
 
-        icon?.bounds = Rect(
-            viewHolder.itemView.right - iconSize * 2 - rightMargin,
-            viewHolder.itemView.top + (viewHolder.itemView.height / 2) - iconSize,
-            viewHolder.itemView.right - rightMargin,
-            viewHolder.itemView.bottom - (viewHolder.itemView.height / 2) + iconSize
-        )
 
+        if (swipeDirs == ItemTouchHelper.UP) {
+            icon?.apply {
+                bounds = Rect(
+                    viewHolder.itemView.left + (viewHolder.itemView.width / 2) - (icon.intrinsicWidth / 2),
+                    ((viewHolder.itemView.height) / 2) - (icon.intrinsicHeight / 2) + recyclerView.paddingTop,
+                    viewHolder.itemView.right - (viewHolder.itemView.width / 2) + (icon.intrinsicWidth / 2),
+                    (viewHolder.itemView.height / 2) + (icon.intrinsicHeight / 2) + recyclerView.paddingTop
+                )
+            }
+        } else {
+            icon?.bounds = Rect(
+                viewHolder.itemView.right - iconSize * 2 - rightMargin,
+                viewHolder.itemView.top + (viewHolder.itemView.height / 2) - iconSize,
+                viewHolder.itemView.right - rightMargin,
+                viewHolder.itemView.bottom - (viewHolder.itemView.height / 2) + iconSize
+            )
+        }
 
         background.bounds = Rect(
             viewHolder.itemView.right + dX.toInt(),

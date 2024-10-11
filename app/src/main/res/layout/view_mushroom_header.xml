@@ -38,9 +38,10 @@
 
         <TextView
             android:id="@+id/mushroomHeaderView_redlistShortIcon"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
             style="@style/AppPrimary"
+            android:textColor="@color/colorWhite"
             tools:text="LC"
             android:background="@drawable/circle_view_color_red"
             android:paddingHorizontal="6dp"

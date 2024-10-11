@@ -14,15 +14,12 @@ import com.noque.svampeatlas.utilities.autoClearedViewBinding
 
 class PromptFragment: DialogFragment(R.layout.fragment_prompt) {
     companion object {
+        const val REQUEST_KEY = "prompt_request"
+        const val RESULT_KEY = "prompt_result"
         const val KEY_TITLE = "KEY_TITLE"
         const val KEY_MESSAGE = "KEY_MESSAGE"
         const val KEY_POSITIVE = "KEY_POSITIVE"
         const val KEY_NEGATIVE = "KEY_NEGATIVE"
-    }
-
-    interface Listener {
-        fun positiveButtonPressed()
-        fun negativeButtonPressed()
     }
 
 // Views
@@ -39,11 +36,16 @@ private val binding by autoClearedViewBinding(FragmentPromptBinding::bind)
         binding.promptFragmentNegativeButton.text = arguments?.getString(KEY_NEGATIVE)
 
         binding.promptFragmentPositiveButton.setOnClickListener {
-            (targetFragment as Listener).positiveButtonPressed()
+            parentFragmentManager.setFragmentResult(REQUEST_KEY, Bundle().apply {
+                putString(RESULT_KEY, KEY_POSITIVE)
+            })
             dismiss()
         }
+
         binding.promptFragmentNegativeButton.setOnClickListener {
-            (targetFragment as Listener).negativeButtonPressed()
+            parentFragmentManager.setFragmentResult(REQUEST_KEY, Bundle().apply {
+                putString(RESULT_KEY, KEY_NEGATIVE)
+            })
             dismiss()
         }
     }

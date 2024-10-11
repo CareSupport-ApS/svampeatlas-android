@@ -38,7 +38,7 @@ import com.noque.svampeatlas.view_models.NotesFragmentViewModel
 import com.noque.svampeatlas.views.MainActivity
 import java.util.Date
 
-class NotesFragment: Fragment(R.layout.fragment_notebook), PromptFragment.Listener, MenuProvider {
+class NotesFragment: Fragment(R.layout.fragment_notebook), MenuProvider {
 
     // Views
     private val binding by autoClearedViewBinding(FragmentNotebookBinding::bind) {
@@ -68,7 +68,7 @@ class NotesFragment: Fragment(R.layout.fragment_notebook), PromptFragment.Listen
 
 private val deletedCallback by lazy {
     ItemTouchHelper(
-        SwipeToDeleteCallback(
+        SwipeToDeleteCallback(ItemTouchHelper.LEFT,
             { viewHolder ->
                 notebookAdapter.sections.getItem(viewHolder.adapterPosition).let {
                     viewModel.deleteNote((it as NotebookAdapter.Items.Note).newObservation, viewHolder.adapterPosition)
@@ -164,10 +164,16 @@ private val deletedCallback by lazy {
             }
 
         })
-    }
 
-    override fun positiveButtonPressed() {
-        DownloaderFragment().show(parentFragmentManager, null)
+        parentFragmentManager.setFragmentResultListener(
+            PromptFragment.REQUEST_KEY, viewLifecycleOwner
+        ) { _, bundle ->
+            val result = bundle.getString(PromptFragment.RESULT_KEY)
+            if (result == PromptFragment.KEY_POSITIVE) {
+                DownloaderFragment().show(parentFragmentManager, null)
+            } else if (result == PromptFragment.KEY_NEGATIVE) {
+                // Handle negative button action
+            }
+        }
     }
-    override fun negativeButtonPressed() {}
 }

@@ -5,8 +5,8 @@ import com.android.volley.ParseError
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.HttpHeaderParser
-import com.google.gson.JsonSyntaxException
 import com.noque.svampeatlas.utilities.api.API
+import kotlinx.serialization.SerializationException
 import org.json.JSONObject
 import java.io.UnsupportedEncodingException
 import java.nio.charset.Charset
@@ -84,7 +84,7 @@ class AppJSONObjectRequest(private val endpoint: API,
             Response.success(JSONObject(json), HttpHeaderParser.parseCacheHeaders(response))
         } catch (error: UnsupportedEncodingException) {
             Response.error(ParseError(error))
-        } catch (error: JsonSyntaxException) {
+        } catch (error: SerializationException) {
             Response.error(ParseError(error))
         }
     }

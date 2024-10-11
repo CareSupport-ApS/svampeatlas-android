@@ -2,7 +2,7 @@ package com.noque.svampeatlas.models
 
 import androidx.lifecycle.MutableLiveData
 import com.noque.svampeatlas.utilities.SharedPreferences
-import java.util.*
+import java.util.Date
 
 class Observable {
     companion object {
@@ -41,6 +41,11 @@ class ListenableUserObservation(private val onChanged: (UserObservation) -> Unit
     val observationDate = Observable.observe(MutableLiveData<Date>()) {
         userObservation.observationDate = it
     }
+
+    val users = Observable.observe(MutableLiveData<List<User>>()) {
+        userObservation.users = it
+    }
+
     val substrate = Observable.observe(MutableLiveData<Pair<Substrate, Boolean>?>()) {
         userObservation.substrate = it
     }
@@ -75,6 +80,7 @@ class ListenableUserObservation(private val onChanged: (UserObservation) -> Unit
 
         userObservation = value
         onChanged.invoke(value)
+        users.value = value.users
         images.value = value.images
         mushroom.value = value.mushroom
         observationDate.value = value.observationDate

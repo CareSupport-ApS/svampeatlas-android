@@ -1,16 +1,10 @@
 package com.noque.svampeatlas.models
 
-import android.content.Context
 import androidx.room.*
-import com.google.android.gms.maps.model.LatLng
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.noque.svampeatlas.R
 import com.noque.svampeatlas.extensions.toDatabaseName
-import com.noque.svampeatlas.view_models.NewObservationViewModel
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.File
 import java.util.*
 
 sealed class NewObservationError(title: Int, message: Int) :
@@ -51,6 +45,7 @@ sealed class NewObservationError(title: Int, message: Int) :
     }
 
     fun createJSON(includeTaxon: Boolean): Result<JSONObject, NewObservationError> {
+
         val substrate = substrate
         val vegetationType = vegetationType
         val location = coordinate

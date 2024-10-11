@@ -15,7 +15,7 @@ class UserView(context: Context?, attrs: AttributeSet?) : LinearLayout(context, 
     private val binding = ViewUserBinding.inflate(LayoutInflater.from(context), this, true)
 
     fun configure(user: User) {
-        binding.userViewProfileImageView.configure(user.initials, user.imageURL, DataService.ImageSize.FULL)
+        binding.userViewProfileImageView.configure(user.initials, null, DataService.ImageSize.FULL)
         binding.userViewSecondaryTextView.visibility = View.GONE
         binding.userViewPrimaryTextView.text = user.name
     }

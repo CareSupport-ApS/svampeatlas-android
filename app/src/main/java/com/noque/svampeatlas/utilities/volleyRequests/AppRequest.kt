@@ -1,20 +1,24 @@
 package com.noque.svampeatlas.utilities.volleyRequests
 
-import android.util.Log
 import com.android.volley.NetworkResponse
 import com.android.volley.ParseError
 import com.android.volley.Request
 import com.android.volley.Response
 import com.android.volley.toolbox.HttpHeaderParser
-import com.google.gson.Gson
-import com.google.gson.JsonSyntaxException
 import com.noque.svampeatlas.utilities.api.API
+import kotlinx.serialization.KSerializer
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.json.Json
 import org.json.JSONObject
 import java.io.UnsupportedEncodingException
-import java.lang.reflect.Type
 import java.nio.charset.Charset
 
-class AppRequest<T>(private val type: Type, private val endpoint: API,
+val Json: Json = Json {
+    ignoreUnknownKeys = true
+    explicitNulls = false
+}
+
+class AppRequest<T>(private val serializer: KSerializer<T>, private val endpoint: API,
                     private val token: String?,
                     private val jsonObject: JSONObject? = null,
                     private val listener: Response.Listener<T>,
@@ -36,18 +40,21 @@ class AppRequest<T>(private val type: Type, private val endpoint: API,
         listener.onResponse(response)
     }
 
+
+
     override fun parseNetworkResponse(response: NetworkResponse?): Response<T> {
         return try {
             val json = String(
                 response?.data ?: ByteArray(0),
-                Charset.forName(HttpHeaderParser.parseCharset(response?.headers)))
-            Response.success(
-                Gson().fromJson<T>(json, type),
-                HttpHeaderParser.parseCacheHeaders(response)
+                Charset.forName(HttpHeaderParser.parseCharset(response?.headers))
             )
+
+            // Deserialize the JSON string using the provided serializer
+            val parsedData = com.noque.svampeatlas.utilities.volleyRequests.Json.decodeFromString(serializer, json)
+            Response.success(parsedData, HttpHeaderParser.parseCacheHeaders(response))
         } catch (e: UnsupportedEncodingException) {
             Response.error(ParseError(e))
-        } catch (e: JsonSyntaxException) {
+        } catch (e: SerializationException) {
             Response.error(ParseError(e))
         }
     }

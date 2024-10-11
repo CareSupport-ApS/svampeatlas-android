@@ -72,7 +72,8 @@ fun Fragment.handleInfo(title: String, message: String) {
     CookieBar.build(activity)
         .setTitle(title)
         .setBackgroundColor(R.color.colorPrimary)
-        .setDuration(3000) // 5 seconds
+        .setDuration(3000)
+        .setMessage(message)// 5 seconds
         .setEnableAutoDismiss(true)
         .setSwipeToDismiss(true)
         .setAction("OK") { CookieBar.dismiss(activity) }

@@ -1,13 +1,26 @@
 package com.noque.svampeatlas.services
 
 import android.content.Context
-import android.provider.ContactsContract
-import androidx.room.*
+import androidx.room.AutoMigration
 import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.noque.svampeatlas.daos.*
-import com.noque.svampeatlas.models.*
+import com.noque.svampeatlas.daos.HostsDao
+import com.noque.svampeatlas.daos.MushroomsDao
+import com.noque.svampeatlas.daos.NotesDao
+import com.noque.svampeatlas.daos.SubstratesDao
+import com.noque.svampeatlas.daos.UserDao
+import com.noque.svampeatlas.daos.VegetationTypeDao
+import com.noque.svampeatlas.models.Host
+import com.noque.svampeatlas.models.Mushroom
+import com.noque.svampeatlas.models.NewObservation
+import com.noque.svampeatlas.models.Substrate
+import com.noque.svampeatlas.models.User
+import com.noque.svampeatlas.models.UserRolesTypeConverters
+import com.noque.svampeatlas.models.VegetationType
 
 val MIGRATION_12_13 = object: Migration(12,13) {
     override fun migrate(database: SupportSQLiteDatabase) {

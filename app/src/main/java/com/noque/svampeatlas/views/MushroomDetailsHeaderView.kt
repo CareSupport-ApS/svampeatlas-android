@@ -23,6 +23,7 @@ class MushroomDetailsHeaderView(context: Context?, attrs: AttributeSet?) : Linea
 
         if (mushroom.redListStatus != null) {
             binding.mushroomHeaderViewRedlistLabel.text = mushroom.redListStatus
+            binding.mushroomHeaderViewRedlistShortIcon.text = mushroom.redListStatus
             when (mushroom.redListStatus) {
                 "LC", "NT" -> {
                     binding.mushroomHeaderViewRedlistShortIcon.setBackgroundResource(R.drawable.circle_view_color_green)

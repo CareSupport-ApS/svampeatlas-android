@@ -2,13 +2,10 @@ package com.noque.svampeatlas.repositories
 
 import com.android.volley.RequestQueue
 import com.android.volley.Response
-import com.google.gson.reflect.TypeToken
-import com.noque.svampeatlas.extensions.toAppError
 import com.noque.svampeatlas.extensions.toAppError2
 import com.noque.svampeatlas.models.AppError2
 import com.noque.svampeatlas.models.Observation
 import com.noque.svampeatlas.models.Result
-import com.noque.svampeatlas.services.DataService
 import com.noque.svampeatlas.services.ImageService
 import com.noque.svampeatlas.utilities.api.API
 import com.noque.svampeatlas.utilities.api.APIType
@@ -47,16 +44,16 @@ class ObservationsRepository(private val requestQueue: RequestQueue) {
     }
 
     private suspend fun get(id: Int): Result<Observation, AppError2> = suspendCoroutine { cont ->
-        val request = AppRequest<Observation>(
-            object : TypeToken<Observation>() {}.type,
+        val request = AppRequest(
+           Observation.serializer(),
             API(APIType.Request.SingleObservation(id)),
             null,
             null,
-            Response.Listener {
+            {
                 cont.resume(Result.Success(it))
             },
 
-            Response.ErrorListener {
+            {
                 cont.resume(Result.Error(it.toAppError2()))
             }
         )

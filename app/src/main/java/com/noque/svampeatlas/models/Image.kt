@@ -2,18 +2,18 @@ package com.noque.svampeatlas.models
 
 import android.os.Parcel
 import android.os.Parcelable
-import androidx.room.Entity
-import androidx.room.ForeignKey
 import androidx.room.PrimaryKey
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
-    data class Image(
-        @PrimaryKey
-        @SerializedName("_id") val id: Int,
-        @SerializedName("taxon_id") val mushroomID: Int,
-        @SerializedName("uri") val uri: String?,
-        @SerializedName("photographer") val photographer: String?,
-        @SerializedName("createdAt") val createdAt: String?
+@Serializable
+data class Image(
+    @PrimaryKey
+        @SerialName("_id") val id: Int,
+    @SerialName("taxon_id") val mushroomID: Int,
+    @SerialName("uri") val uri: String?,
+    @SerialName("photographer") val photographer: String?,
+    @SerialName("createdAt") val createdAt: String?
     ) : Parcelable {
 
         val url: String

@@ -43,7 +43,8 @@ class NewObservationViewModel(val context: AddObservationFragment.Context, val i
         class ObservationUploaded(id: Int): Notification(MotionToastStyle.SUCCESS, R.string.addObservationVC_successfullUpload_title, R.string.observation_id, arrayOf(id))
         class ObservationUpdated : Notification(MotionToastStyle.SUCCESS, R.string.common_success, R.string.message_observationUpdated)
         class NoteSaved : Notification(MotionToastStyle.SUCCESS, R.string.message_noteSaved, R.string.message_noteSaved_message)
-        class Deleted: Notification(MotionToastStyle.INFO, R.string.common_success, R.string.common_success)
+        class DeletedNote: Notification(MotionToastStyle.INFO, R.string.common_deleted_successfully, R.string.addObservationVC_noteDeleted_message)
+        class DeletedObservation: Notification(MotionToastStyle.INFO, R.string.common_deleted_successfully, R.string.addObservationVC_observationDeleted_message)
         class NewObservationError(val error: UserObservation.Error): Notification(MotionToastStyle.ERROR, error.title, error.message)
         class Error(error: AppError2): Notification(MotionToastStyle.ERROR, error.title, error.message)
     }
@@ -68,7 +69,8 @@ class NewObservationViewModel(val context: AddObservationFragment.Context, val i
     val images: LiveData<List<UserObservation.Image>> get() = userObservation.images
     val mushroom: LiveData<Pair<Mushroom, DeterminationConfidence>?> get() = userObservation.mushroom
 
-    private val _user by lazy { MutableLiveData<User>() }
+    val users: LiveData<List<User>> get() = userObservation.users
+
     private val _isLoading by lazy { MutableLiveData(false) }
     private val _coordinateState: MutableLiveData<State<Pair<Location, Boolean>>> by lazy { initialObserveMutableLiveData(Observer {
         // Whenever coordinate state is set, we have to update user observation too.
@@ -99,7 +101,7 @@ class NewObservationViewModel(val context: AddObservationFragment.Context, val i
         viewModelScope.launch {
             if (it.images.isNotEmpty() && context == AddObservationFragment.Context.UploadNote) {
                 it.images.forEach { when (it) {
-                    is UserObservation.Image.LocallyStored -> {recognitionService?.addPhotoToRequest(it.file) }
+                    is UserObservation.Image.LocallyStored -> try { recognitionService?.addPhotoToRequest(it.file) } catch (error: Error) {}
                     is UserObservation.Image.New ->  {}
                     else -> {}
                 } }
@@ -111,7 +113,6 @@ class NewObservationViewModel(val context: AddObservationFragment.Context, val i
     val coordinateState: LiveData<State<Pair<Location, Boolean>>> get() = _coordinateState
     val localitiesState: LiveData<State<List<Locality>>> get() = _localitiesState
     val predictionResultsState: LiveData<State<List<Prediction>>> get() = _predictionResultsState
-    val user: LiveData<User> get() = _user
 
     val notification by lazy { LiveEvent<Notification>() }
     val prompt by lazy { LiveEvent<Prompt>() }
@@ -119,12 +120,6 @@ class NewObservationViewModel(val context: AddObservationFragment.Context, val i
 
 
     init {
-        viewModelScope.launch {
-            RoomService.users.getUser().onSuccess {
-                _user.value = it
-            }
-        }
-
         when (context) {
             AddObservationFragment.Context.New -> {
                 recognitionService = RecognitionService()
@@ -322,7 +317,7 @@ class NewObservationViewModel(val context: AddObservationFragment.Context, val i
 
     fun appendImage(imageFile: File) {
         viewModelScope.launch {
-            recognitionService?.addPhotoToRequest(imageFile)
+            try { recognitionService?.addPhotoToRequest(imageFile) } catch (error: Error) {}
         }
 
         userObservation.images.value = ((userObservation.images.value ?: listOf()) + listOf(UserObservation.Image.New(imageFile)))
@@ -346,8 +341,8 @@ class NewObservationViewModel(val context: AddObservationFragment.Context, val i
                 images.value?.forEach {
                     when (it) {
                         is UserObservation.Image.Hosted -> {}
-                        is UserObservation.Image.LocallyStored -> recognitionService?.addPhotoToRequest(it.file)
-                        is UserObservation.Image.New -> recognitionService?.addPhotoToRequest(it.file)
+                        is UserObservation.Image.LocallyStored -> try { recognitionService?.addPhotoToRequest(it.file) } catch (error: Error) {}
+                        is UserObservation.Image.New -> try { recognitionService?.addPhotoToRequest(it.file) } catch (error: Error) {}
                     }
                 }
             }
@@ -443,8 +438,7 @@ class NewObservationViewModel(val context: AddObservationFragment.Context, val i
                     }
                     result.onError {
                         _localitiesState.value = State.Error(it)
-                        if (context != AddObservationFragment.Context.Note)
-                        notification.postValue(Notification.LocalityInaccessible())
+                        if (context != AddObservationFragment.Context.Note) notification.postValue(Notification.LocalityInaccessible())
                     }
                 }
         }
@@ -510,6 +504,7 @@ class NewObservationViewModel(val context: AddObservationFragment.Context, val i
                             AddObservationFragment.Context.FromRecognition -> {
                                 notification.postValue(Notification.ObservationUploaded(it.first))
                                 event.postValue(Event.Reset)
+                                userObservation.set(UserObservation())
                             }
                             AddObservationFragment.Context.Edit,
                             AddObservationFragment.Context.Note,
@@ -520,7 +515,6 @@ class NewObservationViewModel(val context: AddObservationFragment.Context, val i
                                 event.postValue(Event.GoBack(true))
                             }
                         }
-
                     }
                     _isLoading.postValue(false)
                 }
@@ -537,8 +531,7 @@ class NewObservationViewModel(val context: AddObservationFragment.Context, val i
                     notification.postValue(Notification.Error(it)); _isLoading.postValue(false) }
                 onSuccess {
                     notification.postValue(Notification.ObservationUpdated())
-                    event.postValue(Event.GoBack(true))
-                    _isLoading.postValue(false)
+                    event.postValue(Event.GoBackToRoot(true))
                 }
             }
         }
@@ -582,7 +575,7 @@ class NewObservationViewModel(val context: AddObservationFragment.Context, val i
                 Session.deleteObservation(id.toInt()).apply {
                     onError { notification.postValue(Notification.Error(it)) }
                     onSuccess {
-                        notification.postValue(Notification.Deleted())
+                        notification.postValue(Notification.DeletedObservation())
                         event.postValue(Event.GoBackToRoot(true))
                     }
                 }
@@ -592,7 +585,7 @@ class NewObservationViewModel(val context: AddObservationFragment.Context, val i
                 RoomService.notesDao.delete(NewObservation(Date(id), Date(), null, null, null, null, null, null, null, null, null, listOf(), listOf())).apply {
                         onError { notification.postValue(Notification.Error(it)) }
                         onSuccess {
-                            notification.postValue(Notification.Deleted())
+                            notification.postValue(Notification.DeletedNote())
                             userObservation.userObservation.deleteAllImages()
                             event.postValue(Event.GoBack(true))
                         }

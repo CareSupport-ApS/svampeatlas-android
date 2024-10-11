@@ -7,10 +7,12 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.downloader.OnDownloadListener
 import com.downloader.PRDownloader
-import com.google.gson.GsonBuilder
-import com.google.gson.reflect.TypeToken
 import com.noque.svampeatlas.R
-import com.noque.svampeatlas.models.*
+import com.noque.svampeatlas.models.AppError
+import com.noque.svampeatlas.models.AppError2
+import com.noque.svampeatlas.models.Mushroom
+import com.noque.svampeatlas.models.RecoveryAction
+import com.noque.svampeatlas.models.State
 import com.noque.svampeatlas.services.DataService
 import com.noque.svampeatlas.services.FileManager
 import com.noque.svampeatlas.services.RoomService
@@ -18,12 +20,13 @@ import com.noque.svampeatlas.utilities.MyApplication
 import com.noque.svampeatlas.utilities.api.API
 import com.noque.svampeatlas.utilities.api.APIType
 import com.noque.svampeatlas.utilities.api.SpeciesQueries
+import com.noque.svampeatlas.utilities.volleyRequests.Json
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.decodeFromStream
 import java.io.File
 import java.io.FileNotFoundException
-import java.io.FileReader
 
 
 class DownloaderViewModel(application: Application) : AndroidViewModel(application) {
@@ -86,10 +89,12 @@ class DownloaderViewModel(application: Application) : AndroidViewModel(applicati
     suspend fun readFile(file: File) = withContext(Dispatchers.IO) {
         _loadingState.postValue(LoadingState.ReadingFile)
         try {
-            val json = FileReader(file)
-            val mushrooms = GsonBuilder().create().fromJson<List<Mushroom>>(json, object : TypeToken<List<Mushroom>>() {}.type)
-            _loadingState.postValue(LoadingState.SavingFile)
-            RoomService.mushrooms.save(mushrooms)
+            file.inputStream().use { inputStream ->
+                val mushrooms = Json.decodeFromStream<List<Mushroom>>(inputStream) // Stream the JSON data
+
+                _loadingState.postValue(LoadingState.SavingFile)
+                RoomService.mushrooms.save(mushrooms)
+            }
             file.delete()
         } catch (error: FileNotFoundException) {
             _state.postValue(State.Error(AppError(getApplication<MyApplication>().resources.getString(R.string.dataServiceError_unknown_title), error.localizedMessage ?: "", RecoveryAction.TRYAGAIN)))

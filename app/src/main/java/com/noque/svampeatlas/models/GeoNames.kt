@@ -1,7 +1,9 @@
 package com.noque.svampeatlas.models
 
-import com.google.gson.annotations.SerializedName
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
 
+@Serializable
 data class GeoNames(
-    @SerializedName("geonames") val geoNames: List<GeoName>
+    @SerialName("geonames") val geoNames: List<GeoName>
 )
