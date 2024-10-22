@@ -1,18 +1,11 @@
 package com.noque.svampeatlas.fragments
 
-import android.graphics.Canvas
-import android.graphics.Rect
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Button
-import android.widget.LinearLayout
-import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -20,12 +13,10 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.noque.svampeatlas.R
 import com.noque.svampeatlas.adapters.NotebookAdapter
 import com.noque.svampeatlas.constants.RELOAD_DATA
 import com.noque.svampeatlas.databinding.FragmentNotebookBinding
-import com.noque.svampeatlas.extensions.dpToPx
 import com.noque.svampeatlas.extensions.removeTime
 import com.noque.svampeatlas.extensions.toReadableDate
 import com.noque.svampeatlas.fragments.modals.DownloaderFragment
@@ -129,14 +120,7 @@ private val deletedCallback by lazy {
         viewModel.event.observe(viewLifecycleOwner) {
             when (it) {
                 NotesFragmentViewModel.Event.DownloadTaxon -> {
-                    val dialog = PromptFragment()
-                    dialog.setTargetFragment(this, 10)
-                    dialog.arguments = Bundle().apply {
-                        putString(PromptFragment.KEY_TITLE, getString(R.string.prompt_taxonData_title))
-                        putString(PromptFragment.KEY_MESSAGE, getString(R.string.prompt_taxonData_message))
-                        putString(PromptFragment.KEY_POSITIVE, getString(R.string.action_fetchData))
-                        putString(PromptFragment.KEY_NEGATIVE, getString(R.string.action_no))
-                    }
+                    val dialog = PromptFragment.newInstance(getString(R.string.prompt_taxonData_title), getString(R.string.prompt_taxonData_message), getString(R.string.action_fetchData), getString(R.string.action_no))
                     dialog.show(parentFragmentManager, null)
                 }
             }

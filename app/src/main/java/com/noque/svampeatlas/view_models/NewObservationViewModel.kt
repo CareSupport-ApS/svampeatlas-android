@@ -33,8 +33,8 @@ fun <T> initialObserveMutableLiveData(observer: Observer<T>): MutableLiveData<T>
 class NewObservationViewModel(val context: AddObservationFragment.Context, val id: Long, mushroomId: Int, imageFilePath: String?) : ViewModel() {
     companion object { private const val TAG = "NewObservationViewModel" }
 
-    sealed class Prompt(@StringRes val title: Int, @StringRes val message: Int, vararg formatArgs: Any?, val action: Pair<Int, Int>) {
-        class UseImageMetadata(val imageLocation: Location, val userLocation: Location?): Prompt(R.string.addObservationVC_useImageMetadata_title, R.string.addObservationVC_useImageMetadata_message, imageLocation.accuracy.toString(), action = Pair(R.string.addObservationVC_useImageMetadata_positive, R.string.addObservationVC_useImageMetadata_negative))
+    sealed class Prompt(@StringRes val title: Int, @StringRes val message: Int,  val formatArgs: Array<out Any?>, val action: Pair<Int, Int>) {
+        class UseImageMetadata(val imageLocation: Location, val userLocation: Location?): Prompt(R.string.addObservationVC_useImageMetadata_title, R.string.addObservationVC_useImageMetadata_message,  arrayOf(imageLocation.accuracy.toString()), action = Pair(R.string.addObservationVC_useImageMetadata_positive, R.string.addObservationVC_useImageMetadata_negative))
     }
 
     sealed class Notification(val type: MotionToastStyle, @StringRes val title: Int, @StringRes val message: Int,  val args: Array<out Any?>? = null) {

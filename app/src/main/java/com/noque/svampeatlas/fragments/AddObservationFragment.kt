@@ -392,16 +392,9 @@ class AddObservationFragment : Fragment(), ActivityCompat.OnRequestPermissionsRe
         }
 
         newObservationViewModel.prompt.observe(viewLifecycleOwner) {
-            PromptFragment().apply {
-                                arguments = Bundle().apply {
-                                    putString(PromptFragment.KEY_TITLE, getString(it.title))
-                                    putString(PromptFragment.KEY_MESSAGE, getString(it.message))
-                                    putString(PromptFragment.KEY_POSITIVE, getString(it.action.first))
-                                    putString(PromptFragment.KEY_NEGATIVE, getString(it.action.second))
-                                }
-                                show(this@AddObservationFragment.parentFragmentManager, null)
-                            }
-        }
+            val prompt = PromptFragment.newInstance(getString(it.title), getString(it.message, *it.formatArgs), getString(it.action.first), getString(it.action.second))
+            prompt.show(this@AddObservationFragment.parentFragmentManager, null)
+                }
 
         parentFragmentManager.setFragmentResultListener(
             PromptFragment.REQUEST_KEY, viewLifecycleOwner

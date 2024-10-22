@@ -21,12 +21,9 @@ import androidx.annotation.RequiresApi
 import androidx.camera.core.*
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
-import androidx.core.view.MenuHost
 import androidx.core.view.MenuProvider
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.navigation.fragment.navArgs
@@ -195,13 +192,13 @@ class CameraFragment : Fragment(R.layout.fragment_camera), MenuProvider {
 
             @RequiresApi(Build.VERSION_CODES.Q)
             override fun photoLibraryButtonPressed() {
-               /* pickMediaRequest.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))*/
-                permissionRequest.launch(arrayOf(Manifest.permission.ACCESS_MEDIA_LOCATION))
-                val intent = Intent(Intent.ACTION_GET_CONTENT)
-                intent.type = "image/*"
-                intent.putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/jpeg", "image/png"))
-                startActivityForResult(intent, 0)
 
+                val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+                    addCategory(Intent.CATEGORY_OPENABLE)
+                    type = "image/*" // Allow selecting images only
+                    putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("image/jpeg", "image/png"))
+                }
+                startActivityForResult(intent, 0)
             }
             override fun actionButtonPressed(state: CameraControlsView.State) {
                 when (state) {
@@ -258,15 +255,8 @@ class CameraFragment : Fragment(R.layout.fragment_camera), MenuProvider {
     private fun handleImageSaving(photoFile: File) {
         val saveImages = SharedPreferences.getSaveImages()
         if (saveImages == null) {
-            PromptFragment().also {
-                it.arguments = Bundle().also { bundle ->
-                    bundle.putString(PromptFragment.KEY_TITLE, getString(R.string.cameraVC_shouldSaveImagesPrompt_title))
-                    bundle.putString(PromptFragment.KEY_MESSAGE, getString(R.string.cameraVC_shouldSaveImagesPrompt_message))
-                    bundle.putString(PromptFragment.KEY_POSITIVE, getString(R.string.cameraVC_shouldSaveImagesPrompt_message_positive))
-                    bundle.putString(PromptFragment.KEY_NEGATIVE, getString(R.string.cameraVC_shouldSaveImagesPrompt_message_negative))
-                }
-                it.show(parentFragmentManager, null)
-            }
+            val prompt = PromptFragment.newInstance(getString(R.string.cameraVC_shouldSaveImagesPrompt_title), getString(R.string.cameraVC_shouldSaveImagesPrompt_message), getString(R.string.cameraVC_shouldSaveImagesPrompt_message_positive), getString(R.string.cameraVC_shouldSaveImagesPrompt_message_negative))
+           prompt.show(parentFragmentManager, null)
         } else {
             GlobalScope.launch(Dispatchers.IO) {
                 if (saveImages) FileManager.saveTempImage(photoFile, FileManager.createFile(requireContext()), requireContext())
@@ -292,6 +282,7 @@ class CameraFragment : Fragment(R.layout.fragment_camera), MenuProvider {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
+
     }
 
         override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

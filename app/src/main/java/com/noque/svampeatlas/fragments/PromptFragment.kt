@@ -1,25 +1,37 @@
 package com.noque.svampeatlas.fragments
 
 import android.os.Bundle
-import android.os.Message
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import android.widget.Button
-import android.widget.TextView
 import androidx.fragment.app.DialogFragment
 import com.noque.svampeatlas.R
 import com.noque.svampeatlas.databinding.FragmentPromptBinding
 import com.noque.svampeatlas.utilities.autoClearedViewBinding
 
 class PromptFragment: DialogFragment(R.layout.fragment_prompt) {
+
     companion object {
         const val REQUEST_KEY = "prompt_request"
         const val RESULT_KEY = "prompt_result"
-        const val KEY_TITLE = "KEY_TITLE"
-        const val KEY_MESSAGE = "KEY_MESSAGE"
-        const val KEY_POSITIVE = "KEY_POSITIVE"
-        const val KEY_NEGATIVE = "KEY_NEGATIVE"
+        private const val KEY_TITLE = "key_title"
+        private const val KEY_MESSAGE = "key_message"
+         const val KEY_POSITIVE = "key_positive"
+         const val KEY_NEGATIVE = "key_negative"
+
+        fun newInstance(
+            title: String,
+            message: String,
+            positive: String,
+            negative: String
+        ): PromptFragment {
+            return PromptFragment().apply {
+                arguments = Bundle().apply {
+                    putString(KEY_TITLE, title)
+                    putString(KEY_MESSAGE, message)
+                    putString(KEY_POSITIVE, positive)
+                    putString(KEY_NEGATIVE, negative)
+                }
+            }
+        }
     }
 
 // Views

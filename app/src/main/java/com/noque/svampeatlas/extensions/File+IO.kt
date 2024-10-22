@@ -30,6 +30,10 @@ suspend fun File.getBitmap(): Result<Bitmap, AppError> = withContext(Dispatchers
 }
 
 fun File.getExifLocation(): Location? {
+    if (!exists() || !canRead()) {
+        return null
+    }
+
 ExifInterface(this.inputStream()).apply {
     val lat = latLong?.first()
     val lng = latLong?.last()
@@ -37,10 +41,10 @@ ExifInterface(this.inputStream()).apply {
         SimpleDateFormat("yyyy:MM:dd HH:mm:ss", Locale.getDefault()).parse(it)
     }
 
-    if (lat != null && lng != null) {
-        return Location(date ?: Date(), LatLng(lat, lng), 65f)
+    return if (lat != null && lng != null) {
+        Location(date ?: Date(), LatLng(lat, lng), 65f)
     } else {
-        return null
+        null
     }
 }
 }

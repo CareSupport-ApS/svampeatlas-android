@@ -22,6 +22,7 @@ import com.noque.svampeatlas.services.RoomService
 import com.noque.svampeatlas.utilities.SharedPreferences
 import com.noque.svampeatlas.utilities.api.API
 import com.noque.svampeatlas.utilities.api.APIType
+import com.onesignal.OneSignal
 import io.ktor.client.plugins.ClientRequestException
 import io.ktor.client.plugins.HttpRequestTimeoutException
 import io.ktor.client.plugins.ResponseException
@@ -136,6 +137,12 @@ object Session {
         SharedPreferences.token = token
         this.token = token
         this._user.postValue(user)
+        user?.let { user ->
+            OneSignal.login(user.id.toString())
+            OneSignal.User.addEmail(user.email)
+
+        }
+
 
         if (token == null || user == null) {
             if (_loggedInState.value?.item != false) _loggedInState.postValue(State.Items(false))
